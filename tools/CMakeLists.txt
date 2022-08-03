@@ -1,0 +1,1 @@
+add_executable(particlegenerator particle_generator.cpp)
