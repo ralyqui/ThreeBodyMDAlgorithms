@@ -1,15 +1,32 @@
 #pragma once
+
 #include "../algorithm/Algorithm.hpp"
+#include "../fwd.hpp"
 #include "../potential/Potential.hpp"
 
-class Simulation {
+class Simulation : public std::enable_shared_from_this<Simulation> {
 private:
     int iterations;
     std::shared_ptr<Algorithm> algorithm;
+    std::shared_ptr<Topology> topology;
+    std::shared_ptr<Potential> potential;
+    std::shared_ptr<DomainDecomposition> decomposition;
+    MPI_Datatype* mpiParticleType;
+    std::vector<Utility::Particle>& particles;
 
 public:
-    Simulation(int iterations);
+    Simulation(int iterations, std::shared_ptr<Algorithm> algorithm, std::shared_ptr<Topology> topology,
+               std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition,
+               MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles);
     ~Simulation();
+
     void Start();
-    void SetAlgorithm(std::shared_ptr<Algorithm> algorithm);
+    void Init();
+
+    std::shared_ptr<Algorithm> GetAlgorithm();
+    std::shared_ptr<Topology> GetTopology();
+    std::shared_ptr<Potential> GetPotential();
+    std::shared_ptr<DomainDecomposition> GetDecomposition();
+    MPI_Datatype* GetMPIParticleType();
+    std::vector<Utility::Particle>& GetAllParticles();
 };

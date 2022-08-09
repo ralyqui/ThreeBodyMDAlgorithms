@@ -4,7 +4,7 @@ AxilrodTeller::AxilrodTeller(double v) : v(v) {}
 
 AxilrodTeller::~AxilrodTeller() {}
 
-double AxilrodTeller::Calculate(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k)
+double AxilrodTeller::CalculatePotential(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k)
 {
     double r_ij, r_ik, r_jk;
 
@@ -25,3 +25,9 @@ double AxilrodTeller::Calculate(Utility::Particle &i, Utility::Particle &j, Util
                          r_jk * r_jk));
     return u;
 }
+
+void calculateForces() {
+    
+}
+
+void AxilrodTeller::Init(std::shared_ptr<Simulation> simulation) { Potential::Init(simulation); }

@@ -1,0 +1,1 @@
+enum AlgorithmType { NATAType, P3BCAType, AUTAType };

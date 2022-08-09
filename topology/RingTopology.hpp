@@ -15,4 +15,6 @@ public:
 
     int GetWorldRank() override;
     int GetWorldSize() override;
+
+    void Init(std::shared_ptr<Simulation> simulation) override;
 };

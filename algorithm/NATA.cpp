@@ -1,12 +1,20 @@
 #include "NATA.hpp"
 
-NATA::NATA(int numParticles, MPI_Datatype *mpiParticleType, int leftNeighbor, int rightNeighbor, int worldRank,
-           int worldSize)
-    : Algorithm(numParticles, mpiParticleType), leftNeighbor(leftNeighbor), rightNeighbor(rightNeighbor),
-      worldRank(worldRank), worldSize(worldSize)
-{}
+NATA::NATA() {}
 
 NATA::~NATA() {}
+
+void NATA::Init(std::shared_ptr<Simulation> simulation)
+{
+    Algorithm::Init(simulation);
+
+    this->b0 = this->simulation->GetDecomposition()->GetMyParticles();
+    this->ringTopology = (std::static_pointer_cast<RingTopology>(this->simulation->GetTopology()));
+    this->leftNeighbor = ringTopology->GetLeftNeighbor();
+    this->rightNeighbor = ringTopology->GetRightNeighbor();
+    this->worldRank = ringTopology->GetWorldRank();
+    this->worldSize = ringTopology->GetWorldSize();
+}
 
 bool NATA::containsProcessed(Utility::Triplet t)
 {
@@ -36,20 +44,16 @@ int NATA::shiftRight(std::vector<Utility::Particle> &buf)
 {
     // Deadlockprevention:
     // https://moodle.rrze.uni-erlangen.de/pluginfile.php/13157/mod_resource/content/1/06_MPI_Advanced.pdf Page 12
-    MPI_Sendrecv_replace(buf.data(), buf.size(), *mpiParticleType, this->rightNeighbor, 0, this->leftNeighbor, 0,
-                         MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-    if (worldRank == 0) {
-        // std::cout << "send buf to " << rightNeighbor << "and receive from " << leftNeighbor << std::endl;
-    }
+    MPI_Sendrecv_replace(buf.data(), buf.size(), *this->mpiParticleType, this->rightNeighbor, 0, this->leftNeighbor, 0,
+                         this->ringTopology->GetComm(), MPI_STATUS_IGNORE);
 
     return 0;
 }
 
 void NATA::calculateInteractions()
 {
-    for (size_t i = 0; i < b0.size(); ++i) {
-        if (b0[i].isDummy) {
+    for (size_t i = 0; i < b0->size(); ++i) {
+        if ((*b0)[i].isDummy) {
             continue;
         }
         for (size_t j = 0; j < b1.size(); ++j) {
@@ -60,7 +64,7 @@ void NATA::calculateInteractions()
                 if (b2[k].isDummy) {
                     continue;
                 }
-                double u = this->potential->Calculate(b0[i], b1[j], b2[k]);
+                double u = this->simulation->GetPotential()->CalculatePotential((*b0)[i], b1[j], b2[k]);
             }
         }
     }
@@ -70,6 +74,15 @@ void NATA::SimulationStep()
 {
     // int bufI = 0;
     // int bufJ = 0;
+
+    // reset all forces in b0 to 0
+    this->simulation->GetDecomposition()->ResetForces();
+
+    // std::cout << (*b0).size() << std::endl;
+
+    // use assignment operator to copy vector
+    b1 = *b0;
+    b2 = *b0;
 
     int counter = 0;
 
@@ -96,5 +109,5 @@ void NATA::SimulationStep()
         // bufI = (bufI + 1) % worldSize;
     }
 
-    //std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
+    std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
 }

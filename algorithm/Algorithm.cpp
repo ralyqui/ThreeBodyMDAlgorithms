@@ -1,9 +1,11 @@
 #include "Algorithm.hpp"
 
-Algorithm::Algorithm(int numParticles, MPI_Datatype *mpiParticleType)
-    : numParticles(numParticles), mpiParticleType(mpiParticleType)
-{}
+Algorithm::Algorithm() {}
 
 Algorithm::~Algorithm() {}
 
-void Algorithm::SetPotential(std::shared_ptr<Potential> potential) { this->potential = potential; }
+void Algorithm::Init(std::shared_ptr<Simulation> simulation)
+{
+    this->simulation = simulation;
+    this->mpiParticleType = simulation->GetMPIParticleType();
+}

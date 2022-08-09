@@ -1,16 +1,20 @@
 #pragma once
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #include "DomainDecomposition.hpp"
 
 class AtomDecomposition final : public DomainDecomposition {
-protected:
-public:
-    AtomDecomposition(std::vector<Utility::Particle>& particles, int worldRank, int worldSize);
+private:
+    int worldRank;
+    int worldSize;
 
-    void update() override;
-    void resetForces() override;
-    std::vector<Utility::Particle>& getMyParticles() override;
+public:
+    AtomDecomposition();
+
+    void Init(std::shared_ptr<Simulation> simulation) override;
+
+    void Update() override;
+    void ResetForces() override;
 };

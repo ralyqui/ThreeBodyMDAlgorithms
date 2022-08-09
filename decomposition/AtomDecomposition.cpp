@@ -1,7 +1,18 @@
 #include "AtomDecomposition.hpp"
 
-AtomDecomposition::AtomDecomposition(std::vector<Utility::Particle>& particles, int worldRank, int worldSize)
+AtomDecomposition::AtomDecomposition() {}
+
+void AtomDecomposition::Init(std::shared_ptr<Simulation> simulation)
 {
+    DomainDecomposition::Init(simulation);
+
+    this->worldRank = this->simulation->GetTopology()->GetWorldRank();
+    this->worldSize = this->simulation->GetTopology()->GetWorldSize();
+
+    std::vector<Utility::Particle>& particles = this->simulation->GetAllParticles();
+
+    // std::cout << particles.size() << std::endl;
+
     int numParticles = (int)particles.size();
     int offset;
     bool lastPartProc = false;
@@ -32,21 +43,19 @@ AtomDecomposition::AtomDecomposition(std::vector<Utility::Particle>& particles, 
         }
     }
 
-    //std::cout << "rank " << worldRank << ": my particles reach from " << offset << " to " << offset + numOfMyParticles
+    // std::cout << "rank " << worldRank << ": my particles reach from " << offset << " to " << offset +
+    // numOfMyParticles
     //          << std::endl;
 }
 
-void AtomDecomposition::update()
+void AtomDecomposition::Update()
 {
-    // update all my particles
-    // recalculate boundaries
+    // update all my particles... TBD
 }
 
-void AtomDecomposition::resetForces()
+void AtomDecomposition::ResetForces()
 {
     for (size_t i = 0; i < myParticles.size(); i++) {
         myParticles[i].resetForce();
     }
 }
-
-std::vector<Utility::Particle>& AtomDecomposition::getMyParticles() { return myParticles; }

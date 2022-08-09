@@ -2,18 +2,18 @@
 #include <string>
 #include <vector>
 
+#include "enums.hpp"
+
 #pragma once
 
 namespace Utility
 {
     struct cliArguments {
-        int dim = 7;
-        int proc = 49;
-        int cutoff = 2;
         int iterations;
+        double cutoff;
         double deltaT;
         std::string inputCSV;
-        int n;
+        AlgorithmType algorithm;
 
         void printHelp();
     };
@@ -23,12 +23,10 @@ namespace Utility
         std::cout << "Help: \n"
                   << "Options:\n"
                   << "\t-h,--help\t\tShow this help message\n"
-                  << "\t-d,--dim\t\tGrid dimension\n"
-                  << "\t-p,--proc\t\tnum of processors\n"
+                  << "\t-a,--algorithm\t\talgorithm to use (\"nata\", \"p3bca\", \"auta\")\n"
                   << "\t-i,--iterations\t\tnum of iterations to simulate\n"
-                  << "\t-delta,--delta\t\tduration of one simulation step\n"
+                  << "\t-d,--delta\t\tduration of one simulation step\n"
                   << "\t-csv,--csv\t\tcsv file with particles\n"
-                  << "\t-n,--numparticles\t\tnumber of particles in total\n"
                   << "\t-c,--cutoff\t\tcutoff distance" << std::endl;
     }
 
@@ -41,29 +39,13 @@ namespace Utility
             try {
                 if (args[i].rfind("-", 0) == 0) {
                     flag = args[i].substr(1);
-                    if (flag.compare("d") == 0 || flag.compare("-dim") == 0) {
+                    if (flag.compare("c") == 0 || flag.compare("-cutoff") == 0) {
                         if (args.size() <= (size_t)(i + 1)) {
                             a.printHelp();
                             exit(1);
                         }
                         value = args[i + 1];
-                        a.dim = std::stoi(value);
-                        i++;
-                    } else if (flag.compare("p") == 0 || flag.compare("-proc") == 0) {
-                        if (args.size() <= (size_t)(i + 1)) {
-                            a.printHelp();
-                            exit(1);
-                        }
-                        value = args[i + 1];
-                        a.proc = std::stoi(value);
-                        i++;
-                    } else if (flag.compare("c") == 0 || flag.compare("-cutoff") == 0) {
-                        if (args.size() <= (size_t)(i + 1)) {
-                            a.printHelp();
-                            exit(1);
-                        }
-                        value = args[i + 1];
-                        a.cutoff = std::stoi(value);
+                        a.cutoff = std::stod(value);
                         i++;
                     } else if (flag.compare("i") == 0 || flag.compare("-iterations") == 0) {
                         if (args.size() <= (size_t)(i + 1)) {
@@ -73,15 +55,24 @@ namespace Utility
                         value = args[i + 1];
                         a.iterations = std::stoi(value);
                         i++;
-                    } else if (flag.compare("n") == 0 || flag.compare("-numparticles") == 0) {
+                    } else if (flag.compare("a") == 0 || flag.compare("-algorithm") == 0) {
                         if (args.size() <= (size_t)(i + 1)) {
                             a.printHelp();
                             exit(1);
                         }
                         value = args[i + 1];
-                        a.n = std::stoi(value);
+                        if (value.compare("nata") == 0) {
+                            a.algorithm = AlgorithmType::NATAType;
+                        } else if (value.compare("p3bca") == 0) {
+                            a.algorithm = AlgorithmType::P3BCAType;
+                        } else if (value.compare("auta") == 0) {
+                            a.algorithm = AlgorithmType::AUTAType;
+                        } else {
+                            a.printHelp();
+                            exit(1);
+                        }
                         i++;
-                    } else if (flag.compare("delta") == 0 || flag.compare("-delta") == 0) {
+                    } else if (flag.compare("d") == 0 || flag.compare("-delta") == 0) {
                         if (args.size() <= (size_t)(i + 1)) {
                             a.printHelp();
                             exit(1);

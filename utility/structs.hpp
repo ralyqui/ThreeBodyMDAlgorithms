@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mpi.h>
+#include <Eigen/Dense>
 
 #include <iostream>
 #include <string>
@@ -17,6 +18,8 @@ namespace Utility
         Particle(bool isDummy) : posX(0.0), posY(0.0), posZ(0.0), isDummy(isDummy) {}
         Particle(double posX, double posY, double posZ) : posX(posX), posY(posY), posZ(posZ), isDummy(false) {}
         void resetForce() { fX = fY = fZ = 0.0; }
+
+        Eigen::Array3d GetR() { return Eigen::Array3d(posX, posY, posZ); }
 
         static MPI_Datatype getMPIType()
         {
