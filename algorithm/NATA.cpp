@@ -64,9 +64,19 @@ void NATA::calculateInteractions()
                 if (b2[k].isDummy) {
                     continue;
                 }
-                double u = this->simulation->GetPotential()->CalculatePotential((*b0)[i], b1[j], b2[k]);
+                this->simulation->GetPotential()->CalculateForces((*b0)[i], b1[j], b2[k]);
             }
         }
+    }
+}
+
+void NATA::sumUpParticles()
+{
+    if (this->worldRank == 0) std::cout << "sum up forces" << std::endl;
+    for (size_t i = 0; i < (*this->b0).size(); i++) {
+        (*this->b0)[i].fX += this->b1[i].fX + this->b2[i].fX;
+        (*this->b0)[i].fY += this->b1[i].fY + this->b2[i].fY;
+        (*this->b0)[i].fZ += this->b1[i].fZ + this->b2[i].fZ;
     }
 }
 
@@ -110,4 +120,6 @@ void NATA::SimulationStep()
     }
 
     std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
+
+    sumUpParticles();
 }

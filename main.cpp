@@ -35,9 +35,12 @@ std::shared_ptr<Simulation> createNATAContext()
 
     // set up simulation
     // int iterations, std::shared_ptr<Algorithm> algorithm, std::shared_ptr<Topology> topology,
-    // std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition
-    std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(
-        a.iterations, nata, ringTopology, axilrodTeller, atomDecomposition, &mpiParticleType, particles);
+    // std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition,
+    // MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles, double dt,
+    // Eigen::Vector3d gForce
+    std::shared_ptr<Simulation> simulation =
+        std::make_shared<Simulation>(a.iterations, nata, ringTopology, axilrodTeller, atomDecomposition,
+                                     &mpiParticleType, particles, a.deltaT, a.gForce);
     return simulation;
 }
 
@@ -57,9 +60,12 @@ std::shared_ptr<Simulation> createP3BCAContext()
 
     // set up simulation
     // int iterations, std::shared_ptr<Algorithm> algorithm, std::shared_ptr<Topology> topology,
-    // std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition
-    std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(
-        a.iterations, p3bca, cartTopology, axilrodTeller, regularGridDecomposition, &mpiParticleType, particles);
+    // std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition,
+    // MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles, double dt,
+    // Eigen::Vector3d gForce
+    std::shared_ptr<Simulation> simulation =
+        std::make_shared<Simulation>(a.iterations, p3bca, cartTopology, axilrodTeller, regularGridDecomposition,
+                                     &mpiParticleType, particles, a.deltaT, a.gForce);
     return simulation;
 }
 
@@ -79,9 +85,12 @@ std::shared_ptr<Simulation> createAUTAContext()
 
     // set up simulation
     // int iterations, std::shared_ptr<Algorithm> algorithm, std::shared_ptr<Topology> topology,
-    // std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition
-    std::shared_ptr<Simulation> simulation = std::make_shared<Simulation>(
-        a.iterations, auta, ringTopology, axilrodTeller, atomDecomposition, &mpiParticleType, particles);
+    // std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition,
+    // MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles, double dt,
+    // Eigen::Vector3d gForce
+    std::shared_ptr<Simulation> simulation =
+        std::make_shared<Simulation>(a.iterations, auta, ringTopology, axilrodTeller, atomDecomposition,
+                                     &mpiParticleType, particles, a.deltaT, a.gForce);
     return simulation;
 }
 
@@ -100,7 +109,7 @@ int main(int argc, char *argv[])
     a = Utility::cliParse(args);
 
     // create particleMPIType
-    mpiParticleType = Utility::Particle::getMPIType();
+    mpiParticleType = Utility::Particle::GetMPIType();
     MPI_Type_commit(&mpiParticleType);
 
     // load particle input data

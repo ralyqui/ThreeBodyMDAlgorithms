@@ -19,6 +19,7 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
 
     // all boxed are included that are fully or partially covered by the cutoff distance
     this->b = (int)(this->cutoff / cellSize) + 1;
+
     if (this->cartTopology->GetWorldRank() == 0) {
         std::cout << "dim: " << dim << ", numProc: " << this->cartTopology->GetWorldSize()
                   << ", physical Domain Size: " << decomposition->GetPhysicalDomainSize() << ", cellsize: " << cellSize
@@ -43,7 +44,7 @@ void P3BCA::calculateInteractions()
                 if (b2[k].isDummy) {
                     continue;
                 }
-                double u = this->simulation->GetPotential()->CalculatePotential((*b0)[i], b1[j], b2[k]);
+                this->simulation->GetPotential()->CalculateForces((*b0)[i], b1[j], b2[k]);
             }
         }
     }
@@ -66,7 +67,7 @@ void P3BCA::shift(std::vector<Utility::Particle> &buf, int dim, int dir)
     MPI_Probe(src, 0, this->cartTopology->GetComm(), &status);
     MPI_Get_count(&status, *this->simulation->GetMPIParticleType(), &numRecv);
 
-    this->tmpRecv.reserve(numRecv);
+    this->tmpRecv.resize(numRecv);
 
     MPI_Recv(this->tmpRecv.data(), numRecv, *this->mpiParticleType, src, 0, this->cartTopology->GetComm(),
              MPI_STATUS_IGNORE);

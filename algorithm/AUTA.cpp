@@ -47,7 +47,7 @@ void AUTA::calculateInteractions()
                 if (b2[k].isDummy) {
                     continue;
                 }
-                double u = this->simulation->GetPotential()->CalculatePotential(b0[i], b1[j], b2[k]);
+                this->simulation->GetPotential()->CalculateForces(b0[i], b1[j], b2[k]);
             }
         }
     }
@@ -100,8 +100,11 @@ void AUTA::calculateOneThirdOfInteractions(int thirdID)
         numSteps += b0Sorted->size() % 3;
     }
 
-    std::cout << "proc " << this->worldRank << " calculates from " << start << " to " << start + numSteps - 1 << " ("
-              << numSteps - 1 << " interactions) of last step with total bufsize: " << b0Sorted->size() << std::endl;
+    if (this->worldRank == 0) {
+        std::cout << "proc " << this->worldRank << " calculates from " << start << " to " << start + numSteps - 1
+                  << " (" << numSteps - 1 << " interactions) of last step with total bufsize: " << b0Sorted->size()
+                  << std::endl;
+    }
 
     for (int i = start; i < numSteps; ++i) {
         if ((*b0Sorted)[i].isDummy) {
@@ -115,8 +118,7 @@ void AUTA::calculateOneThirdOfInteractions(int thirdID)
                 if ((*b2Sorted)[k].isDummy) {
                     continue;
                 }
-                double u = this->simulation->GetPotential()->CalculatePotential((*b0Sorted)[i], (*b2Sorted)[j],
-                                                                                (*b2Sorted)[k]);
+                this->simulation->GetPotential()->CalculateForces((*b0Sorted)[i], (*b2Sorted)[j], (*b2Sorted)[k]);
             }
         }
     }
@@ -144,6 +146,103 @@ int& AUTA::getBufOwner(int i)
     }
 }
 
+void AUTA::sendBackParticles()
+{
+    MPI_Request requestSend0, requestSend1, requestSend2;
+    MPI_Status statusRecv0, statusRecv1, statusRecv2;
+    bool b0Sent = false, b1Sent = false, b2Sent = false;
+
+    if (this->b0Owner != this->worldRank) {
+        MPI_Isend(this->b0.data(), this->b0.size(), *this->mpiParticleType, this->b0Owner, 0,
+                  this->ringTopology->GetComm(), &requestSend0);
+        b0Sent = true;
+    }
+    if (this->b1Owner != this->worldRank) {
+        MPI_Isend(this->b1.data(), this->b1.size(), *this->mpiParticleType, this->b1Owner, 1,
+                  this->ringTopology->GetComm(), &requestSend1);
+        b1Sent = true;
+    }
+    if (this->b2Owner != this->worldRank) {
+        MPI_Isend(this->b2.data(), this->b2.size(), *this->mpiParticleType, this->b2Owner, 2,
+                  this->ringTopology->GetComm(), &requestSend2);
+        b2Sent = true;
+    }
+
+    // all buffers have the same size
+    int numRecv = b0.size();
+
+    if (this->b0Owner != this->worldRank) {
+        this->b0Tmp.resize(numRecv);
+
+        MPI_Recv(b0Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 0, this->ringTopology->GetComm(),
+                 &statusRecv0);
+
+        if (this->worldRank == 0) {
+            std::cout << "proc " << this->worldRank << " received buffer0 from " << statusRecv0.MPI_SOURCE << ", with "
+                      << b0Tmp.size() << " elements" << std::endl;
+        }
+    }
+    if (this->b1Owner != this->worldRank) {
+        this->b1Tmp.resize(numRecv);
+
+        MPI_Recv(b1Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 1, this->ringTopology->GetComm(),
+                 &statusRecv1);
+        if (this->worldRank == 0)
+            std::cout << "proc " << this->worldRank << " received buffer1 from " << statusRecv1.MPI_SOURCE << ", with "
+                      << b1Tmp.size() << " elements" << std::endl;
+    }
+    if (this->b2Owner != this->worldRank) {
+        this->b2Tmp.resize(numRecv);
+
+        MPI_Recv(b2Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 2, this->ringTopology->GetComm(),
+                 &statusRecv2);
+        if (this->worldRank == 0)
+            std::cout << "proc " << this->worldRank << " received buffer2 from " << statusRecv2.MPI_SOURCE << ", with "
+                      << b2Tmp.size() << " elements" << std::endl;
+    }
+
+    if (b0Sent) MPI_Wait(&requestSend0, MPI_STATUS_IGNORE);
+    if (b1Sent) MPI_Wait(&requestSend1, MPI_STATUS_IGNORE);
+    if (b2Sent) MPI_Wait(&requestSend2, MPI_STATUS_IGNORE);
+
+    if (b0Sent) {
+        this->b0 = this->b0Tmp;
+        if (this->worldRank == 0) std::cout << "b0Tmp has " << b0Tmp.size() << " elements" << std::endl;
+        this->b0Tmp.clear();
+    }
+
+    if (b1Sent) {
+        this->b1 = this->b1Tmp;
+        if (this->worldRank == 0) std::cout << "b1Tmp has " << b1Tmp.size() << " elements" << std::endl;
+        this->b1Tmp.clear();
+    }
+
+    if (b2Sent) {
+        this->b2 = this->b2Tmp;
+        if (this->worldRank == 0) std::cout << "b2Tmp has " << b2Tmp.size() << " elements" << std::endl;
+        this->b2Tmp.clear();
+    }
+
+    this->b0Owner = this->worldRank;
+    this->b1Owner = this->worldRank;
+    this->b2Owner = this->worldRank;
+
+    if (this->worldRank == 0) {
+        std::cout << "buf 0 has now " << this->b0.size() << " elements, buf 1 has now " << this->b1.size()
+                  << " elements, buf 2 has now " << this->b2.size() << " elements" << std::endl;
+    }
+}
+
+void AUTA::sumUpParticles()
+{
+    if (this->worldRank == 0) std::cout << "sum up forces" << std::endl;
+    for (size_t i = 0; i < this->b0.size(); i++) {
+        this->b0[i].fX += this->b1[i].fX + this->b2[i].fX;
+        this->b0[i].fY += this->b1[i].fY + this->b2[i].fY;
+        this->b0[i].fZ += this->b1[i].fZ + this->b2[i].fZ;
+    }
+}
+
 void AUTA::SimulationStep()
 {
     // reset all forces in b0 to 0
@@ -158,16 +257,24 @@ void AUTA::SimulationStep()
 
     int counter = 0;
 
-    for (int s = this->worldSize; s >= 3; s -= 3) {
+    for (int s = this->worldSize; s > 0; s -= 3) {
         for (int j = 0; j < s; ++j) {
             if (j != 0 || s != this->worldSize) {
                 getBufOwner(i) = shiftRight(bi, getBufOwner(i));
             }
+            if (this->worldRank == 0) {
+                std::cout << "proc " << worldRank << " calculates interactions between (" << b0Owner << ", " << b1Owner
+                          << ", " << b2Owner << ")" << std::endl;
+            }
             calculateInteractions();
             counter++;
         }
+        if (this->worldRank == 0) {
+            std::cout << "end inner loop" << std::endl;
+        }
         i = (i + 1) % 3;
         bi = pickBuffer(i);
+        if (this->worldRank == 0) std::cout << "s: " << s << std::endl;
     }
     if (this->worldSize % 3 == 0) {
         getBufOwner(i) = shiftRight(bi, getBufOwner(i));
@@ -175,13 +282,26 @@ void AUTA::SimulationStep()
         int thirdID = this->worldRank / (this->worldSize / 3);
 
         // Calculate one third of the interactions
+        counter++;
+        if (this->worldRank == 0) {
+            std::cout << "proc " << worldRank << " calculates one third of interactions between (" << b0Owner << ", "
+                      << b1Owner << ", " << b2Owner << ")" << std::endl;
+        }
         calculateOneThirdOfInteractions(thirdID);
     }
 
-    std::cout << "proc " << this->worldRank << ": b0Owner: " << this->b0Owner << ", b1Owner: " << this->b1Owner
-              << ", b2Owner: " << this->b2Owner << std::endl;
+    if (this->worldRank == 0) {
+        std::cout << "proc " << this->worldRank << ": b0Owner: " << this->b0Owner << ", b1Owner: " << this->b1Owner
+                  << ", b2Owner: " << this->b2Owner << std::endl;
+    }
 
     // send back to owner
+    sendBackParticles();
 
-    // std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
+    // sum up particles
+    sumUpParticles();
+
+    if (this->worldRank == 0) {
+        std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
+    }
 }

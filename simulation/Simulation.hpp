@@ -13,11 +13,14 @@ private:
     std::shared_ptr<DomainDecomposition> decomposition;
     MPI_Datatype* mpiParticleType;
     std::vector<Utility::Particle>& particles;
+    double dt;
+    Eigen::Vector3d gForce;
 
 public:
     Simulation(int iterations, std::shared_ptr<Algorithm> algorithm, std::shared_ptr<Topology> topology,
                std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition,
-               MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles);
+               MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles, double dt,
+               Eigen::Vector3d gForce);
     ~Simulation();
 
     void Start();

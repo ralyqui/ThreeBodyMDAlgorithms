@@ -23,6 +23,7 @@ private:
     void calculateProcessed(int step, bool &calculate);
     int shiftRight(std::vector<Utility::Particle> &buf);
     void calculateInteractions();
+    void sumUpParticles();
 
 public:
     NATA();

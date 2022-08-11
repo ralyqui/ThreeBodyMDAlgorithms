@@ -2,9 +2,10 @@
 
 Simulation::Simulation(int iterations, std::shared_ptr<Algorithm> algorithm, std::shared_ptr<Topology> topology,
                        std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition,
-                       MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles)
+                       MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles, double dt,
+                       Eigen::Vector3d gForce)
     : iterations(iterations), algorithm(algorithm), topology(topology), potential(potential),
-      decomposition(decomposition), mpiParticleType(mpiParticleType), particles(particles)
+      decomposition(decomposition), mpiParticleType(mpiParticleType), particles(particles), dt(dt), gForce(gForce)
 {}
 
 void Simulation::Init()
@@ -28,7 +29,9 @@ void Simulation::Start()
     for (int i = 0; i < iterations; ++i) {
         // do step
         this->algorithm->SimulationStep();
-        //this->decomposition->Update();
+        MPI_Barrier(this->topology->GetComm());
+        this->decomposition->Update(this->dt, this->gForce);
+        MPI_Barrier(this->topology->GetComm());
     }
 }
 

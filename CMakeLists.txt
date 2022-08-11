@@ -2,6 +2,7 @@ include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 
 add_subdirectory(utility)
 add_subdirectory(tools)
+add_subdirectory(external/gtest)
 
 set(MAIN_SOURCES
     main.cpp
@@ -27,6 +28,8 @@ target_include_directories(main PRIVATE utility algorithm decomposition
 target_link_libraries(main ${MPI_C_LIBRARIES})
 target_link_libraries(main Eigen3::Eigen)
 
-# target_include_directories(main PRIVATE ${Boost_INCLUDE_DIRS})
-# target_link_libraries(main example ${Boost_LIBRARIES})
-# add_custom_command(TARGET main POST_BUILD COMMAND main)
+include_directories(external/gtest/include)
+
+# TESTS
+add_executable(tests tests/tests.cpp)
+target_link_libraries(tests PRIVATE gtest)

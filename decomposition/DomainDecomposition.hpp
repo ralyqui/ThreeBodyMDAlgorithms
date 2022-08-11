@@ -14,12 +14,14 @@ protected:
     std::vector<Utility::Particle> myParticles;
     int numOfMyParticles;
 
+    void updateMyParticles(double dt, Eigen::Vector3d gForce);
+
 public:
     virtual ~DomainDecomposition() = 0;
 
     virtual void Init(std::shared_ptr<Simulation> simulation);
 
-    virtual void Update() = 0;
+    virtual void Update(double dt, Eigen::Vector3d gForce) = 0;
     virtual void ResetForces() = 0;
     std::vector<Utility::Particle>* GetMyParticles();
     int GetNumParticles();

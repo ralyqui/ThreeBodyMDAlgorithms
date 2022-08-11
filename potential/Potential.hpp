@@ -13,5 +13,5 @@ public:
     Potential();
     virtual ~Potential() = 0;
     virtual void Init(std::shared_ptr<Simulation> simulation);
-    virtual double CalculatePotential(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k) = 0;
+    virtual void CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k) = 0;
 };

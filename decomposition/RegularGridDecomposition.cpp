@@ -79,27 +79,43 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
     int rightNeighbor = cartTopology->GetRightNeighbor(dim);
 
     int numRecv;
-    MPI_Status status;
+    MPI_Status status0, status1;
+    MPI_Request request0, request1;
 
     MPI_Datatype pType = *this->simulation->GetMPIParticleType();
 
-    MPI_Probe(rightNeighbor, 0, this->cartTopology->GetComm(), &status);
-    MPI_Get_count(&status, pType, &numRecv);
+    MPI_Isend(sendToLeftNeighbor.data(), sendToLeftNeighbor.size(), pType, leftNeighbor, 0,
+              this->cartTopology->GetComm(), &request0);
 
-    recvFromRightNeighbor.reserve(numRecv);
+    MPI_Probe(rightNeighbor, 0, this->cartTopology->GetComm(), &status0);
+    MPI_Get_count(&status0, pType, &numRecv);
 
-    MPI_Sendrecv(sendToLeftNeighbor.data(), sendToLeftNeighbor.size(), pType, leftNeighbor, 0,
-                 recvFromRightNeighbor.data(), numRecv, pType, rightNeighbor, 0, this->cartTopology->GetComm(),
-                 MPI_STATUS_IGNORE);
+    recvFromRightNeighbor.resize(numRecv);
 
-    MPI_Probe(leftNeighbor, 0, this->cartTopology->GetComm(), &status);
-    MPI_Get_count(&status, pType, &numRecv);
+    MPI_Recv(recvFromRightNeighbor.data(), numRecv, pType, rightNeighbor, 0, this->cartTopology->GetComm(),
+             MPI_STATUS_IGNORE);
 
-    recvFromLeftNeighbor.reserve(numRecv);
+    // MPI_Sendrecv(sendToLeftNeighbor.data(), sendToLeftNeighbor.size(), pType, leftNeighbor, 0,
+    //             recvFromRightNeighbor.data(), numRecv, pType, rightNeighbor, 0, this->cartTopology->GetComm(),
+    //             MPI_STATUS_IGNORE);
 
-    MPI_Sendrecv(sendToRightNeighbor.data(), sendToRightNeighbor.size(), pType, rightNeighbor, 0,
-                 recvFromLeftNeighbor.data(), numRecv, pType, leftNeighbor, 0, this->cartTopology->GetComm(),
-                 MPI_STATUS_IGNORE);
+    MPI_Isend(sendToRightNeighbor.data(), sendToRightNeighbor.size(), pType, rightNeighbor, 0,
+              this->cartTopology->GetComm(), &request1);
+
+    MPI_Probe(leftNeighbor, 0, this->cartTopology->GetComm(), &status1);
+    MPI_Get_count(&status1, pType, &numRecv);
+
+    recvFromLeftNeighbor.resize(numRecv);
+
+    MPI_Recv(recvFromLeftNeighbor.data(), numRecv, pType, leftNeighbor, 0, this->cartTopology->GetComm(),
+             MPI_STATUS_IGNORE);
+
+    // MPI_Sendrecv(sendToRightNeighbor.data(), sendToRightNeighbor.size(), pType, rightNeighbor, 0,
+    //             recvFromLeftNeighbor.data(), numRecv, pType, leftNeighbor, 0, this->cartTopology->GetComm(),
+    //             MPI_STATUS_IGNORE);
+
+    MPI_Wait(&request0, MPI_STATUS_IGNORE);
+    MPI_Wait(&request1, MPI_STATUS_IGNORE);
 
     // merge Particles
     for (Utility::Particle& p : recvFromLeftNeighbor) {
@@ -112,9 +128,9 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
 
 bool RegularGridDecomposition::isInsideLocalCell(Utility::Particle& particle)
 {
-    if (particle.posX <= this->localCellMin.x() || particle.posY <= this->localCellMin.y() ||
-        particle.posZ <= this->localCellMin.z() || particle.posX > this->localCellMax.x() ||
-        particle.posY > this->localCellMax.y() || particle.posZ > this->localCellMax.z()) {
+    if (particle.pX <= this->localCellMin.x() || particle.pY <= this->localCellMin.y() ||
+        particle.pZ <= this->localCellMin.z() || particle.pX > this->localCellMax.x() ||
+        particle.pY > this->localCellMax.y() || particle.pZ > this->localCellMax.z()) {
         return false;
     }
     return true;
@@ -127,20 +143,21 @@ std::tuple<Eigen::Array3d, Eigen::Array3d> RegularGridDecomposition::getDomainMi
     Eigen::Array3d min = Eigen::Array3d(inf, inf, inf);
     Eigen::Array3d max = Eigen::Array3d(-inf, -inf, -inf);
     for (Utility::Particle& p : particles) {
-        if (p.posX < min.x() && p.posY < min.y() && p.posZ < min.z()) {
-            min = Eigen::Array3d(p.posX, p.posY, p.posZ);
+        if (p.pX < min.x() && p.pY < min.y() && p.pZ < min.z()) {
+            min = Eigen::Array3d(p.pX, p.pY, p.pZ);
         }
-        if (p.posX > max.x() && p.posY > max.y() && p.posZ > max.z()) {
-            max = Eigen::Array3d(p.posX, p.posY, p.posZ);
+        if (p.pX > max.x() && p.pY > max.y() && p.pZ > max.z()) {
+            max = Eigen::Array3d(p.pX, p.pY, p.pZ);
         }
     }
 
     return std::tuple<Eigen::Array3d, Eigen::Array3d>(min, max);
 }
 
-void RegularGridDecomposition::Update()
+void RegularGridDecomposition::Update(double dt, Eigen::Vector3d gForce)
 {
-    // update all my particles... TBD
+    // update all my particles
+    this->updateMyParticles(dt, gForce);
 
     // recalculate boundaries
     exchangeParticles();
@@ -149,7 +166,7 @@ void RegularGridDecomposition::Update()
 void RegularGridDecomposition::ResetForces()
 {
     for (size_t i = 0; i < myParticles.size(); i++) {
-        myParticles[i].resetForce();
+        myParticles[i].ResetForce();
     }
 }
 

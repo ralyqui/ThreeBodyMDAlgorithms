@@ -48,14 +48,15 @@ void AtomDecomposition::Init(std::shared_ptr<Simulation> simulation)
     //          << std::endl;
 }
 
-void AtomDecomposition::Update()
+void AtomDecomposition::Update(double dt, Eigen::Vector3d gForce)
 {
-    // update all my particles... TBD
+    // update all my particles
+    this->updateMyParticles(dt, gForce);
 }
 
 void AtomDecomposition::ResetForces()
 {
     for (size_t i = 0; i < myParticles.size(); i++) {
-        myParticles[i].resetForce();
+        myParticles[i].ResetForce();
     }
 }

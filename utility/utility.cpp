@@ -17,7 +17,8 @@ namespace Utility
         std::vector<double> row;
         for (size_t i = 0; i < doc.GetRowCount(); i++) {
             row = doc.GetRow<double>(i);
-            particles.push_back(Particle(row[0], row[1], row[2]));
+            particles.push_back(
+                Particle(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]));
         }
     }
 
