@@ -20,7 +20,9 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
     // all boxed are included that are fully or partially covered by the cutoff distance
     this->b = (int)(this->cutoff / cellSize) + 1;
 
-    if (this->cartTopology->GetWorldRank() == 0) {
+    this->worldRank = this->cartTopology->GetWorldRank();
+
+    if (this->worldRank == 0) {
         std::cout << "dim: " << dim << ", numProc: " << this->cartTopology->GetWorldSize()
                   << ", physical Domain Size: " << decomposition->GetPhysicalDomainSize() << ", cellsize: " << cellSize
                   << ", b: " << b << std::endl;
@@ -76,6 +78,78 @@ void P3BCA::shift(std::vector<Utility::Particle> &buf, int dim, int dir)
 
     // assign particles to buf
     buf = tmpRecv;
+}
+
+void P3BCA::sendBackParticles()
+{
+    MPI_Request requestSend1, requestSend2;
+    MPI_Status statusRecv1, statusRecv2;
+    bool b1Sent = false, b2Sent = false;
+
+    if (this->b1Owner != this->worldRank) {
+        MPI_Isend(this->b1.data(), this->b1.size(), *this->mpiParticleType, this->b1Owner, 1,
+                  this->cartTopology->GetComm(), &requestSend1);
+        b1Sent = true;
+    }
+    if (this->b2Owner != this->worldRank) {
+        MPI_Isend(this->b2.data(), this->b2.size(), *this->mpiParticleType, this->b2Owner, 2,
+                  this->cartTopology->GetComm(), &requestSend2);
+        b2Sent = true;
+    }
+
+    // all buffers have the same size
+    int numRecv = (*b0).size();
+
+    if (this->b1Owner != this->worldRank) {
+        this->b1Tmp.resize(numRecv);
+
+        MPI_Recv(b1Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 1, this->cartTopology->GetComm(),
+                 &statusRecv1);
+        if (this->worldRank == 0)
+            std::cout << "proc " << this->worldRank << " received buffer1 from " << statusRecv1.MPI_SOURCE << ", with "
+                      << b1Tmp.size() << " elements" << std::endl;
+    }
+    if (this->b2Owner != this->worldRank) {
+        this->b2Tmp.resize(numRecv);
+
+        MPI_Recv(b2Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 2, this->cartTopology->GetComm(),
+                 &statusRecv2);
+        if (this->worldRank == 0)
+            std::cout << "proc " << this->worldRank << " received buffer2 from " << statusRecv2.MPI_SOURCE << ", with "
+                      << b2Tmp.size() << " elements" << std::endl;
+    }
+
+    if (b1Sent) MPI_Wait(&requestSend1, MPI_STATUS_IGNORE);
+    if (b2Sent) MPI_Wait(&requestSend2, MPI_STATUS_IGNORE);
+
+    if (b1Sent) {
+        this->b1 = this->b1Tmp;
+        if (this->worldRank == 0) std::cout << "b1Tmp has " << b1Tmp.size() << " elements" << std::endl;
+        this->b1Tmp.clear();
+    }
+
+    if (b2Sent) {
+        this->b2 = this->b2Tmp;
+        if (this->worldRank == 0) std::cout << "b2Tmp has " << b2Tmp.size() << " elements" << std::endl;
+        this->b2Tmp.clear();
+    }
+
+    this->b1Owner = this->worldRank;
+    this->b2Owner = this->worldRank;
+
+    if (this->worldRank == 0) {
+        std::cout << "buf 0 has now " << (*this->b0).size() << " elements, buf 1 has now " << this->b1.size()
+                  << " elements, buf 2 has now " << this->b2.size() << " elements" << std::endl;
+    }
+}
+
+void P3BCA::sumUpParticles()
+{
+    for (size_t i = 0; i < (*this->b0).size(); i++) {
+        (*this->b0)[i].fX += this->b1[i].fX + this->b2[i].fX;
+        (*this->b0)[i].fY += this->b1[i].fY + this->b2[i].fY;
+        (*this->b0)[i].fZ += this->b1[i].fZ + this->b2[i].fZ;
+    }
 }
 
 void P3BCA::SimulationStep()
@@ -143,4 +217,8 @@ void P3BCA::SimulationStep()
         yDirInner *= -1;
         zDirInner *= -1;
     }
+
+    sendBackParticles();
+
+    sumUpParticles();
 }
