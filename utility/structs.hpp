@@ -106,9 +106,30 @@ namespace Utility
                    (c == t.a && a == t.b && b == t.c) || (c == t.a && b == t.b && a == t.c);
         }
 
+        bool operator!=(const Triplet& t) const { return !(this->operator==(t)); }
+
         std::string toString()
         {
             return "(" + std::to_string(a) + ", " + std::to_string(b) + ", " + std::to_string(c) + ")";
+        }
+
+        static MPI_Datatype GetMPIType()
+        {
+            // create MPI struct
+            MPI_Datatype mpiTripletType;
+            const int nitemsTriplet = 3;
+            int blocklengthsTriplet[3] = {1, 1, 1};
+            MPI_Datatype types[3] = {MPI_INT, MPI_INT, MPI_INT};
+
+            MPI_Aint offsetsTriplet[3];
+
+            offsetsTriplet[0] = offsetof(Utility::Triplet, a);
+            offsetsTriplet[1] = offsetof(Utility::Triplet, b);
+            offsetsTriplet[2] = offsetof(Utility::Triplet, c);
+
+            MPI_Type_create_struct(nitemsTriplet, blocklengthsTriplet, offsetsTriplet, types, &mpiTripletType);
+
+            return mpiTripletType;
         }
     };
 }  // namespace Utility

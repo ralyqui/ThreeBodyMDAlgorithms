@@ -9,6 +9,7 @@ protected:
 
 public:
     RingTopology();
+    ~RingTopology();
 
     int GetLeftNeighbor();
     int GetRightNeighbor();

@@ -14,6 +14,7 @@ void NATA::Init(std::shared_ptr<Simulation> simulation)
     this->rightNeighbor = ringTopology->GetRightNeighbor();
     this->worldRank = ringTopology->GetWorldRank();
     this->worldSize = ringTopology->GetWorldSize();
+    this->potential = this->simulation->GetPotential();
 }
 
 bool NATA::containsProcessed(Utility::Triplet t)
@@ -64,7 +65,8 @@ void NATA::calculateInteractions()
                 if (b2[k].isDummy) {
                     continue;
                 }
-                this->simulation->GetPotential()->CalculateForces((*b0)[i], b1[j], b2[k]);
+                // this->simulation->GetPotential()->CalculateForces((*b0)[i], b1[j], b2[k]);
+                this->potential->CalculateForces((*b0)[i], b1[j], b2[k]);
             }
         }
     }
@@ -72,23 +74,40 @@ void NATA::calculateInteractions()
 
 void NATA::sumUpParticles()
 {
-    if (this->worldRank == 0) std::cout << "sum up forces" << std::endl;
+    // std::chrono::time_point<std::chrono::system_clock> start;
+    // std::chrono::time_point<std::chrono::system_clock> end;
+
+    // start = std::chrono::system_clock::now();
+
     for (size_t i = 0; i < (*this->b0).size(); i++) {
         (*this->b0)[i].fX += this->b1[i].fX + this->b2[i].fX;
         (*this->b0)[i].fY += this->b1[i].fY + this->b2[i].fY;
         (*this->b0)[i].fZ += this->b1[i].fZ + this->b2[i].fZ;
+
+        /*
+        Vec3Dd v0((*this->b0)[i].fX, (*this->b0)[i].fY, (*this->b0)[i].fZ);
+        Vec3Dd v1(this->b1[i].fX, this->b1[i].fY, this->b1[i].fZ);
+        Vec3Dd v2(this->b2[i].fX, this->b2[i].fY, this->b2[i].fZ);
+
+        v0 += v1 += v2;
+
+        (*this->b0)[i].fX = v0.get_x();
+        (*this->b0)[i].fY = v0.get_y();
+        (*this->b0)[i].fZ = v0.get_z();
+        */
     }
+
+    // end = std::chrono::system_clock::now();
+
+    // auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+
+    // std::cout << "summation took " << elapsed_time.count() << " ns" << std::endl;
 }
 
-void NATA::SimulationStep()
+int NATA::SimulationStep()
 {
-    // int bufI = 0;
-    // int bufJ = 0;
-
     // reset all forces in b0 to 0
     this->simulation->GetDecomposition()->ResetForces();
-
-    // std::cout << (*b0).size() << std::endl;
 
     // use assignment operator to copy vector
     b1 = *b0;
@@ -105,21 +124,25 @@ void NATA::SimulationStep()
             calculateProcessed(step, calculate);
             if (calculate) {
                 calculateInteractions();
-                // if (worldRank == 0) {
-                //    std::cout << "calculate interactions between (" << this->worldRank << ", " << bufI << ", " << bufJ
-                //              << ")" << std::endl;
-                //}
                 counter++;
+#ifdef TESTMODE
+                // TESTMODE is defined
+                processed.push_back(Utility::Triplet(this->worldRank,
+                                                     Utility::mod(i + this->worldRank, this->worldSize),
+                                                     Utility::mod(j + this->worldRank, this->worldSize)));
+#endif
             }
             shiftRight(b2);
-            // bufJ = (bufJ + 1) % worldSize;
             ++step;
         }
         shiftRight(b1);
-        // bufI = (bufI + 1) % worldSize;
     }
 
-    std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
+    // std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
 
     sumUpParticles();
+
+    return counter;
+
+    // Utility::writeStepToCSV("NATA_Step" + std::to_string(iteration) + ".csv", *this->b0);
 }

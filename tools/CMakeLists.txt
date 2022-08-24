@@ -1,1 +1,9 @@
-add_executable(particlegenerator particle_generator.cpp)
+add_executable(
+  particlegenerator
+  particleToCSV.cpp
+  ParticleGenerator.cpp
+  ClusteredGaussGenerator.cpp
+  ClosestPackedGenerator.cpp
+  GaussGenerator.cpp
+  GridGenerator.cpp
+  UniformGenerator.cpp)

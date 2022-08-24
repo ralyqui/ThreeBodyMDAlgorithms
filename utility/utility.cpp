@@ -4,7 +4,7 @@ namespace Utility
 {
     // https://stackoverflow.com/a/4609795
     template <typename T>
-    static int sgn(T val)
+    int sgn(T val)
     {
         return (T(0) < val) - (val < T(0));
     }
@@ -42,5 +42,31 @@ namespace Utility
             }
         }
     }*/
+
+    void writeStepToCSV(std::string file, std::vector<Particle> &particles)
+    {
+        std::ofstream csvFile;
+        csvFile.open(file);
+        csvFile << "pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m\n";
+        for (size_t i = 0; i < particles.size(); i++) {
+            csvFile << particles[i].pX << ", " << particles[i].pY << ", " << particles[i].pZ << ", " << particles[i].vX
+                    << ", " << particles[i].vY << ", " << particles[i].vZ << ", " << particles[i].aX << ", "
+                    << particles[i].aY << ", " << particles[i].aZ << ", " << particles[i].mass << "\n";
+        }
+        csvFile.close();
+    }
+
+    // https://stackoverflow.com/a/55422097
+    int BinomialCoefficient(const int n, const int k)
+    {
+        std::vector<int> aSolutions(k);
+        aSolutions[0] = n - k + 1;
+
+        for (int i = 1; i < k; ++i) {
+            aSolutions[i] = aSolutions[i - 1] * (n - k + 1 + i) / (i + 1);
+        }
+
+        return aSolutions[k - 1];
+    }
 
 }  // namespace Utility

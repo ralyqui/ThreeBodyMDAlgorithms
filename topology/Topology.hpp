@@ -5,8 +5,8 @@
 #include <memory>
 
 #include "../fwd.hpp"
-#include "../utility/utility.hpp"
 #include "../simulation/Simulation.hpp"
+#include "../utility/utility.hpp"
 
 class Topology {
 protected:
@@ -16,6 +16,8 @@ protected:
     MPI_Comm comm;
 
 public:
+    Topology();
+    ~Topology();
     virtual int GetWorldRank() = 0;
     virtual int GetWorldSize() = 0;
     virtual void Init(std::shared_ptr<Simulation> simulation);

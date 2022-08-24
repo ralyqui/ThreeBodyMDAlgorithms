@@ -26,7 +26,7 @@ private:
 
     double cutoff;
 
-    int b;
+    int numCutoffBoxes;
 
 public:
     P3BCA(double cutoff);

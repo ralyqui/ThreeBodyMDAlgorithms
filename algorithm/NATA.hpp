@@ -1,7 +1,9 @@
 #pragma once
+#include <chrono>
 #include <vector>
 
 #include "../topology/RingTopology.hpp"
+#include "../utility/vector3d.h"
 #include "Algorithm.hpp"
 
 class NATA final : public Algorithm {
@@ -12,6 +14,7 @@ private:
     int worldSize;
 
     std::shared_ptr<RingTopology> ringTopology;
+    std::shared_ptr<Potential> potential;
 
     std::vector<Utility::Particle> *b0;
     std::vector<Utility::Particle> b1;
@@ -31,5 +34,5 @@ public:
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 
-    void SimulationStep() override;
+    int SimulationStep() override;
 };

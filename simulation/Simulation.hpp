@@ -32,4 +32,7 @@ public:
     std::shared_ptr<DomainDecomposition> GetDecomposition();
     MPI_Datatype* GetMPIParticleType();
     std::vector<Utility::Particle>& GetAllParticles();
+    double GetDeltaT();
+    int GetNumIterations();
+    Eigen::Vector3d GetGForce();
 };

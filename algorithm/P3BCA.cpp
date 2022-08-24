@@ -18,7 +18,7 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
     double cellSize = decomposition->GetCellSize();
 
     // all boxed are included that are fully or partially covered by the cutoff distance
-    this->b = (int)(this->cutoff / cellSize) + 1;
+    this->numCutoffBoxes = (int)(this->cutoff / cellSize) + 1;
 
     this->worldRank = this->cartTopology->GetWorldRank();
 
@@ -221,4 +221,4 @@ void P3BCA::SimulationStep()
     sendBackParticles();
 
     sumUpParticles();
-}
+int P3BCA::GetNumCutoffBoxes() { return this->numCutoffBoxes; }

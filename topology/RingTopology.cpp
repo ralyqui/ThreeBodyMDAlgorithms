@@ -1,6 +1,7 @@
 #include "RingTopology.hpp"
 
 RingTopology::RingTopology() {}
+RingTopology::~RingTopology() { MPI_Comm_free(&this->comm); }
 
 int RingTopology::GetLeftNeighbor() { return this->leftNeighbor; }
 int RingTopology::GetRightNeighbor() { return this->rightNeighbor; }

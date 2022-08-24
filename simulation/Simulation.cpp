@@ -17,7 +17,13 @@ void Simulation::Init()
     this->potential->Init(simulationPtr);
 }
 
-Simulation::~Simulation() {}
+Simulation::~Simulation()
+{
+    this->topology->~Topology();
+    this->decomposition->~DomainDecomposition();
+    this->algorithm->~Algorithm();
+    this->potential->~Potential();
+}
 
 std::shared_ptr<Algorithm> Simulation::GetAlgorithm() { return this->algorithm; }
 std::shared_ptr<Topology> Simulation::GetTopology() { return this->topology; }
@@ -38,3 +44,7 @@ void Simulation::Start()
 MPI_Datatype* Simulation::GetMPIParticleType() { return this->mpiParticleType; }
 
 std::vector<Utility::Particle>& Simulation::GetAllParticles() { return this->particles; }
+
+double Simulation::GetDeltaT() { return this->dt; }
+int Simulation::GetNumIterations() { return this->iterations; }
+Eigen::Vector3d Simulation::GetGForce() { return this->gForce; }

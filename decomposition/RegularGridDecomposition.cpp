@@ -87,6 +87,8 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
     MPI_Isend(sendToLeftNeighbor.data(), sendToLeftNeighbor.size(), pType, leftNeighbor, 0,
               this->cartTopology->GetComm(), &request0);
 
+    MPI_Wait(&request0, MPI_STATUS_IGNORE);
+
     MPI_Probe(rightNeighbor, 0, this->cartTopology->GetComm(), &status0);
     MPI_Get_count(&status0, pType, &numRecv);
 
@@ -102,6 +104,8 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
     MPI_Isend(sendToRightNeighbor.data(), sendToRightNeighbor.size(), pType, rightNeighbor, 0,
               this->cartTopology->GetComm(), &request1);
 
+    MPI_Wait(&request1, MPI_STATUS_IGNORE);
+
     MPI_Probe(leftNeighbor, 0, this->cartTopology->GetComm(), &status1);
     MPI_Get_count(&status1, pType, &numRecv);
 
@@ -113,9 +117,6 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
     // MPI_Sendrecv(sendToRightNeighbor.data(), sendToRightNeighbor.size(), pType, rightNeighbor, 0,
     //             recvFromLeftNeighbor.data(), numRecv, pType, leftNeighbor, 0, this->cartTopology->GetComm(),
     //             MPI_STATUS_IGNORE);
-
-    MPI_Wait(&request0, MPI_STATUS_IGNORE);
-    MPI_Wait(&request1, MPI_STATUS_IGNORE);
 
     // merge Particles
     for (Utility::Particle& p : recvFromLeftNeighbor) {
@@ -158,6 +159,8 @@ void RegularGridDecomposition::Update(double dt, Eigen::Vector3d gForce)
 {
     // update all my particles
     this->updateMyParticles(dt, gForce);
+
+    // std::cout << "updated all particles" << std::endl;
 
     // recalculate boundaries
     exchangeParticles();
