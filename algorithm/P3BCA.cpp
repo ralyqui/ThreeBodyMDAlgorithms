@@ -25,8 +25,8 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
     if (this->worldRank == 0) {
         std::cout << "dim: " << dim << ", numProc: " << this->cartTopology->GetWorldSize()
                   << ", physical Domain Size: " << decomposition->GetPhysicalDomainSize() << ", cellsize: " << cellSize
-                  << ", b: " << b << std::endl;
-        if (this->b < 1 || this->b >= dim / 2) {
+                  << ", b: " << numCutoffBoxes << std::endl;
+        if (this->numCutoffBoxes < 1 || this->numCutoffBoxes >= dim / 2) {
             std::cout << "invalid cutoff" << std::endl;
         }
     }
@@ -152,7 +152,7 @@ void P3BCA::sumUpParticles()
     }
 }
 
-void P3BCA::SimulationStep()
+int P3BCA::SimulationStep()
 {
     this->simulation->GetDecomposition()->ResetForces();
 
@@ -160,8 +160,8 @@ void P3BCA::SimulationStep()
     b1 = *b0;
     b2 = *b0;
 
-    int sqrSteps = (this->b + 1) * (this->b + 1) - 1;
-    int cubicSteps = (sqrSteps + 1) * (this->b + 1) - 1;
+    int sqrSteps = (this->numCutoffBoxes + 1) * (this->numCutoffBoxes + 1) - 1;
+    int cubicSteps = (sqrSteps + 1) * (this->numCutoffBoxes + 1) - 1;
 
     if (this->cartTopology->GetWorldRank() == 0) {
         std::cout << "sqrSteps: " << sqrSteps << ", cubicSteps: " << cubicSteps << std::endl;
@@ -185,7 +185,7 @@ void P3BCA::SimulationStep()
                     shift(b2, 2, zDirInner);
                     yDirInner *= -1;
                     xDirInner *= -1;
-                } else if (i3 % this->b == 0 && i3 > 0) {
+                } else if (i3 % this->numCutoffBoxes == 0 && i3 > 0) {
                     // shift along y-achsis
                     shift(b2, 1, yDirInner);
                     xDirInner *= -1;
@@ -201,7 +201,7 @@ void P3BCA::SimulationStep()
             shift(b1, 2, -1);
             yDirOuter *= -1;
             xDirOuter *= -1;
-        } else if (i2 % this->b == 0 && i2 > 0) {
+        } else if (i2 % this->numCutoffBoxes == 0 && i2 > 0) {
             // shift along y-achsis
             shift(b1, 1, yDirOuter);
             xDirOuter *= -1;
@@ -221,4 +221,6 @@ void P3BCA::SimulationStep()
     sendBackParticles();
 
     sumUpParticles();
+}
+
 int P3BCA::GetNumCutoffBoxes() { return this->numCutoffBoxes; }

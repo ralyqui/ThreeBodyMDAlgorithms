@@ -34,5 +34,6 @@ public:
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 
-    void SimulationStep() override;
+    int SimulationStep() override;
+    int GetNumCutoffBoxes();
 };
