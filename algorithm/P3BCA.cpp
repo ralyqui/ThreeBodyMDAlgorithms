@@ -221,6 +221,8 @@ int P3BCA::SimulationStep()
     sendBackParticles();
 
     sumUpParticles();
+
+    return 0;
 }
 
 int P3BCA::GetNumCutoffBoxes() { return this->numCutoffBoxes; }
