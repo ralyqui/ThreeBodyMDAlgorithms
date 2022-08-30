@@ -20,26 +20,19 @@ private:
     int b2Owner;
 
     void calculateInteractions();
-    int shift(std::vector<Utility::Particle>& buf, int dim, int dir, int owner);
     int shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<int, 3>& nextSrcRank,
                   std::array<int, 3>& nextDstRank, std::array<int, 3>& offsetVector, std::array<int, 3>& diff);
     void shiftHelper(int i, std::array<int, 3>& myCartRank, std::array<int, 3>& src);
-    void shiftHelper2(int i2, int& i3, std::array<int, 3>& cartRank, std::array<int, 3>& src,
-                      std::array<int, 3>& dst, std::array<int, 3>& diff, int cutoffBorder);
-
+    void shiftHelper2(int i2, int& i3, std::array<int, 3>& cartRank, std::array<int, 3>& src, std::array<int, 3>& dst,
+                      std::array<int, 3>& diff, int cutoffBorder);
     void sumUpParticles();
     void sendBackParticles();
     int& getBufOwner(int i);
-    std::tuple<int, int> getInnerDirs(int i2);
-    int periodicDistance(int x, int y, int dim);
-    void moveForwardInLexManner();
     void calcDestFromSrc(std::array<int, 3>& myCartRank, std::array<int, 3>& src, std::array<int, 3>& dst);
     void calcDiff(std::array<int, 3>& cartRank, std::array<int, 3>& src, std::array<int, 3>& diff, int i);
 
     double cutoff;
-
     int numCutoffBoxes;
-
     int dim;
 
 public:
