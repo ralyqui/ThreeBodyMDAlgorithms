@@ -100,12 +100,6 @@ void AUTA::calculateOneThirdOfInteractions(int thirdID)
         numSteps += b0Sorted->size() % 3;
     }
 
-    /*if (this->worldRank == 0) {
-        std::cout << "proc " << this->worldRank << " calculates from " << start << " to " << start + numSteps - 1
-                  << " (" << numSteps - 1 << " interactions) of last step with total bufsize: " << b0Sorted->size()
-                  << std::endl;
-    }*/
-
     for (int i = start; i < numSteps; ++i) {
         if ((*b0Sorted)[i].isDummy) {
             continue;
@@ -176,31 +170,18 @@ void AUTA::sendBackParticles()
 
         MPI_Recv(b0Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 0, this->ringTopology->GetComm(),
                  &statusRecv0);
-
-        /*if (this->worldRank == 0) {
-            std::cout << "proc " << this->worldRank << " received buffer0 from " << statusRecv0.MPI_SOURCE << ", with "
-                      << b0Tmp.size() << " elements" << std::endl;
-        }*/
     }
     if (this->b1Owner != this->worldRank) {
         this->b1Tmp.resize(numRecv);
 
         MPI_Recv(b1Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 1, this->ringTopology->GetComm(),
                  &statusRecv1);
-        /*if (this->worldRank == 0)
-            std::cout << "proc " << this->worldRank << " received buffer1 from " << statusRecv1.MPI_SOURCE << ", with "
-                      << b1Tmp.size() << " elements" << std::endl;
-                      */
     }
     if (this->b2Owner != this->worldRank) {
         this->b2Tmp.resize(numRecv);
 
         MPI_Recv(b2Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 2, this->ringTopology->GetComm(),
                  &statusRecv2);
-        /*if (this->worldRank == 0)
-            std::cout << "proc " << this->worldRank << " received buffer2 from " << statusRecv2.MPI_SOURCE << ", with "
-                      << b2Tmp.size() << " elements" << std::endl;
-                      */
     }
 
     if (b0Sent) MPI_Wait(&requestSend0, MPI_STATUS_IGNORE);
@@ -209,35 +190,26 @@ void AUTA::sendBackParticles()
 
     if (b0Sent) {
         this->b0 = this->b0Tmp;
-        // if (this->worldRank == 0) std::cout << "b0Tmp has " << b0Tmp.size() << " elements" << std::endl;
         this->b0Tmp.clear();
     }
 
     if (b1Sent) {
         this->b1 = this->b1Tmp;
-        // if (this->worldRank == 0) std::cout << "b1Tmp has " << b1Tmp.size() << " elements" << std::endl;
         this->b1Tmp.clear();
     }
 
     if (b2Sent) {
         this->b2 = this->b2Tmp;
-        // if (this->worldRank == 0) std::cout << "b2Tmp has " << b2Tmp.size() << " elements" << std::endl;
         this->b2Tmp.clear();
     }
 
     this->b0Owner = this->worldRank;
     this->b1Owner = this->worldRank;
     this->b2Owner = this->worldRank;
-
-    /*if (this->worldRank == 0) {
-        std::cout << "buf 0 has now " << this->b0.size() << " elements, buf 1 has now " << this->b1.size()
-                  << " elements, buf 2 has now " << this->b2.size() << " elements" << std::endl;
-    }*/
 }
 
 void AUTA::sumUpParticles()
 {
-    // if (this->worldRank == 0) std::cout << "sum up forces" << std::endl;
     for (size_t i = 0; i < this->b0.size(); i++) {
         this->b0[i].fX += this->b1[i].fX + this->b2[i].fX;
         this->b0[i].fY += this->b1[i].fY + this->b2[i].fY;
@@ -264,10 +236,6 @@ int AUTA::SimulationStep()
             if (j != 0 || s != this->worldSize) {
                 getBufOwner(i) = shiftRight(bi, getBufOwner(i));
             }
-            /*if (this->worldRank == 0) {
-                std::cout << "proc " << worldRank << " calculates interactions between (" << b0Owner << ", " << b1Owner
-                          << ", " << b2Owner << ")" << std::endl;
-            }*/
             calculateInteractions();
             counter++;
 #ifdef TESTMODE
@@ -275,9 +243,6 @@ int AUTA::SimulationStep()
             processed.push_back(Utility::Triplet(this->worldRank, getBufOwner(1), getBufOwner(2)));
 #endif
         }
-        /*if (this->worldRank == 0) {
-            std::cout << "end inner loop" << std::endl;
-        }*/
         i = (i + 1) % 3;
         bi = pickBuffer(i);
         // if (this->worldRank == 0) std::cout << "s: " << s << std::endl;
@@ -289,10 +254,6 @@ int AUTA::SimulationStep()
 
         // Calculate one third of the interactions
         counter++;
-        /*if (this->worldRank == 0) {
-            std::cout << "proc " << worldRank << " calculates one third of interactions between (" << b0Owner << ", "
-                      << b1Owner << ", " << b2Owner << ")" << std::endl;
-        }*/
         calculateOneThirdOfInteractions(thirdID);
 #ifdef TESTMODE
         // TESTMODE is defined
@@ -300,20 +261,11 @@ int AUTA::SimulationStep()
 #endif
     }
 
-    /*if (this->worldRank == 0) {
-        std::cout << "proc " << this->worldRank << ": b0Owner: " << this->b0Owner << ", b1Owner: " << this->b1Owner
-                  << ", b2Owner: " << this->b2Owner << std::endl;
-    }*/
-
     // send back to owner
     sendBackParticles();
 
     // sum up particles
     sumUpParticles();
-
-    /*if (this->worldRank == 0) {
-        std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
-    }*/
 
     // Utility::writeStepToCSV("AUTA_Step" + std::to_string(iteration) + ".csv", this->b0);
 

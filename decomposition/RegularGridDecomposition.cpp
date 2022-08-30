@@ -14,7 +14,6 @@ void RegularGridDecomposition::Init(std::shared_ptr<Simulation> simulation)
 
     // calculate the num of processors along each dimension
     this->dim = std::cbrt(worldSize);
-    // std::cout << "this is not called" << std::endl;
 
     std::tuple<Eigen::Array3d, Eigen::Array3d> domainMinMax = getDomainMinMax(this->simulation->GetAllParticles());
 
@@ -97,10 +96,6 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
     MPI_Recv(recvFromRightNeighbor.data(), numRecv, pType, rightNeighbor, 0, this->cartTopology->GetComm(),
              MPI_STATUS_IGNORE);
 
-    // MPI_Sendrecv(sendToLeftNeighbor.data(), sendToLeftNeighbor.size(), pType, leftNeighbor, 0,
-    //             recvFromRightNeighbor.data(), numRecv, pType, rightNeighbor, 0, this->cartTopology->GetComm(),
-    //             MPI_STATUS_IGNORE);
-
     MPI_Isend(sendToRightNeighbor.data(), sendToRightNeighbor.size(), pType, rightNeighbor, 0,
               this->cartTopology->GetComm(), &request1);
 
@@ -113,10 +108,6 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
 
     MPI_Recv(recvFromLeftNeighbor.data(), numRecv, pType, leftNeighbor, 0, this->cartTopology->GetComm(),
              MPI_STATUS_IGNORE);
-
-    // MPI_Sendrecv(sendToRightNeighbor.data(), sendToRightNeighbor.size(), pType, rightNeighbor, 0,
-    //             recvFromLeftNeighbor.data(), numRecv, pType, leftNeighbor, 0, this->cartTopology->GetComm(),
-    //             MPI_STATUS_IGNORE);
 
     // merge Particles
     for (Utility::Particle& p : recvFromLeftNeighbor) {
@@ -159,8 +150,6 @@ void RegularGridDecomposition::Update(double dt, Eigen::Vector3d gForce)
 {
     // update all my particles
     this->updateMyParticles(dt, gForce);
-
-    // std::cout << "updated all particles" << std::endl;
 
     // recalculate boundaries
     exchangeParticles();

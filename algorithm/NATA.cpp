@@ -138,11 +138,9 @@ int NATA::SimulationStep()
         shiftRight(b1);
     }
 
-    // std::cout << "proc " << worldRank << " calculated " << counter << " interactions" << std::endl;
-
     sumUpParticles();
 
-    return counter;
-
     // Utility::writeStepToCSV("NATA_Step" + std::to_string(iteration) + ".csv", *this->b0);
+
+    return counter;
 }

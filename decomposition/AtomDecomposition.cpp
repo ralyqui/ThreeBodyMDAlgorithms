@@ -11,8 +11,6 @@ void AtomDecomposition::Init(std::shared_ptr<Simulation> simulation)
 
     std::vector<Utility::Particle>& particles = this->simulation->GetAllParticles();
 
-    // std::cout << particles.size() << std::endl;
-
     int numParticles = (int)particles.size();
     int offset;
     bool lastPartProc = false;
@@ -42,10 +40,6 @@ void AtomDecomposition::Init(std::shared_ptr<Simulation> simulation)
             myParticles.push_back(Utility::Particle(true));
         }
     }
-
-    // std::cout << "rank " << worldRank << ": my particles reach from " << offset << " to " << offset +
-    // numOfMyParticles
-    //          << std::endl;
 }
 
 void AtomDecomposition::Update(double dt, Eigen::Vector3d gForce)
