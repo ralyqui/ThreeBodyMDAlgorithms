@@ -45,6 +45,8 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
+#ifdef TESTMODE
+
 #ifndef GTEST_MPI_MINIMAL_LISTENER_H
 #define GTEST_MPI_MINIMAL_LISTENER_H
 
@@ -513,3 +515,5 @@ namespace GTestMPIListener
 }  // namespace GTestMPIListener
 
 #endif /* GTEST_MPI_MINIMAL_LISTENER_H */
+
+#endif

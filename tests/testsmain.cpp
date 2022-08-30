@@ -1,3 +1,5 @@
+#ifdef TESTMODE
+
 #include "testsmain.hpp"
 
 MPI_Comm interComm;
@@ -22,3 +24,5 @@ int main(int argc, char* argv[])
 
     return 0;
 }
+
+#endif

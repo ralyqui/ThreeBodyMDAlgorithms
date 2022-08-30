@@ -1,3 +1,5 @@
+#ifdef TESTMODE
+
 #include "tests.hpp"
 
 std::vector<Utility::Particle> particles;
@@ -906,3 +908,5 @@ int main(int argc, char* argv[])
 
     return result;
 }
+
+#endif

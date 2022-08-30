@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef TESTMODE
+
 #include <gtest/gtest.h>
 
 #include <Eigen/Dense>
@@ -21,3 +23,5 @@
 #include "../utility/cli.hpp"
 #include "../utility/utility.hpp"
 #include "gtest_mpi_listener.hpp"
+
+#endif
