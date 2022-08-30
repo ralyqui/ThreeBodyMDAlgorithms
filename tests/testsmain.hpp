@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef TESTMODE
+#ifdef TESTS_3BMDA
 
 #include <mpi.h>
 #include <stdlib.h>

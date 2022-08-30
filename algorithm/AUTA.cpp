@@ -238,8 +238,8 @@ int AUTA::SimulationStep()
             }
             calculateInteractions();
             counter++;
-#ifdef TESTMODE
-            // TESTMODE is defined
+#ifdef TESTS_3BMDA
+            // TESTS_3BMDA is defined
             processed.push_back(Utility::Triplet(this->worldRank, getBufOwner(1), getBufOwner(2)));
 #endif
         }
@@ -255,8 +255,8 @@ int AUTA::SimulationStep()
         // Calculate one third of the interactions
         counter++;
         calculateOneThirdOfInteractions(thirdID);
-#ifdef TESTMODE
-        // TESTMODE is defined
+#ifdef TESTS_3BMDA
+        // TESTS_3BMDA is defined
         processed.push_back(Utility::Triplet(this->worldRank, getBufOwner(1), getBufOwner(2)));
 #endif
     }

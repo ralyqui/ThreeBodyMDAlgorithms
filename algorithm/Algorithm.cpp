@@ -10,6 +10,6 @@ void Algorithm::Init(std::shared_ptr<Simulation> simulation)
     this->mpiParticleType = simulation->GetMPIParticleType();
 }
 
-#ifdef TESTMODE
+#ifdef TESTS_3BMDA
 std::vector<Utility::Triplet> Algorithm::GetProcessed() { return this->processed; }
 #endif

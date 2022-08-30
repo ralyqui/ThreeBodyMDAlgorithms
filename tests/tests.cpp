@@ -1,4 +1,4 @@
-#ifdef TESTMODE
+#ifdef TESTS_3BMDA
 
 #include "tests.hpp"
 

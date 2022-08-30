@@ -125,8 +125,8 @@ int NATA::SimulationStep()
             if (calculate) {
                 calculateInteractions();
                 counter++;
-#ifdef TESTMODE
-                // TESTMODE is defined
+#ifdef TESTS_3BMDA
+                // TESTS_3BMDA is defined
                 processed.push_back(Utility::Triplet(this->worldRank,
                                                      Utility::mod(i + this->worldRank, this->worldSize),
                                                      Utility::mod(j + this->worldRank, this->worldSize)));

@@ -45,7 +45,7 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
 
-#ifdef TESTMODE
+#ifdef TESTS_3BMDA
 
 #ifndef GTEST_MPI_MINIMAL_LISTENER_H
 #define GTEST_MPI_MINIMAL_LISTENER_H

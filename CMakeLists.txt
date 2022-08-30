@@ -29,7 +29,8 @@ target_link_libraries(main Eigen3::Eigen)
 
 # TESTS
 
-if(BUILD_TESTS)
+if(TESTS_3BMDA)
+  set(INSTALL_GTEST OFF)
   add_subdirectory(external/gtest)
   include_directories(external/gtest/include)
 
@@ -71,4 +72,21 @@ if(BUILD_TESTS)
                # --gtest_list_tests`
       DISCOVERY_TIMEOUT 60)
 
-endif(BUILD_TESTS)
+endif(TESTS_3BMDA)
+
+# BENCHMARK
+if(BENCHMARK_3BMDA)
+  set(BENCHMARK_ENABLE_INSTALL OFF)
+  set(BENCHMARK_ENABLE_TESTING OFF)
+  set(BENCHMARK_INSTALL_DOCS OFF)
+  set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON)
+
+  add_subdirectory(external/benchmark)
+
+  set(BENCHMARK_SOURCES benchmarks/benchmain.cpp benchmarks/benchmain.hpp)
+
+  add_executable(bench ${BENCHMARK_SOURCES})
+
+  target_link_libraries(bench benchmark)
+
+endif(BENCHMARK_3BMDA)

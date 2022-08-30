@@ -14,8 +14,8 @@ protected:
     std::shared_ptr<Simulation> simulation;
     MPI_Datatype *mpiParticleType;
 
-#ifdef TESTMODE
-    // TESTMODE is defined
+#ifdef TESTS_3BMDA
+    // TESTS_3BMDA is defined
     std::vector<Utility::Triplet> processed;
 #endif
 
@@ -24,7 +24,7 @@ public:
     virtual void Init(std::shared_ptr<Simulation> simulation);
     virtual ~Algorithm() = 0;
     virtual int SimulationStep() = 0;
-#ifdef TESTMODE
+#ifdef TESTS_3BMDA
     std::vector<Utility::Triplet> GetProcessed();
 #endif
 };
