@@ -22,6 +22,9 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
 
     this->worldRank = this->cartTopology->GetWorldRank();
 
+    this->numSteps = 4 * (this->numCutoffBoxes * this->numCutoffBoxes * this->numCutoffBoxes) +
+                     6 * (this->numCutoffBoxes * this->numCutoffBoxes) + 3 * this->numCutoffBoxes + 1;
+
     /*if (this->worldRank == 0) {
         std::cout << "dim: " << this->dim << ", numProc: " << this->cartTopology->GetWorldSize()
                   << ", physical Domain Size: " << decomposition->GetPhysicalDomainSize() << ", cellsize: " << cellSize
@@ -99,7 +102,7 @@ void P3BCA::calcDiff(std::array<int, 3>& cartRank, std::array<int, 3>& src, std:
 }
 
 void P3BCA::shiftHelper2(int i2, int& i3, std::array<int, 3>& cartRank, std::array<int, 3>& src,
-                         std::array<int, 3>& dst, std::array<int, 3>& diff, int cutoffBorder)
+                         std::array<int, 3>& dst, std::array<int, 3>& diff)
 {
     int myCoords[3];
     MPI_Cart_coords(this->cartTopology->GetComm(), this->worldRank, 3, myCoords);
@@ -120,7 +123,7 @@ void P3BCA::shiftHelper2(int i2, int& i3, std::array<int, 3>& cartRank, std::arr
         // from b1InitOwner move to the next processor
         shiftHelper(i3 + 1 - i2, b1InitOwner, srcTmp2);
 
-    } while (srcTmp != srcTmp2 && i3 < cutoffBorder && i3++);
+    } while (srcTmp != srcTmp2 && i3 < this->numSteps && i3++);
 
     src = srcTmp;
 
@@ -264,8 +267,8 @@ int P3BCA::SimulationStep()
 
     int counter = 0;
 
-    std::array<int, 3> offsetVector = {0, 0, 0};
-    std::array<int, 3> offsetVector2 = {0, 0, 0};
+    std::array<int, 3> offsetVectorOuter = {0, 0, 0};
+    std::array<int, 3> offsetVectorInner = {0, 0, 0};
 
     // copy b0 to b1 and b2
     b1 = *b0;
@@ -273,9 +276,6 @@ int P3BCA::SimulationStep()
 
     this->b1Owner = this->worldRank;
     this->b2Owner = this->worldRank;
-
-    int numSteps = 4 * (this->numCutoffBoxes * this->numCutoffBoxes * this->numCutoffBoxes) +
-                   6 * (this->numCutoffBoxes * this->numCutoffBoxes) + 3 * this->numCutoffBoxes + 1;
 
     int myCoords[3];
     std::array<int, 3> myCoordsArray;
@@ -285,49 +285,43 @@ int P3BCA::SimulationStep()
     myCoordsArray[1] = myCoords[1];
     myCoordsArray[2] = myCoords[2];
 
-    std::array<int, 3> nextSrcRank;
-    std::array<int, 3> nextDstRank;
+    std::array<int, 3> nextSrcRankOuter;
+    std::array<int, 3> nextDstRankOuter;
 
-    std::array<int, 3> nextSrcRank2;
-    std::array<int, 3> nextDstRank2;
+    std::array<int, 3> nextSrcRankInner;
+    std::array<int, 3> nextDstRankInner;
 
-    int b1Coords[3];
-    std::array<int, 3> b1CoordsArray;
-    MPI_Cart_coords(this->cartTopology->GetComm(), this->b1Owner, 3, b1Coords);
-    b1CoordsArray[0] = b1Coords[0];
-    b1CoordsArray[1] = b1Coords[1];
-    b1CoordsArray[2] = b1Coords[2];
+    std::array<int, 3> diffOuter;
+    std::array<int, 3> diffInner;
 
-    std::array<int, 3> diff;
-    std::array<int, 3> diff2;
-
-    for (int i2 = 0; i2 < numSteps; i2++) {
-        for (int i3 = i2; i3 < numSteps; i3++) {
-            // calculateInteractions();
+    for (int i2 = 0; i2 < this->numSteps; i2++) {
+        for (int i3 = i2; i3 < this->numSteps; i3++) {
+            calculateInteractions();
             counter++;
 
             if (i3 < numSteps - 1) {
-                shiftHelper2(i2, i3, myCoordsArray, nextSrcRank2, nextDstRank2, diff2, numSteps);
+                shiftHelper2(i2, i3, myCoordsArray, nextSrcRankInner, nextDstRankInner, diffInner);
 
-                if (i3 < numSteps - 1) {
-                    getBufOwner(2) =
-                        shiftLeft(this->b2, getBufOwner(2), nextSrcRank2, nextDstRank2, offsetVector2, diff2);
+                if (i3 < this->numSteps - 1) {
+                    getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner, nextDstRankInner,
+                                               offsetVectorInner, diffInner);
                 }
             }
         }
 
         // only shift if not the last step
-        if (i2 < numSteps - 1) {
-            shiftHelper(i2 + 1, myCoordsArray, nextSrcRank);
-            calcDestFromSrc(myCoordsArray, nextSrcRank, nextDstRank);
-            calcDiff(myCoordsArray, nextSrcRank, diff, i2 + 1);
+        if (i2 < this->numSteps - 1) {
+            shiftHelper(i2 + 1, myCoordsArray, nextSrcRankOuter);
+            calcDestFromSrc(myCoordsArray, nextSrcRankOuter, nextDstRankOuter);
+            calcDiff(myCoordsArray, nextSrcRankOuter, diffOuter, i2 + 1);
 
-            getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRank, nextDstRank, offsetVector, diff);
+            getBufOwner(1) =
+                shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter, nextDstRankOuter, offsetVectorOuter, diffOuter);
 
             // copy b1 to b2 -> optimized schedule
             b2 = b1;
             this->b2Owner = this->b1Owner;
-            offsetVector2 = offsetVector;
+            offsetVectorInner = offsetVectorOuter;
         }
     }
 
