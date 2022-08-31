@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <Eigen/Dense>
 
 #include "enums.hpp"
 

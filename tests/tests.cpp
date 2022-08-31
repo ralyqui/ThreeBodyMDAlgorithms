@@ -467,22 +467,6 @@ TEST(auta, test_num_interactions)
     GTEST_ASSERT_EQ(numInteractionsExp, numInteractionsAct);
 }
 
-TEST(p3bca, test_num_interactions)
-{
-    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 0.001, Eigen::Vector3d(0, 0, 0), 0.5);
-    simulation->Init();
-
-    std::shared_ptr<P3BCA> p3bca = std::static_pointer_cast<P3BCA>(simulation->GetAlgorithm());
-
-    int numProcessorBoxesinCutoffRange =
-        (p3bca->GetNumCutoffBoxes() + 1) * (p3bca->GetNumCutoffBoxes() + 1) * (p3bca->GetNumCutoffBoxes() + 1);
-    int numInteractionsExp = Utility::BinomialCoefficient(numProcessorBoxesinCutoffRange + 1, 2);
-
-    int numInteractionsPerProc = simulation->GetAlgorithm()->SimulationStep();
-
-    GTEST_ASSERT_EQ(numInteractionsExp, numInteractionsPerProc);
-}
-
 TEST(nata, test_processed_triplets)
 {
     MPI_Datatype tripletType = Utility::Triplet::GetMPIType();
@@ -597,19 +581,23 @@ TEST(auta, test_processed_triplets)
 
 TEST(p3bca, test_processed_triplets)
 {
+    bool noRedundancyInMyParticles = false;
+    bool noRedundancyInAllParticles = false;
+    bool correctNumberOfInteractions = false;
+    bool allNecessaryTriplets = false;
+    int redCount = 0;
+
     MPI_Datatype tripletType = Utility::Triplet::GetMPIType();
     MPI_Type_commit(&tripletType);
 
     std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 0.001, Eigen::Vector3d(0, 0, 0), 0.5);
-    // std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 0.001, Eigen::Vector3d(0, 0, 0), 0.5);
+
     simulation->Init();
 
     std::shared_ptr<RegularGridDecomposition> decomposition =
         std::static_pointer_cast<RegularGridDecomposition>(simulation->GetDecomposition());
     std::shared_ptr<P3BCA> algorithm = std::static_pointer_cast<P3BCA>(simulation->GetAlgorithm());
     std::shared_ptr<CartTopology> topology = std::static_pointer_cast<CartTopology>(simulation->GetTopology());
-
-    int numProcessors = simulation->GetTopology()->GetWorldSize();
 
     simulation->GetAlgorithm()->SimulationStep();
 
@@ -634,7 +622,6 @@ TEST(p3bca, test_processed_triplets)
                                                       p1Coords[2], p2Coords[0], p2Coords[1], p2Coords[2]));
     }
 
-    // check if this processor has calculated the right triplets
     // find my subset of interactions
     std::tuple<std::tuple<int, int, int>, std::vector<CartRankTriplet>> expectedOfMyRank;
     for (auto e : expectedTriplets) {
@@ -645,29 +632,35 @@ TEST(p3bca, test_processed_triplets)
             break;
         }
     }
-    // if (simulation->GetTopology()->GetWorldRank() == 0) {
+
+    // check number of interactions
+    correctNumberOfInteractions = myCartRankProcessed.size() == std::get<1>(expectedOfMyRank).size();
+
     // check for redundancy in expectedOfMyRank
-    /*for (size_t i = 0; i < std::get<1>(expectedOfMyRank).size(); i++) {
+    redCount = 0;
+    for (size_t i = 0; i < std::get<1>(expectedOfMyRank).size(); i++) {
         CartRankTriplet t0 = std::get<1>(expectedOfMyRank)[i];
         for (size_t j = 0; j < std::get<1>(expectedOfMyRank).size(); j++) {
             if (i != j) {
                 CartRankTriplet t1 = std::get<1>(expectedOfMyRank)[j];
                 if (t0 == t1) {
-                    std::cout << "rendundancy for: " << t0.toString() << " and " << t1.toString() << std::endl;
+                    redCount++;
                 }
             }
         }
-    }*/
+    }
+    noRedundancyInMyParticles = redCount == 0 ? true : false;
 
     // check for redundancy in all expected
-    int redCount = 0;
-    /*std::vector<CartRankTriplet> allExpected;
+    redCount = 0;
+    std::vector<CartRankTriplet> allExpected;
     for (auto& e : expectedTriplets) {
         if (std::get<0>(e) != topology->GetCartRank()) {
             auto expected = std::get<1>(e);
             allExpected.insert(allExpected.end(), expected.begin(), expected.end());
         }
-    }*/
+    }
+
     for (size_t i = 0; i < std::get<1>(expectedOfMyRank).size(); i++) {
         CartRankTriplet t0 = std::get<1>(expectedOfMyRank)[i];
 
@@ -677,102 +670,38 @@ TEST(p3bca, test_processed_triplets)
             if (eRank != myRank) {
                 for (auto& e : std::get<1>(expectedTriplets[j])) {
                     if (e == t0) {
-                        std::cout << "rendundancy for: " << t0.toString() << " and " << e.toString() << std::endl;
                         redCount++;
                     }
                 }
             }
         }
     }
-    std::cout << redCount << std::endl;
-    //}
+    noRedundancyInAllParticles = redCount == 0 ? true : false;
 
-    /*if (simulation->GetTopology()->GetWorldRank() == 0) {
-        std::cout << std::get<1>(expectedOfMyRank).size() << std::endl;
-        std::cout << myCartRankProcessed.size() << std::endl;
-        for (auto& ex0 : std::get<1>(expectedOfMyRank)) {
-            std::cout << ex0.toString() << ", ";
-        }
-        std::cout << std::endl;
-        for (auto& myP : myCartRankProcessed) {
-            std::cout << myP.toString() << ", ";
-        }
-        std::cout << std::endl;
-    }*/
-
-    // if true: this processor has calculated all necessary triplets
-    bool result0 = true;
-
+    // check if we have calculated all necessary triplet and not more or less
     for (std::vector<CartRankTriplet>::iterator it0 = myCartRankProcessed.begin(); it0 != myCartRankProcessed.end();) {
         std::vector<CartRankTriplet>::iterator it1 =
             std::find(std::get<1>(expectedOfMyRank).begin(), std::get<1>(expectedOfMyRank).end(), *it0);
         if (it1 != std::get<1>(expectedOfMyRank).end()) {
             it0 = myCartRankProcessed.erase(it0);
-            // std::get<1>(expectedOfMyRank).erase(it1);
+            allNecessaryTriplets = true;
         } else {
             // a triplet has not been calculated
-            result0 = false;
+            allNecessaryTriplets = false;
             ++it0;
-            // break;
+            break;
         }
     }
-
-    /*if (simulation->GetTopology()->GetWorldRank() == 0) {
-        std::cout << myCartRankProcessed.size() << std::endl;
-        for (auto& myP : myCartRankProcessed) {
-            std::cout << myP.toString() << ", ";
-        }
-        std::cout << std::endl;
-    }*/
-
-    /*if (myCartRankProcessed.size() > 0 || std::get<1>(expectedOfMyRank).size() > 0) {
-        std::cout << myCartRankProcessed.size() << ", " << std::get<1>(expectedOfMyRank).size() << std::endl;
-        result0 = false;
-    }*/
-
-    /*
-
-    std::vector<Utility::Triplet> summedProcessed;
-
-    summedProcessed.resize(expectedTriplets.size());
-
-    int numProcessed = processed.size();
-
-    std::vector<int> allNumProcessed;
-
-    allNumProcessed.resize(numProcessors);
-
-    std::vector<int> displacements;
-    for (int i = 0; i < numProcessors; i++) {
-        displacements.push_back(i);
+    if (myCartRankProcessed.size() > 0) {
+        allNecessaryTriplets = false;
     }
 
-                // elements from each process are gathered in order of their rank
-                MPI_Allgather(&numProcessed, 1, MPI_INT, allNumProcessed.data(), 1, MPI_INT,
-               simulation->GetTopology()->GetComm());
+    MPI_Type_free(&tripletType);
 
-                MPI_Allgatherv(processed.data(), processed.size(), tripletType, summedProcessed.data(),
-           allNumProcessed.data(), displacements.data(), tripletType, simulation->GetTopology()->GetComm());
-
-                bool result = true;
-
-                for (std::vector<Utility::Triplet>::iterator it = summedProcessed.begin(); it != summedProcessed.end();)
-       { if (std::find(expectedTriplets.begin(), expectedTriplets.end(), *it) != expectedTriplets.end()) { it =
-       summedProcessed.erase(it); } else {
-                        // a triplet has not been calculated
-                        result = false;
-                        break;
-                    }
-                }
-
-                MPI_Type_free(&tripletType);
-
-                // test if we have calculated all neccesary triplets, but not less
-                GTEST_ASSERT_EQ(summedProcessed.size(), 0);
-
-                */
-
-    GTEST_ASSERT_TRUE(result0);
+    GTEST_ASSERT_TRUE(allNecessaryTriplets);
+    GTEST_ASSERT_TRUE(noRedundancyInMyParticles);
+    GTEST_ASSERT_TRUE(noRedundancyInAllParticles);
+    GTEST_ASSERT_TRUE(correctNumberOfInteractions);
 }
 
 TEST(utility, test_triplet_uniqueness)

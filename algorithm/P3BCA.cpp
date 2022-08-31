@@ -296,8 +296,24 @@ int P3BCA::SimulationStep()
 
     for (int i2 = 0; i2 < this->numSteps; i2++) {
         for (int i3 = i2; i3 < this->numSteps; i3++) {
+            /*if (myCoords[0] == 0 && myCoords[1] == 0 && myCoords[2] == 0) {
+                int b1Coords2[3];
+                int b2Coords2[3];
+
+                MPI_Cart_coords(this->cartTopology->GetComm(), this->b1Owner, 3, b1Coords2);
+                MPI_Cart_coords(this->cartTopology->GetComm(), this->b2Owner, 3, b2Coords2);
+                std::cout << "my coords (" << myCoords[0] << ", " << myCoords[1] << ", " << myCoords[2]
+                          << "), b1: (" << b1Coords2[0] << ", " << b1Coords2[1] << ", " << b1Coords2[2] << "), b2: "
+                          << "(" << b2Coords2[0] << ", " << b2Coords2[1] << ", " << b2Coords2[2] << ")" << std::endl;
+            }*/
+
             calculateInteractions();
             counter++;
+
+#ifdef TESTS_3BMDA
+            // TESTS_3BMDA is defined
+            processed.push_back(Utility::Triplet(this->worldRank, this->b1Owner, this->b2Owner));
+#endif
 
             if (i3 < numSteps - 1) {
                 shiftHelper2(i2, i3, myCoordsArray, nextSrcRankInner, nextDstRankInner, diffInner);

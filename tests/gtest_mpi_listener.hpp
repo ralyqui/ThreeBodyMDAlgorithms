@@ -88,7 +88,7 @@ namespace GTestMPIListener
                 int rank;
                 ASSERT_EQ(MPI_Comm_rank(MPI_COMM_WORLD, &rank), MPI_SUCCESS);
                 if (rank == 0) {
-                    printf("Finalizing MPI...\n");
+                    // printf("Finalizing MPI...\n");
                 }
                 ASSERT_EQ(MPI_Finalize(), MPI_SUCCESS);
             }

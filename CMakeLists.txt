@@ -83,10 +83,29 @@ if(BENCHMARK_3BMDA)
 
   add_subdirectory(external/benchmark)
 
-  set(BENCHMARK_SOURCES benchmarks/benchmain.cpp benchmarks/benchmain.hpp)
+  set(BENCHMARK_SOURCES
+      benchmarks/benchmain.cpp
+      benchmarks/benchmain.hpp
+      topology/Topology.cpp
+      topology/RingTopology.cpp
+      topology/CartTopology.cpp
+      decomposition/AtomDecomposition.cpp
+      decomposition/RegularGridDecomposition.cpp
+      decomposition/DomainDecomposition.cpp
+      algorithm/Algorithm.cpp
+      algorithm/NATA.cpp
+      algorithm/AUTA.cpp
+      algorithm/P3BCA.cpp
+      utility/utility.cpp
+      potential/AxilrodTeller.cpp
+      potential/Potential.cpp
+      simulation/Simulation.cpp)
 
-  add_executable(bench ${BENCHMARK_SOURCES})
+  add_executable(benchrunner benchmarks/benchrunner.cpp)
+  add_executable(benchmain ${BENCHMARK_SOURCES})
 
-  target_link_libraries(bench benchmark)
+  target_link_libraries(benchmain benchmark)
+  target_link_libraries(benchmain ${MPI_C_LIBRARIES})
+  target_link_libraries(benchmain Eigen3::Eigen)
 
 endif(BENCHMARK_3BMDA)
