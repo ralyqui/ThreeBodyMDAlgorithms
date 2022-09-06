@@ -65,14 +65,14 @@ int main(int argc, char **argv)
 
         // hacky solution to avoid unreg options with getopt
 
-        std::vector<std::string> args(argv, argv + argc);
-        std::vector<char *> cstrings;
-        cstrings.reserve(args.size());
-        for (auto &s : args) cstrings.push_back(&s[0]);
-        char **argvChildren = cstrings.data();
+        // std::vector<std::string> args(argv, argv + argc);
+        // std::vector<char *> cstrings;
+        // cstrings.reserve(args.size());
+        // for (auto &s : args) cstrings.push_back(&s[0]);
+        // char **argvChildren = cstrings.data();
 
-        ::benchmark::Initialize(&argc, argv);
-        ::benchmark::Shutdown();
+        // ::benchmark::Initialize(&argc, argv);
+        // ::benchmark::Shutdown();
 
         static const struct option long_options[] = {{"yaml", required_argument, 0, 'y'}, {0, 0, 0, 0}};
         // http://www.mario-konrad.ch/blog/programming/getopt.html
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
                                   particleSpacing, distributionMean, distributionStdDev, numClusters);
             numParticles = particles.size();
 
-            MPI_Comm_spawn("./benchmain", argvChildren, numProcs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &interComm0,
+            MPI_Comm_spawn("./benchmain", argv, numProcs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &interComm0,
                            MPI_ERRCODES_IGNORE);
         }
 
