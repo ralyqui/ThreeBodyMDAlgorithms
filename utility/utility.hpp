@@ -27,6 +27,4 @@ namespace Utility
 
     std::string get_file_contents(const char *filename);
 
-    char **copy_argv(int argc, char *argv[]);
-
 }  // namespace Utility
