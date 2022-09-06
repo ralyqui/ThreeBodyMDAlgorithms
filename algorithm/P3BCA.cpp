@@ -25,6 +25,11 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
     this->numSteps = 4 * (this->numCutoffBoxes * this->numCutoffBoxes * this->numCutoffBoxes) +
                      6 * (this->numCutoffBoxes * this->numCutoffBoxes) + 3 * this->numCutoffBoxes + 1;
 
+    if (this->numCutoffBoxes < 1 || (double)this->numCutoffBoxes >= ((double)this->dim / 2.0)) {
+        std::cerr << "invalid cutoff: " << this->numCutoffBoxes << ", with dim: " << this->dim << std::endl;
+        exit(1);
+    }
+
     /*if (this->worldRank == 0) {
         std::cout << "dim: " << this->dim << ", numProc: " << this->cartTopology->GetWorldSize()
                   << ", physical Domain Size: " << decomposition->GetPhysicalDomainSize() << ", cellsize: " << cellSize
