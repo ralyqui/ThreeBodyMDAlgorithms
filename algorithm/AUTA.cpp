@@ -33,26 +33,6 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
     return status.MPI_TAG;
 }
 
-void AUTA::calculateInteractions()
-{
-    for (size_t i = 0; i < b0.size(); ++i) {
-        if (b0[i].isDummy) {
-            continue;
-        }
-        for (size_t j = 0; j < b1.size(); ++j) {
-            if (b1[j].isDummy) {
-                continue;
-            }
-            for (size_t k = 0; k < b2.size(); ++k) {
-                if (b2[k].isDummy) {
-                    continue;
-                }
-                this->simulation->GetPotential()->CalculateForces(b0[i], b1[j], b2[k]);
-            }
-        }
-    }
-}
-
 void AUTA::calculateOneThirdOfInteractions(int thirdID)
 {
     std::vector<Utility::Particle>* b0Sorted = nullptr;
@@ -112,7 +92,8 @@ void AUTA::calculateOneThirdOfInteractions(int thirdID)
                 if ((*b2Sorted)[k].isDummy) {
                     continue;
                 }
-                this->simulation->GetPotential()->CalculateForces((*b0Sorted)[i], (*b2Sorted)[j], (*b2Sorted)[k]);
+                // this->simulation->GetPotential()->CalculateForces((*b0Sorted)[i], (*b2Sorted)[j], (*b2Sorted)[k]);
+                this->potential->CalculateForces((*b0Sorted)[i], (*b2Sorted)[j], (*b2Sorted)[k]);
             }
         }
     }
@@ -208,15 +189,6 @@ void AUTA::sendBackParticles()
     this->b2Owner = this->worldRank;
 }
 
-void AUTA::sumUpParticles()
-{
-    for (size_t i = 0; i < this->b0.size(); i++) {
-        this->b0[i].fX += this->b1[i].fX + this->b2[i].fX;
-        this->b0[i].fY += this->b1[i].fY + this->b2[i].fY;
-        this->b0[i].fZ += this->b1[i].fZ + this->b2[i].fZ;
-    }
-}
-
 int AUTA::SimulationStep()
 {
     // reset all forces in b0 to 0
@@ -236,7 +208,8 @@ int AUTA::SimulationStep()
             if (j != 0 || s != this->worldSize) {
                 getBufOwner(i) = shiftRight(bi, getBufOwner(i));
             }
-            calculateInteractions();
+            // calculateInteractions();
+            this->CalculateInteractions(this->b0, this->b1, this->b2);
             counter++;
 #ifdef TESTS_3BMDA
             // TESTS_3BMDA is defined
@@ -265,7 +238,8 @@ int AUTA::SimulationStep()
     sendBackParticles();
 
     // sum up particles
-    sumUpParticles();
+    // sumUpParticles();
+    this->SumUpParticles(this->b0, this->b1, this->b2);
 
     // Utility::writeStepToCSV("AUTA_Step" + std::to_string(iteration) + ".csv", this->b0);
 

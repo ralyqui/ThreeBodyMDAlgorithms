@@ -14,9 +14,8 @@ private:
     int worldSize;
 
     std::shared_ptr<RingTopology> ringTopology;
-    std::shared_ptr<Potential> potential;
 
-    std::vector<Utility::Particle> *b0;
+    std::vector<Utility::Particle> b0;
     std::vector<Utility::Particle> b1;
     std::vector<Utility::Particle> b2;
 
@@ -25,8 +24,6 @@ private:
     bool containsProcessed(Utility::Triplet t);
     void calculateProcessed(int step, bool &calculate);
     int shiftRight(std::vector<Utility::Particle> &buf);
-    void calculateInteractions();
-    void sumUpParticles();
 
 public:
     NATA();

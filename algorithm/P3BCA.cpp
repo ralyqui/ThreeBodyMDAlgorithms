@@ -8,7 +8,7 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
 {
     Algorithm::Init(simulation);
 
-    this->b0 = this->simulation->GetDecomposition()->GetMyParticles();
+    this->b0 = *(this->simulation->GetDecomposition()->GetMyParticles());
     this->cartTopology = std::static_pointer_cast<CartTopology>(this->simulation->GetTopology());
 
     std::shared_ptr<RegularGridDecomposition> decomposition =
@@ -33,26 +33,6 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
             std::cout << "invalid cutoff" << std::endl;
         }
     }*/
-}
-
-void P3BCA::calculateInteractions()
-{
-    for (size_t i = 0; i < (*b0).size(); ++i) {
-        if ((*b0)[i].isDummy) {
-            continue;
-        }
-        for (size_t j = 0; j < b1.size(); ++j) {
-            if (b1[j].isDummy) {
-                continue;
-            }
-            for (size_t k = 0; k < b2.size(); ++k) {
-                if (b2[k].isDummy) {
-                    continue;
-                }
-                this->simulation->GetPotential()->CalculateForces((*b0)[i], b1[j], b2[k]);
-            }
-        }
-    }
 }
 
 // a mapping from an int to a cartesian coordinate (int, int, int)
@@ -241,16 +221,6 @@ void P3BCA::sendBackParticles()
     }
 }
 
-// void __attribute__((optimize("O0"))) P3BCA::sumUpParticles()
-void P3BCA::sumUpParticles()
-{
-    for (size_t i = 0; i < (*this->b0).size(); i++) {
-        (*this->b0)[i].fX += this->b1[i].fX + this->b2[i].fX;
-        (*this->b0)[i].fY += this->b1[i].fY + this->b2[i].fY;
-        (*this->b0)[i].fZ += this->b1[i].fZ + this->b2[i].fZ;
-    }
-}
-
 int& P3BCA::getBufOwner(int i)
 {
     switch (i) {
@@ -271,8 +241,8 @@ int P3BCA::SimulationStep()
     std::array<int, 3> offsetVectorInner = {0, 0, 0};
 
     // copy b0 to b1 and b2
-    b1 = *b0;
-    b2 = *b0;
+    b1 = b0;
+    b2 = b0;
 
     this->b1Owner = this->worldRank;
     this->b2Owner = this->worldRank;
@@ -296,7 +266,6 @@ int P3BCA::SimulationStep()
 
     for (int i2 = 0; i2 < this->numSteps; i2++) {
         for (int i3 = i2; i3 < this->numSteps; i3++) {
-
             /*if (myCoords[0] == 0 && myCoords[1] == 0 && myCoords[2] == 0) {
                 int b1Coords2[3];
                 int b2Coords2[3];
@@ -308,7 +277,8 @@ int P3BCA::SimulationStep()
                           << "(" << b2Coords2[0] << ", " << b2Coords2[1] << ", " << b2Coords2[2] << ")" << std::endl;
             }*/
 
-            calculateInteractions();
+            // calculateInteractions();
+            this->CalculateInteractions(this->b0, this->b1, this->b2);
             counter++;
 
 #ifdef TESTS_3BMDA
@@ -346,7 +316,8 @@ int P3BCA::SimulationStep()
 
     sendBackParticles();
 
-    sumUpParticles();
+    // sumUpParticles();
+    this->SumUpParticles(this->b0, this->b1, this->b2);
 
     // Utility::writeStepToCSV("P3BCA_Step" + std::to_string(iteration) + ".csv", *this->b0);
 

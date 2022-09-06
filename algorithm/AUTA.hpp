@@ -24,12 +24,10 @@ private:
     int b2Owner;
 
     int shiftRight(std::vector<Utility::Particle>& buf, int owner);
-    void calculateInteractions();
     void calculateOneThirdOfInteractions(int thirdID);
     std::vector<Utility::Particle>& pickBuffer(int i);
     int& getBufOwner(int i);
     void sendBackParticles();
-    void sumUpParticles();
 
 public:
     AUTA();
