@@ -22,6 +22,17 @@ namespace Utility
         }
     }
 
+    void getParticlesFromTuple(
+        std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>> &tuples,
+        std::vector<Particle> &particles)
+    {
+        for (std::tuple<double, double, double, double, double, double, double, double, double, double> &t : tuples) {
+            particles.push_back(Particle(std::get<0>(t), std::get<1>(t), std::get<2>(t), std::get<3>(t), std::get<4>(t),
+                                         std::get<5>(t), std::get<6>(t), std::get<7>(t), std::get<8>(t),
+                                         std::get<9>(t)));
+        }
+    }
+
     /*void calculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                                std::vector<Utility::Particle> &b2, std::shared_ptr<Potential> potential)
     {
@@ -67,6 +78,38 @@ namespace Utility
         }
 
         return aSolutions[k - 1];
+    }
+
+    // https://stackoverflow.com/a/69552155
+    std::string get_file_contents(const char *filename)
+    {
+        std::ifstream in(filename, std::ios::in | std::ios::binary);
+        if (!in) {
+            std::cerr << "could not open " << filename << std::endl;
+            exit(1);
+        }
+        std::ostringstream contents;
+        contents << in.rdbuf();
+        return contents.str();
+    }
+
+    char **copy_argv(int argc, char *argv[])
+    {
+        // calculate the contiguous argv buffer size
+        int length = 0;
+        for (int i = 0; i < argc; i++) {
+            length += (strlen(argv[i]) + 1);
+        }
+        char **new_argv = (char **)malloc((argc + 1) * sizeof(char *) + length);
+        // copy argv into the contiguous buffer
+        length = 0;
+        for (int i = 0; i < argc; i++) {
+            new_argv[i] = &(((char *)new_argv)[argc * sizeof(char *) + length]);
+            strcpy(new_argv[i], argv[i]);
+            length = (strlen(argv[i]) + 1);
+        }
+        new_argv[argc] = NULL;
+        return (new_argv);
     }
 
 }  // namespace Utility

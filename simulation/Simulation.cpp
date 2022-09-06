@@ -33,8 +33,8 @@ std::shared_ptr<DomainDecomposition> Simulation::GetDecomposition() { return thi
 void Simulation::Start()
 {
     for (int i = 0; i < iterations; ++i) {
-        // do step
-        this->algorithm->SimulationStep();
+        // do step and record the number of interactions
+        numInteractions.push_back(this->algorithm->SimulationStep());
         MPI_Barrier(this->topology->GetComm());
         this->decomposition->Update(this->dt, this->gForce);
         MPI_Barrier(this->topology->GetComm());
@@ -47,4 +47,8 @@ std::vector<Utility::Particle>& Simulation::GetAllParticles() { return this->par
 
 double Simulation::GetDeltaT() { return this->dt; }
 int Simulation::GetNumIterations() { return this->iterations; }
+int Simulation::GetNumInteractions(int step)
+{
+    return (size_t)step < this->numInteractions.size() ? this->numInteractions[step] : 0;
+}
 Eigen::Vector3d Simulation::GetGForce() { return this->gForce; }

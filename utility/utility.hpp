@@ -14,6 +14,9 @@ namespace Utility
     int mod(int a, int b);
 
     void getParticlesFromCSV(std::string file, std::vector<Particle> &particles);
+    void getParticlesFromTuple(
+        std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>> &tuples,
+        std::vector<Particle> &particles);
 
     /*void calculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                                std::vector<Utility::Particle> &b2, std::shared_ptr<Potential> potential);*/
@@ -21,5 +24,9 @@ namespace Utility
     void writeStepToCSV(std::string file, std::vector<Particle> &particles);
 
     int BinomialCoefficient(const int n, const int k);
+
+    std::string get_file_contents(const char *filename);
+
+    char **copy_argv(int argc, char *argv[]);
 
 }  // namespace Utility

@@ -65,6 +65,10 @@ namespace GTestMPIListener
     class MPIEnvironment : public ::testing::Environment {
     public:
         MPIEnvironment() : ::testing::Environment() {}
+        MPIEnvironment(MPI_Comm parent) : ::testing::Environment(), parent(parent) {}
+        MPIEnvironment(MPI_Comm parent, std::vector<MPI_Datatype> types)
+            : ::testing::Environment(), parent(parent), types(types)
+        {}
 
         virtual ~MPIEnvironment() {}
 
@@ -82,6 +86,14 @@ namespace GTestMPIListener
 
         virtual void TearDown()
         {
+            if (this->parent != MPI_COMM_NULL) {
+                ASSERT_EQ(MPI_Barrier(this->parent), MPI_SUCCESS);
+            }
+
+            for (MPI_Datatype &t : this->types) {
+                ASSERT_EQ(MPI_Type_free(&t), MPI_SUCCESS);
+            }
+
             int is_mpi_finalized;
             ASSERT_EQ(MPI_Finalized(&is_mpi_finalized), MPI_SUCCESS);
             if (!is_mpi_finalized) {
@@ -99,6 +111,9 @@ namespace GTestMPIListener
     private:
         // Disallow copying
         MPIEnvironment(const MPIEnvironment &env __attribute__((unused))) {}
+
+        MPI_Comm parent;
+        std::vector<MPI_Datatype> types;
 
     };  // class MPIEnvironment
 

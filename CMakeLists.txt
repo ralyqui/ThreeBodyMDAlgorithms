@@ -2,6 +2,7 @@ include_directories(SYSTEM ${MPI_INCLUDE_PATH})
 
 add_subdirectory(utility)
 add_subdirectory(tools)
+add_subdirectory(external/rapidyaml)
 
 set(MAIN_SOURCES
     main.cpp
@@ -27,19 +28,21 @@ target_include_directories(main PRIVATE utility algorithm decomposition
 target_link_libraries(main ${MPI_C_LIBRARIES})
 target_link_libraries(main Eigen3::Eigen)
 
+set_target_properties(main PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                                      ${CMAKE_BINARY_DIR}/executables)
+
 # TESTS
 
 if(TESTS_3BMDA)
+
+  include(GoogleTest)
+
   set(INSTALL_GTEST OFF)
   add_subdirectory(external/gtest)
   include_directories(external/gtest/include)
 
-  set(TEST_MAIN_SOURCES tests/testsmain.cpp tests/testsmain.hpp)
-
   set(TEST_SOURCES
       tests/tests.cpp
-      tests/tests.hpp
-      tests/gtest_mpi_listener.hpp
       topology/Topology.cpp
       topology/RingTopology.cpp
       topology/CartTopology.cpp
@@ -53,24 +56,33 @@ if(TESTS_3BMDA)
       utility/utility.cpp
       potential/AxilrodTeller.cpp
       potential/Potential.cpp
-      simulation/Simulation.cpp)
+      simulation/Simulation.cpp
+      tools/ClosestPackedGenerator.cpp
+      tools/ClusteredGaussGenerator.cpp
+      tools/GaussGenerator.cpp
+      tools/GridGenerator.cpp
+      tools/ParticleGenerator.cpp
+      tools/UniformGenerator.cpp
+      utility/utility.cpp)
 
   add_executable(testrunner tests/testrunner.cpp)
-  add_executable(testsmain ${TEST_MAIN_SOURCES})
-  target_link_libraries(testsmain ${MPI_C_LIBRARIES})
+
   add_executable(tests ${TEST_SOURCES})
   target_link_libraries(tests gtest)
   target_link_libraries(tests ${MPI_C_LIBRARIES})
   target_link_libraries(tests Eigen3::Eigen)
 
-  include(GoogleTest)
+  target_compile_definitions(tests PUBLIC TESTS_3BMDA)
 
-  gtest_discover_tests(
-    tests
-    TEST_PREFIX
-      "tests/" # increase the discovery timeout for `runTests
-               # --gtest_list_tests`
-      DISCOVERY_TIMEOUT 60)
+  # https://stackoverflow.com/questions/71971858/ctest-and-mpi-parallel-tests
+  # solving the problem when gtest executes tests without mpi set_property(
+  # TARGET tests PROPERTY CROSSCOMPILING_EMULATOR '${MPIEXEC_EXECUTABLE}
+  # ${MPIEXEC_NUMPROC_FLAG} 1') gtest_discover_tests(tests TEST_PREFIX "tests/"
+  # DISCOVERY_TIMEOUT 60)
+
+  set_target_properties(
+    tests testrunner PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                                ${CMAKE_BINARY_DIR}/executables/tests)
 
 endif(TESTS_3BMDA)
 
@@ -85,7 +97,11 @@ if(BENCHMARK_3BMDA)
 
   set(BENCHMARK_SOURCES
       benchmarks/benchmain.cpp
-      benchmarks/benchmain.hpp
+      benchmarks/MPIBenchmark.cpp
+      benchmarks/AUTAContext.cpp
+      benchmarks/NATAContext.cpp
+      benchmarks/Context.cpp
+      benchmarks/SingleIteration.cpp
       topology/Topology.cpp
       topology/RingTopology.cpp
       topology/CartTopology.cpp
@@ -99,13 +115,28 @@ if(BENCHMARK_3BMDA)
       utility/utility.cpp
       potential/AxilrodTeller.cpp
       potential/Potential.cpp
-      simulation/Simulation.cpp)
+      simulation/Simulation.cpp
+      tools/ClosestPackedGenerator.cpp
+      tools/ClusteredGaussGenerator.cpp
+      tools/GaussGenerator.cpp
+      tools/GridGenerator.cpp
+      tools/ParticleGenerator.cpp
+      tools/UniformGenerator.cpp)
 
   add_executable(benchrunner benchmarks/benchrunner.cpp)
   add_executable(benchmain ${BENCHMARK_SOURCES})
 
+  target_include_directories(benchmain PRIVATE thirdparty/rapidyaml/src)
+
   target_link_libraries(benchmain benchmark)
   target_link_libraries(benchmain ${MPI_C_LIBRARIES})
   target_link_libraries(benchmain Eigen3::Eigen)
+  target_link_libraries(benchmain ryml)
+
+  target_compile_definitions(benchmain PUBLIC BENCHMARK_3BMDA)
+
+  set_target_properties(
+    benchrunner benchmain PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                                     ${CMAKE_BINARY_DIR}/executables/benchmark)
 
 endif(BENCHMARK_3BMDA)

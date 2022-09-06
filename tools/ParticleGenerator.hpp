@@ -34,4 +34,6 @@ public:
 
     std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
     GetParticles();
+
+    static Generator Str2Gen(std::string str);
 };

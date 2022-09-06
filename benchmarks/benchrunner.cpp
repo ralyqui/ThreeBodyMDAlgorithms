@@ -1,7 +1,14 @@
 #include <stdlib.h>
 
-int main(/*int argc, char* argv[]*/)
+#include <string>
+
+int main(int argc, char* argv[])
 {
-    int result = system("mpirun -n 1 ./benchmain");
+    std::string cmd = "mpirun -n 1 ./benchmain ";
+    for (int i = 1; i < argc; i++) {
+        cmd.append(argv[i]);
+        cmd.append(" ");
+    }
+    int result = system(cmd.c_str());
     return result;
 }

@@ -15,3 +15,20 @@ ParticleGenerator::GetParticles()
 {
     return this->particles;
 }
+
+Generator ParticleGenerator::Str2Gen(std::string str)
+{
+    if (str.compare("closestpacked") == 0) {
+        return Generator::ClosestPacked;
+    } else if (str.compare("clusteredgauss") == 0) {
+        return Generator::ClusteredGauss;
+    } else if (str.compare("gauss") == 0) {
+        return Generator::Gauss;
+    } else if (str.compare("grid") == 0) {
+        return Generator::Grid;
+    } else if (str.compare("uniform") == 0) {
+        return Generator::Uniform;
+    } else {
+        return Generator::Uniform;
+    }
+}

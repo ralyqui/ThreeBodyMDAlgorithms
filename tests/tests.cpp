@@ -4,7 +4,74 @@
 
 std::vector<Utility::Particle> particles;
 MPI_Datatype mpiParticleType;
+std::vector<MPI_Datatype> types;
 MPI_Comm parent;
+
+MPI_Comm interComm0;
+MPI_Comm interComm1;
+int myRankInterComm0;
+int myRankInterComm1;
+
+std::vector<Utility::Particle> uniformParticles;
+std::vector<Utility::Particle> gridParticles;
+std::vector<Utility::Particle> gaussParticles;
+std::vector<Utility::Particle> closestpackedParticles;
+std::vector<Utility::Particle> clusteredgaussParticles;
+
+void generateParticles()
+{
+    int numParticles = 1000;
+    std::array<double, 3> velocity = {0, -0.1, 0};
+    std::array<double, 3> boxLength = {10, 10, 10};
+    std::array<double, 3> bottomLeftCorner = {0, 0, 0};
+    double mass = 0.0001;
+    uint_fast32_t seed0 = 926762934;
+    uint_fast32_t seed1 = 89347587;
+    std::array<size_t, 3> particlesPerDim = {10, 10, 10};
+    double particleSpacing = 0.5;
+    const std::array<double, 3> distributionMean = {0.5, 0.5, 0.5};
+    const std::array<double, 3> distributionStdDev = {0.5, 0.5, 0.5};
+    int numClusters = 25;
+
+    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+        uniformParticlesTuple;
+    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+        gridParticlesTuple;
+    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+        gaussParticlesTuple;
+    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+        closestpackedParticlesTuple;
+    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+        clusteredgaussParticlesTuple;
+
+    UniformGenerator uniformGenerator(numParticles, velocity, boxLength, bottomLeftCorner, mass, seed0, seed1);
+    GridGenerator gridGenerator(numParticles, velocity, boxLength, bottomLeftCorner, mass, seed0, seed1,
+                                particlesPerDim, particleSpacing);
+    GaussGenerator gaussGenerator(numParticles, velocity, boxLength, bottomLeftCorner, mass, seed0, seed1,
+                                  distributionMean, distributionStdDev);
+    ClosestPackedGenerator closestPackedGenerator(numClusters, velocity, boxLength, bottomLeftCorner, mass, seed0,
+                                                  seed1, particleSpacing);
+    ClusteredGaussGenerator clusteredGaussGenerator(numParticles, velocity, boxLength, bottomLeftCorner, mass, seed0,
+                                                    seed1, distributionMean, distributionStdDev, numClusters);
+
+    uniformGenerator.Generate();
+    gridGenerator.Generate();
+    gaussGenerator.Generate();
+    closestPackedGenerator.Generate();
+    clusteredGaussGenerator.Generate();
+
+    uniformParticlesTuple = uniformGenerator.GetParticles();
+    gridParticlesTuple = gridGenerator.GetParticles();
+    gaussParticlesTuple = gaussGenerator.GetParticles();
+    closestpackedParticlesTuple = closestPackedGenerator.GetParticles();
+    clusteredgaussParticlesTuple = clusteredGaussGenerator.GetParticles();
+
+    Utility::getParticlesFromTuple(uniformParticlesTuple, uniformParticles);
+    Utility::getParticlesFromTuple(gridParticlesTuple, gridParticles);
+    Utility::getParticlesFromTuple(gaussParticlesTuple, gaussParticles);
+    Utility::getParticlesFromTuple(closestpackedParticlesTuple, closestpackedParticles);
+    Utility::getParticlesFromTuple(clusteredgaussParticlesTuple, clusteredgaussParticles);
+}
 
 struct CartRankTriplet {
     int a0, a1, a2;
@@ -413,10 +480,8 @@ TEST(p3bca, test_topology_with_step)
     int myParticlesOldSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
 
     simulation->GetAlgorithm()->SimulationStep();
-    // std::cout << "we are here" << std::endl;
     MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
-    // std::cout << "and now we are here" << std::endl;
     MPI_Barrier(simulation->GetTopology()->GetComm());
 
     int myParticlesNewSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
@@ -797,43 +862,101 @@ TEST(utility, test_particle_GetR)
 
 int main(int argc, char* argv[])
 {
-    ::testing::InitGoogleTest(&argc, argv);
+    int result;
+    int numParticles;
+
+    // if (argc == 1) {
+    //    result = system("mpiexec -n 1 ./tests mpi");
+    //} else if (strcmp(argv[1], "mpi") == 0) {
+
     // init MPI
     MPI_Init(&argc, &argv);
 
     MPI_Comm_get_parent(&parent);
 
-    // parse cli arguments
-    std::vector<std::string> args;
-
-    for (int i = 2; i < argc; i++) {
-        args.push_back(argv[i]);
-    }
-
     // create particleMPIType
     mpiParticleType = Utility::Particle::GetMPIType();
     MPI_Type_commit(&mpiParticleType);
 
-    // load particle input data
-    Utility::getParticlesFromCSV("tools/test3.csv", particles);
+    types.push_back(mpiParticleType);
 
-    // Add object that will finalize MPI on exit; Google Test owns this pointer
-    ::testing::AddGlobalTestEnvironment(new GTestMPIListener::MPIEnvironment);
+    if (parent == MPI_COMM_NULL) {
+        generateParticles();
+        particles = uniformParticles;
+        numParticles = particles.size();
 
-    // Get the event listener list.
-    ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
+        std::vector<char*> args;
 
-    // Remove default listener: the default printer and the default XML printer
-    ::testing::TestEventListener* l = listeners.Release(listeners.default_result_printer());
+        args.push_back((char*)"--gtest_color=yes");
 
-    // Adds MPI listener; Google Test owns this pointer
-    listeners.Append(new GTestMPIListener::MPIWrapperPrinter(l, MPI_COMM_WORLD));
+        args.push_back((char*)"--gtest_filter=nata.*:auta.*:utility.*");
 
-    int result = RUN_ALL_TESTS();
+        MPI_Comm_spawn("./tests", args.data(), 16, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &interComm0, MPI_ERRCODES_IGNORE);
+        MPI_Comm_rank(interComm0, &myRankInterComm0);
 
-    // finalize ... this is done by MPI listener
-    // MPI_Type_free(&mpiParticleType);
-    // MPI_Finalize();
+        // send particles to children
+        MPI_Bcast(&numParticles, 1, MPI_INT, MPI_ROOT, interComm0);
+        MPI_Bcast(particles.data(), numParticles, mpiParticleType, MPI_ROOT, interComm0);
+
+        // The mpi listener executes a barrier after all test have been performed so we can run filtered tests
+        // sequentially
+        MPI_Barrier(interComm0);
+
+        args.pop_back();
+        args.push_back((char*)"--gtest_filter=p3bca.*");
+
+        MPI_Comm_spawn("./tests", args.data(), 64, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &interComm1, MPI_ERRCODES_IGNORE);
+        MPI_Comm_rank(interComm1, &myRankInterComm1);
+
+        // send particles to children
+        MPI_Bcast(&numParticles, 1, MPI_INT, MPI_ROOT, interComm1);
+        MPI_Bcast(particles.data(), numParticles, mpiParticleType, MPI_ROOT, interComm1);
+
+        // The mpi listener executes a barrier after all test have been performed so we can run filtered tests
+        // sequentially
+        MPI_Barrier(interComm1);
+
+        MPI_Type_free(&mpiParticleType);
+        MPI_Finalize();
+
+        result = 0;
+    } else {
+        ::testing::InitGoogleTest(&argc, argv);
+
+        // parse cli arguments
+        std::vector<std::string> args;
+
+        for (int i = 2; i < argc; i++) {
+            args.push_back(argv[i]);
+        }
+
+        // receive particles from root
+        MPI_Bcast(&numParticles, 1, MPI_INT, 0, parent);
+        particles.resize(numParticles);
+        MPI_Bcast(particles.data(), numParticles, mpiParticleType, 0, parent);
+
+        // load particle input data
+        // Utility::getParticlesFromCSV("tools/test3.csv", particles);
+
+        // Add object that will finalize MPI on exit; Google Test owns this pointer
+        ::testing::AddGlobalTestEnvironment(new GTestMPIListener::MPIEnvironment(parent, types));
+
+        // Get the event listener list.
+        ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
+
+        // Remove default listener: the default printer and the default XML printer
+        ::testing::TestEventListener* l = listeners.Release(listeners.default_result_printer());
+
+        // Adds MPI listener; Google Test owns this pointer
+        listeners.Append(new GTestMPIListener::MPIWrapperPrinter(l, MPI_COMM_WORLD));
+
+        result = RUN_ALL_TESTS();
+
+        // finalize ... this is done by MPI listener
+    }
+    //} else {
+    //    result = 1;
+    //}
 
     return result;
 }

@@ -3,7 +3,7 @@
 #ifdef TESTS_3BMDA
 
 #include <gtest/gtest.h>
-
+#include <mpi.h>
 #include <Eigen/Dense>
 
 #include "../algorithm/AUTA.hpp"
@@ -17,6 +17,12 @@
 #include "../potential/AxilrodTeller.hpp"
 #include "../potential/Potential.hpp"
 #include "../simulation/Simulation.hpp"
+#include "../tools/ClosestPackedGenerator.hpp"
+#include "../tools/ClusteredGaussGenerator.hpp"
+#include "../tools/GaussGenerator.hpp"
+#include "../tools/GridGenerator.hpp"
+#include "../tools/ParticleGenerator.hpp"
+#include "../tools/UniformGenerator.hpp"
 #include "../topology/CartTopology.hpp"
 #include "../topology/RingTopology.hpp"
 #include "../topology/Topology.hpp"

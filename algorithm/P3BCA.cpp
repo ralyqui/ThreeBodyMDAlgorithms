@@ -296,6 +296,7 @@ int P3BCA::SimulationStep()
 
     for (int i2 = 0; i2 < this->numSteps; i2++) {
         for (int i3 = i2; i3 < this->numSteps; i3++) {
+
             /*if (myCoords[0] == 0 && myCoords[1] == 0 && myCoords[2] == 0) {
                 int b1Coords2[3];
                 int b2Coords2[3];

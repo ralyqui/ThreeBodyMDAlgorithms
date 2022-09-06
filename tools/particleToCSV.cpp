@@ -16,23 +16,6 @@
 #include "ParticleGenerator.hpp"
 #include "UniformGenerator.hpp"
 
-Generator str2Gen(std::string str)
-{
-    if (str.compare("closestpacked") == 0) {
-        return Generator::ClosestPacked;
-    } else if (str.compare("clusteredgauss") == 0) {
-        return Generator::ClusteredGauss;
-    } else if (str.compare("gauss") == 0) {
-        return Generator::Gauss;
-    } else if (str.compare("grid") == 0) {
-        return Generator::Grid;
-    } else if (str.compare("uniform") == 0) {
-        return Generator::Uniform;
-    } else {
-        return Generator::Uniform;
-    }
-}
-
 int main(int argc, char *argv[])
 {
     std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>> particles;
@@ -78,7 +61,7 @@ int main(int argc, char *argv[])
         int result = getopt_long_only(argc, argv, "n:m:d:o:v:w:a:b:p:q:", long_options, &index);
         if (result == -1) break; /* end of list */
         switch (result) {
-            case 'a': gen = str2Gen(optarg); break;
+            case 'a': gen = ParticleGenerator::Str2Gen(optarg); break;
             case 'b': numParticles = std::stoi(optarg); break;
             case 'c': distributionMean[0] = distributionMean[1] = distributionMean[2] = std::stod(optarg); break;
             case 'd': distributionStdDev[0] = distributionStdDev[1] = distributionStdDev[2] = std::stod(optarg); break;
