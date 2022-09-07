@@ -235,7 +235,9 @@ int AUTA::SimulationStep()
     }
 
     // send back to owner
-    sendBackParticles();
+    if (this->worldSize > 1) {
+        sendBackParticles();
+    }
 
     // sum up particles
     // sumUpParticles();

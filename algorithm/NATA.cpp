@@ -79,10 +79,14 @@ int NATA::SimulationStep()
                                                      Utility::mod(j + this->worldRank, this->worldSize)));
 #endif
             }
-            shiftRight(b2);
-            ++step;
+            if (this->worldSize > 1) {
+                shiftRight(b2);
+                ++step;
+            }
         }
-        shiftRight(b1);
+        if (this->worldSize > 1) {
+            shiftRight(b1);
+        }
     }
 
     // sumUpParticles();
