@@ -17,7 +17,8 @@ protected:
     void updateMyParticles(double dt, Eigen::Vector3d gForce);
 
 public:
-    virtual ~DomainDecomposition() = 0;
+    DomainDecomposition();
+    virtual ~DomainDecomposition();
 
     virtual void Init(std::shared_ptr<Simulation> simulation);
 

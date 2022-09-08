@@ -30,6 +30,7 @@ protected:
 
 public:
     RegularGridDecomposition();
+    virtual ~RegularGridDecomposition();
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 

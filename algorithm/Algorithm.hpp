@@ -23,8 +23,9 @@ protected:
 
 public:
     Algorithm();
+    virtual ~Algorithm();
+
     virtual void Init(std::shared_ptr<Simulation> simulation);
-    virtual ~Algorithm() = 0;
     virtual int SimulationStep() = 0;
 
     void CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,

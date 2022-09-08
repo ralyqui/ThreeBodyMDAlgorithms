@@ -1,6 +1,7 @@
 #include "RegularGridDecomposition.hpp"
 
 RegularGridDecomposition::RegularGridDecomposition() {}
+RegularGridDecomposition::~RegularGridDecomposition() {}
 
 void RegularGridDecomposition::Init(std::shared_ptr<Simulation> simulation)
 {

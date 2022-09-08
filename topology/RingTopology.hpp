@@ -9,13 +9,10 @@ protected:
 
 public:
     RingTopology();
-    ~RingTopology();
+    virtual ~RingTopology();
 
     int GetLeftNeighbor();
     int GetRightNeighbor();
-
-    int GetWorldRank() override;
-    int GetWorldSize() override;
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 };

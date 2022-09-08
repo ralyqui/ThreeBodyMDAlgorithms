@@ -35,7 +35,7 @@ private:
 
 public:
     P3BCA(double cutoff);
-    ~P3BCA();
+    virtual ~P3BCA();
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 

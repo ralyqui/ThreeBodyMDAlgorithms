@@ -10,10 +10,7 @@ protected:
 
 public:
     CartTopology();
-    ~CartTopology();
-
-    int GetWorldRank() override;
-    int GetWorldSize() override;
+    virtual ~CartTopology();
 
     std::tuple<int, int, int> GetCartRank();
     std::tuple<int, int, int> GetCartRank(int rank);

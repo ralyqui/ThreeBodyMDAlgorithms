@@ -1,13 +1,10 @@
 #include "RingTopology.hpp"
 
 RingTopology::RingTopology() {}
-RingTopology::~RingTopology() { MPI_Comm_free(&this->comm); }
+RingTopology::~RingTopology() {}
 
 int RingTopology::GetLeftNeighbor() { return this->leftNeighbor; }
 int RingTopology::GetRightNeighbor() { return this->rightNeighbor; }
-
-int RingTopology::GetWorldRank() { return this->worldRank; }
-int RingTopology::GetWorldSize() { return this->worldSize; }
 
 void RingTopology::Init(std::shared_ptr<Simulation> simulation)
 {

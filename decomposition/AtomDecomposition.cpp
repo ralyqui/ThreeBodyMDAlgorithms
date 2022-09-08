@@ -1,6 +1,7 @@
 #include "AtomDecomposition.hpp"
 
 AtomDecomposition::AtomDecomposition() {}
+AtomDecomposition::~AtomDecomposition() {}
 
 void AtomDecomposition::Init(std::shared_ptr<Simulation> simulation)
 {

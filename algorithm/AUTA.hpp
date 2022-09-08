@@ -31,7 +31,7 @@ private:
 
 public:
     AUTA();
-    ~AUTA();
+    virtual ~AUTA();
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 

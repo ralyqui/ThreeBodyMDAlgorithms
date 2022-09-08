@@ -25,6 +25,9 @@ void SingleIteration::AfterBench(benchmark::State &state __attribute__((unused))
     state.counters["interactions"] = this->simulation->GetNumInteractions(0);
     state.counters["num_particles"] = this->simulation->GetAllParticles().size();
     state.counters["num_processors"] = this->simulation->GetTopology()->GetWorldSize();
+
+    this->simulation.reset();
+    this->context->DeInit();
 }
 
 #endif

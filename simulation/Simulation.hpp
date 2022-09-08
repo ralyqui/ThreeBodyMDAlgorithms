@@ -22,7 +22,7 @@ public:
                std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition,
                MPI_Datatype* mpiParticleType, std::vector<Utility::Particle>& particles, double dt,
                Eigen::Vector3d gForce);
-    ~Simulation();
+    virtual ~Simulation();
 
     void Start();
     void Init();

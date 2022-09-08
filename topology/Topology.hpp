@@ -17,9 +17,9 @@ protected:
 
 public:
     Topology();
-    ~Topology();
-    virtual int GetWorldRank() = 0;
-    virtual int GetWorldSize() = 0;
+    virtual ~Topology();
+    int GetWorldRank();
+    int GetWorldSize();
     virtual void Init(std::shared_ptr<Simulation> simulation);
     MPI_Comm GetComm();
 };

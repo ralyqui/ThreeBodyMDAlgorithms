@@ -12,6 +12,7 @@ private:
 
 public:
     AtomDecomposition();
+    virtual ~AtomDecomposition();
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 

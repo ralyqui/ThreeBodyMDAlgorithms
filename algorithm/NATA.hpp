@@ -27,7 +27,7 @@ private:
 
 public:
     NATA();
-    ~NATA();
+    virtual ~NATA();
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 

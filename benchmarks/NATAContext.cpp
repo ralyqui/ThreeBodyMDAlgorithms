@@ -32,6 +32,4 @@ void NATAContext::Init(ContextArgs args)
                                      &this->mpiParticleType, this->particles, args.deltaT, args.gForce);
 }
 
-std::shared_ptr<Simulation> NATAContext::GetSimulation() { return this->simulation; }
-
 #endif

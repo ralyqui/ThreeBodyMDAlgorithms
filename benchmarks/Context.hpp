@@ -32,6 +32,7 @@ struct ContextArgs {
 
 class Context {
 protected:
+    std::shared_ptr<Simulation> simulation;
     std::vector<Utility::Particle> particles;
     MPI_Datatype mpiParticleType;
 
@@ -40,7 +41,8 @@ public:
     ~Context();
 
     virtual void Init(ContextArgs args) = 0;
-    virtual std::shared_ptr<Simulation> GetSimulation() = 0;
+    std::shared_ptr<Simulation> GetSimulation();
+    void DeInit();
 };
 
 #endif

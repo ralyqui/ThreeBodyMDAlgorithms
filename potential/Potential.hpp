@@ -11,7 +11,7 @@ protected:
 
 public:
     Potential();
-    virtual ~Potential() = 0;
+    virtual ~Potential();
     virtual void Init(std::shared_ptr<Simulation> simulation);
     virtual void CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k) = 0;
 };

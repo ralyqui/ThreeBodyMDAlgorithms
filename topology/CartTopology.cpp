@@ -1,7 +1,7 @@
 #include "CartTopology.hpp"
 
 CartTopology::CartTopology() {}
-CartTopology::~CartTopology() { MPI_Comm_free(&this->comm); }
+CartTopology::~CartTopology() {}
 
 void CartTopology::Init(std::shared_ptr<Simulation> simulation)
 {
@@ -34,9 +34,6 @@ std::tuple<int, int> CartTopology::Shift(int dim, int dir)
 
 int CartTopology::GetLeftNeighbor(int dim) { return std::get<0>(this->Shift(dim, 1)); }
 int CartTopology::GetRightNeighbor(int dim) { return std::get<1>(this->Shift(dim, 1)); }
-
-int CartTopology::GetWorldRank() { return this->worldRank; }
-int CartTopology::GetWorldSize() { return this->worldSize; }
 
 std::tuple<int, int, int> CartTopology::GetCartRank() { return this->cartRank; }
 std::tuple<int, int, int> CartTopology::GetCartRank(int rank)

@@ -32,6 +32,4 @@ void AUTAContext::Init(ContextArgs args)
                                      &this->mpiParticleType, this->particles, args.deltaT, args.gForce);
 }
 
-std::shared_ptr<Simulation> AUTAContext::GetSimulation() { return this->simulation; }
-
 #endif
