@@ -48,10 +48,3 @@ void AtomDecomposition::Update(double dt, Eigen::Vector3d gForce)
     // update all my particles
     this->updateMyParticles(dt, gForce);
 }
-
-void AtomDecomposition::ResetForces()
-{
-    for (size_t i = 0; i < myParticles.size(); i++) {
-        myParticles[i].ResetForce();
-    }
-}

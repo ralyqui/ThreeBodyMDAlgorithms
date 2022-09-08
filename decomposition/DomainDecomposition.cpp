@@ -14,3 +14,10 @@ void DomainDecomposition::updateMyParticles(double dt, Eigen::Vector3d gForce)
         myParticles[i].Update(dt, gForce);
     }
 }
+
+void DomainDecomposition::ResetForces()
+{
+    for (size_t i = 0; i < myParticles.size(); i++) {
+        myParticles[i].ResetForce();
+    }
+}

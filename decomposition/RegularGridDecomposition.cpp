@@ -156,13 +156,6 @@ void RegularGridDecomposition::Update(double dt, Eigen::Vector3d gForce)
     exchangeParticles();
 }
 
-void RegularGridDecomposition::ResetForces()
-{
-    for (size_t i = 0; i < myParticles.size(); i++) {
-        myParticles[i].ResetForce();
-    }
-}
-
 double RegularGridDecomposition::GetCellSize() { return this->localCellWidth; }
 int RegularGridDecomposition::GetDim() { return this->dim; }
 double RegularGridDecomposition::GetPhysicalDomainSize() { return this->physicalDomainSize; }

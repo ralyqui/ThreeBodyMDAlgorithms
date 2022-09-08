@@ -23,7 +23,7 @@ public:
     virtual void Init(std::shared_ptr<Simulation> simulation);
 
     virtual void Update(double dt, Eigen::Vector3d gForce) = 0;
-    virtual void ResetForces() = 0;
+    void ResetForces();
     std::vector<Utility::Particle>* GetMyParticles();
     int GetNumParticles();
 };
