@@ -12,8 +12,9 @@ void Algorithm::Init(std::shared_ptr<Simulation> simulation)
 }
 
 void Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
-                                      std::vector<Utility::Particle> &b2)
+                                      std::vector<Utility::Particle> &b2, double cutoff)
 {
+    double sqrCutoff = cutoff * cutoff;
     for (size_t i = 0; i < b0.size(); ++i) {
         if (b0[i].isDummy) {
             continue;
@@ -25,6 +26,16 @@ void Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::v
             for (size_t k = 0; k < b2.size(); ++k) {
                 if (b2[k].isDummy) {
                     continue;
+                }
+                // only calculate if this triplet is inside the cutoff
+                if (cutoff > 0) {
+                    if (b0[i].GetSqrDist(b1[j]) > sqrCutoff || b0[i].GetSqrDist(b2[k]) > sqrCutoff ||
+                        b1[j].GetSqrDist(b2[k]) > sqrCutoff) {
+                        // std::cout << "do not calculate, cutoff: " << cutoff << ", dist0: " << b0[i].GetDist(b1[j])
+                        //          << ", dist1: " << b0[i].GetDist(b2[k]) << ", dist2: " << b1[j].GetDist(b2[k])
+                        //          << std::endl;
+                        continue;
+                    }
                 }
                 this->potential->CalculateForces(b0[i], b1[j], b2[k]);
             }

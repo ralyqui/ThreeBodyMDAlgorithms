@@ -43,4 +43,5 @@ public:
     int SimulationStepNew();
     int SimulationStepNewNew();
     int GetNumCutoffBoxes();
+    double GetCutoff();
 };

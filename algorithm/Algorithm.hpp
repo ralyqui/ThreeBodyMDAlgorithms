@@ -29,7 +29,7 @@ public:
     virtual int SimulationStep() = 0;
 
     void CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
-                               std::vector<Utility::Particle> &b2);
+                               std::vector<Utility::Particle> &b2, double cutoff = -1);
     void SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                         std::vector<Utility::Particle> &b2);
 

@@ -9,8 +9,6 @@
 #include <random>
 #include <tuple>
 
-enum Generator { ClosestPacked, ClusteredGauss, Gauss, Grid, Uniform };
-
 class ParticleGenerator {
 protected:
     int numParticles;
@@ -34,6 +32,8 @@ public:
 
     std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
     GetParticles();
+
+    enum Generator { ClosestPacked, ClusteredGauss, Gauss, Grid, Uniform };
 
     static Generator Str2Gen(std::string str);
 };

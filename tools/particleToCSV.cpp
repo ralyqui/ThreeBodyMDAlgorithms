@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     std::string output;
     std::array<double, 3> velocity;
     double mass = 0;
-    Generator gen = Generator::Uniform;
+    ParticleGenerator::Generator gen = ParticleGenerator::Generator::Uniform;
     uint_fast32_t seed0, seed1;
 
     static const struct option long_options[] = {{"generator", required_argument, 0, 'a'},
@@ -94,24 +94,24 @@ int main(int argc, char *argv[])
     std::shared_ptr<ParticleGenerator> pGenerator(nullptr);
 
     switch (gen) {
-        case ClosestPacked:
+        case ParticleGenerator::Generator::ClosestPacked:
             pGenerator = std::make_shared<ClosestPackedGenerator>(numParticles, velocity, boxLength, bottomLeftCorner,
                                                                   mass, seed0, seed1, particleSpacing);
             break;
-        case ClusteredGauss:
+        case ParticleGenerator::Generator::ClusteredGauss:
             pGenerator = std::make_shared<ClusteredGaussGenerator>(numParticles, velocity, boxLength, bottomLeftCorner,
                                                                    mass, seed0, seed1, distributionMean,
                                                                    distributionStdDev, numClusters);
             break;
-        case Gauss:
+        case ParticleGenerator::Generator::Gauss:
             pGenerator = std::make_shared<GaussGenerator>(numParticles, velocity, boxLength, bottomLeftCorner, mass,
                                                           seed0, seed1, distributionMean, distributionStdDev);
             break;
-        case Grid:
+        case ParticleGenerator::Generator::Grid:
             pGenerator = std::make_shared<GridGenerator>(numParticles, velocity, boxLength, bottomLeftCorner, mass,
                                                          seed0, seed1, particlesPerDim, particleSpacing);
             break;
-        case Uniform:
+        case ParticleGenerator::Generator::Uniform:
             pGenerator = std::make_shared<UniformGenerator>(numParticles, velocity, boxLength, bottomLeftCorner, mass,
                                                             seed0, seed1);
             break;

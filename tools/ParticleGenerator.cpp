@@ -16,7 +16,7 @@ ParticleGenerator::GetParticles()
     return this->particles;
 }
 
-Generator ParticleGenerator::Str2Gen(std::string str)
+ParticleGenerator::Generator ParticleGenerator::Str2Gen(std::string str)
 {
     if (str.compare("closestpacked") == 0) {
         return Generator::ClosestPacked;

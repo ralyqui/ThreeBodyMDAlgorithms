@@ -22,7 +22,7 @@ auto MPIBench = [](benchmark::State &state, std::shared_ptr<MPIBenchmark> bm) {
     for (auto _ : state) {
         // Do the work and time it on each proc
         auto start = std::chrono::high_resolution_clock::now();
-        bm->DoStuff(state);
+        bm->RunWorkToBench(state);
         auto end = std::chrono::high_resolution_clock::now();
 
         auto const duration = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
@@ -49,6 +49,7 @@ int main(int argc, char **argv)
     int result;
     int numParticles;
     std::string config;
+    std::string out;
     int configlen;
 
     // init MPI
@@ -63,26 +64,17 @@ int main(int argc, char **argv)
     if (parent == MPI_COMM_NULL) {
         MPI_Comm interComm0;
 
-        // hacky solution to avoid unreg options with getopt
-
-        // std::vector<std::string> args(argv, argv + argc);
-        // std::vector<char *> cstrings;
-        // cstrings.reserve(args.size());
-        // for (auto &s : args) cstrings.push_back(&s[0]);
-        // char **argvChildren = cstrings.data();
-
-        // ::benchmark::Initialize(&argc, argv);
-        // ::benchmark::Shutdown();
-
-        static const struct option long_options[] = {{"yaml", required_argument, 0, 'y'}, {0, 0, 0, 0}};
+        static const struct option long_options[] = {
+            {"yaml", required_argument, 0, 'y'}, {"out", required_argument, 0, 'o'}, {0, 0, 0, 0}};
         // http://www.mario-konrad.ch/blog/programming/getopt.html
         while (1) {
             int index = -1;
             struct option *opt = 0;
-            int result = getopt_long(argc, argv, "y:", long_options, &index);
+            int result = getopt_long(argc, argv, "y:o:", long_options, &index);
             if (result == -1) break;
             switch (result) {
                 case 'y': config = Utility::get_file_contents(optarg); break;
+                case 'o': out = optarg; break;
                 case 0:
                     opt = (struct option *)&(long_options[index]);
                     printf("'%s' was specified.", opt->name);
@@ -92,90 +84,120 @@ int main(int argc, char **argv)
                 default: break;
             }
         }
+
         ryml::Tree tree = ryml::parse_in_place(ryml::to_substr(config));
 
-        // get bench parameters from yaml
-        int numP;
-        std::string gen;
-        std::array<double, 3> velocity;
-        std::array<double, 3> boxLength;
-        std::array<double, 3> bottomLeftCorner;
-        double mass;
-        uint_fast32_t seed0;
-        uint_fast32_t seed1;
-        std::array<size_t, 3> particlesPerDim;
-        double particleSpacing;
-        std::array<double, 3> distributionMean;
-        std::array<double, 3> distributionStdDev;
-        int numClusters;
+        // look for variants
+        ryml::NodeRef variants = tree["variants"];
+        std::vector<BenchVariant> benchVariants;
 
-        int numProcs;
+        for (ryml::NodeRef const &child : variants.children()) {
+            BenchVariant v;
 
-        tree["particleparams"]["numParticles"] >> numP;
-        tree["generator"] >> gen;
+            tree["particleparams"]["numParticles"] >> v.numParticles;
 
-        tree["particleparams"]["velocity"][0] >> velocity[0];
-        tree["particleparams"]["velocity"][1] >> velocity[1];
-        tree["particleparams"]["velocity"][2] >> velocity[2];
+            std::string genStr;
+            tree["generator"] >> genStr;
+            v.gen = ParticleGenerator::Str2Gen(genStr);
 
-        tree["particleparams"]["boxLength"][0] >> boxLength[0];
-        tree["particleparams"]["boxLength"][1] >> boxLength[1];
-        tree["particleparams"]["boxLength"][2] >> boxLength[2];
+            tree["particleparams"]["velocity"][0] >> v.velocity[0];
+            tree["particleparams"]["velocity"][1] >> v.velocity[1];
+            tree["particleparams"]["velocity"][2] >> v.velocity[2];
 
-        tree["particleparams"]["bottomLeftCorner"][0] >> bottomLeftCorner[0];
-        tree["particleparams"]["bottomLeftCorner"][1] >> bottomLeftCorner[1];
-        tree["particleparams"]["bottomLeftCorner"][2] >> bottomLeftCorner[2];
+            tree["particleparams"]["boxLength"][0] >> v.boxLength[0];
+            tree["particleparams"]["boxLength"][1] >> v.boxLength[1];
+            tree["particleparams"]["boxLength"][2] >> v.boxLength[2];
 
-        tree["particleparams"]["particlesPerDim"][0] >> particlesPerDim[0];
-        tree["particleparams"]["particlesPerDim"][1] >> particlesPerDim[1];
-        tree["particleparams"]["particlesPerDim"][2] >> particlesPerDim[2];
+            tree["particleparams"]["bottomLeftCorner"][0] >> v.bottomLeftCorner[0];
+            tree["particleparams"]["bottomLeftCorner"][1] >> v.bottomLeftCorner[1];
+            tree["particleparams"]["bottomLeftCorner"][2] >> v.bottomLeftCorner[2];
 
-        tree["particleparams"]["distributionMean"][0] >> distributionMean[0];
-        tree["particleparams"]["distributionMean"][1] >> distributionMean[1];
-        tree["particleparams"]["distributionMean"][2] >> distributionMean[2];
+            tree["particleparams"]["particlesPerDim"][0] >> v.particlesPerDim[0];
+            tree["particleparams"]["particlesPerDim"][1] >> v.particlesPerDim[1];
+            tree["particleparams"]["particlesPerDim"][2] >> v.particlesPerDim[2];
 
-        tree["particleparams"]["distributionStdDev"][0] >> distributionStdDev[0];
-        tree["particleparams"]["distributionStdDev"][1] >> distributionStdDev[1];
-        tree["particleparams"]["distributionStdDev"][2] >> distributionStdDev[2];
+            tree["particleparams"]["distributionMean"][0] >> v.distributionMean[0];
+            tree["particleparams"]["distributionMean"][1] >> v.distributionMean[1];
+            tree["particleparams"]["distributionMean"][2] >> v.distributionMean[2];
 
-        tree["particleparams"]["mass"] >> mass;
-        tree["particleparams"]["seed0"] >> seed0;
-        tree["particleparams"]["seed1"] >> seed1;
-        tree["particleparams"]["particleSpacing"] >> particleSpacing;
-        tree["particleparams"]["numClusters"] >> numClusters;
+            tree["particleparams"]["distributionStdDev"][0] >> v.distributionStdDev[0];
+            tree["particleparams"]["distributionStdDev"][1] >> v.distributionStdDev[1];
+            tree["particleparams"]["distributionStdDev"][2] >> v.distributionStdDev[2];
 
-        tree["numprocessors"] >> numProcs;
+            tree["particleparams"]["mass"] >> v.mass;
+            tree["particleparams"]["seed0"] >> v.seed0;
+            tree["particleparams"]["seed1"] >> v.seed1;
+            tree["particleparams"]["particleSpacing"] >> v.particleSpacing;
+            tree["particleparams"]["numClusters"] >> v.numClusters;
 
-        /*std::cout << numP << std::endl
-                  << gen << std::endl
-                  << distributionStdDev[0] << std::endl
-                  << distributionStdDev[1] << std::endl
-                  << distributionStdDev[2] << std::endl
-                  << mass << std::endl;*/
+            tree["numprocessors"] >> v.numProcs;
 
-        // generate particles and spawn mpi processors depending on config input
-        {
-            particles =
-                generateParticles(gen, numP, velocity, boxLength, bottomLeftCorner, mass, seed0, seed1, particlesPerDim,
-                                  particleSpacing, distributionMean, distributionStdDev, numClusters);
-            numParticles = particles.size();
+            // look for overrides
+            if (child.is_map()) {
+                for (ryml::NodeRef const &variantC : child.children()) {
+                    if (variantC.key().compare("numprocessors") == 0) {
+                        variantC >> v.numProcs;
+                    } else if (variantC.key().compare("particleparams") == 0) {
+                        for (ryml::NodeRef const &variantCC : variantC.children()) {
+                            if (variantCC.key().compare("numParticles") == 0) {
+                                variantCC >> v.numParticles;
+                            }
+                        }
+                    }
+                }
 
-            MPI_Comm_spawn("./benchmain", argv, numProcs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &interComm0,
-                           MPI_ERRCODES_IGNORE);
+                benchVariants.push_back(v);
+            }
         }
 
-        // send config  to children
-        {
-            configlen = config.size();
-            MPI_Bcast(&configlen, 1, MPI_INT, MPI_ROOT, interComm0);
-            MPI_Bcast(&config[0], configlen, MPI_CHAR, MPI_ROOT, interComm0);
-        }
+        int i = 0;
+        for (BenchVariant &v : benchVariants) {
+            // generate particles and spawn mpi processors depending on config input
+            {
+                particles = generateParticles(v);
+                numParticles = particles.size();
 
-        // send particles to children
-        {
-            // bcast the yaml config
-            MPI_Bcast(&numParticles, 1, MPI_INT, MPI_ROOT, interComm0);
-            MPI_Bcast(particles.data(), numParticles, mpiParticleType, MPI_ROOT, interComm0);
+                std::vector<std::string> newArgsVec = {
+                    "--benchmark_out=" + out.substr(0, out.find_last_of('.')) + "_" + std::to_string(i) + ".json",
+                    "--benchmark_out_format=json", "--benchmark_counters_tabular=true"};
+                std::vector<char *> newArgv;
+                for (const auto &arg : newArgsVec) {
+                    newArgv.push_back((char *)arg.data());
+                }
+                newArgv.push_back(nullptr);
+
+                if (v.numProcs > 1) {
+                    int array_of_maxprocs[2] = {1, v.numProcs - 1};
+                    char *array_of_commands[2] = {argv[0], argv[0]};
+                    char **array_of_argv[2] = {newArgv.data(), MPI_ARGV_NULL};
+                    MPI_Info array_of_info[2] = {MPI_INFO_NULL, MPI_INFO_NULL};
+
+                    MPI_Comm_spawn_multiple(2, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, 0,
+                                            MPI_COMM_WORLD, &interComm0, MPI_ERRCODES_IGNORE);
+                } else {
+                    MPI_Comm_spawn(argv[0], newArgv.data(), v.numProcs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &interComm0,
+                                   MPI_ERRCODES_IGNORE);
+                }
+            }
+
+            // send config  to children
+            {
+                configlen = config.size();
+                MPI_Bcast(&configlen, 1, MPI_INT, MPI_ROOT, interComm0);
+                MPI_Bcast(&config[0], configlen, MPI_CHAR, MPI_ROOT, interComm0);
+            }
+
+            // send particles to children
+            {
+                // bcast the yaml config
+                MPI_Bcast(&numParticles, 1, MPI_INT, MPI_ROOT, interComm0);
+                MPI_Bcast(particles.data(), numParticles, mpiParticleType, MPI_ROOT, interComm0);
+            }
+
+            // wait until benchmarks are done
+            MPI_Barrier(interComm0);
+
+            ++i;
         }
 
         result = 0;
@@ -197,30 +219,23 @@ int main(int argc, char **argv)
         MPI_Bcast(particles.data(), numParticles, mpiParticleType, 0, parent);
 
         // create benchmark objects
-        benchmarks = generateBenchmarksFromConfig(tree, particles, mpiParticleType);
-
-        /*if (rank == 0) {
-            std::cout << benchmarks.size() << std::endl;
-        }*/
+        benchmarks = generateBenchmarksFromConfig(tree, mpiParticleType);
 
         int iterations;
         benchmark::TimeUnit tu;
         std::string tuStr;
 
-        tree["iterations"] >> iterations;
+        tree["gbench_iterations"] >> iterations;
         tree["unit"] >> tuStr;
         tu = timeUnitFromStr(tuStr);
 
-        /*if (rank == 0) {
-            std::cout << iterations << ", " << tu << std::endl;
-        }*/
-
         // hacky solution so only the processor with rank 0 writes to output file
-        if (rank != 0) {
-            argc = 0;
-        }
+        // if (rank != 0) {
+        //    argc = 0;
+        //}
 
         for (std::shared_ptr<MPIBenchmark> &bm : benchmarks) {
+            bm->SetParticles(particles);
             ::benchmark::RegisterBenchmark(bm->GetName().c_str(), MPIBench, bm)
                 ->UseManualTime()
                 ->Iterations(iterations)
@@ -240,6 +255,8 @@ int main(int argc, char **argv)
         }
 
         benchmark::Shutdown();
+
+        MPI_Barrier(parent);
     }
 
     // finalize

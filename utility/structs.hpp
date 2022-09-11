@@ -58,6 +58,16 @@ namespace Utility
             aZ = newAcc.z();
         }
 
+        double GetSqrDist(Particle o)
+        {
+            return (o.pX - pX) * (o.pX - pX) + (o.pY - pY) * (o.pY - pY) + (o.pZ - pZ) * (o.pZ - pZ);
+        }
+
+        double GetDist(Particle o)
+        {
+            return std::sqrt((o.pX - pX) * (o.pX - pX) + (o.pY - pY) * (o.pY - pY) + (o.pZ - pZ) * (o.pZ - pZ));
+        }
+
         Eigen::Array3d GetR() { return Eigen::Array3d(pX, pY, pZ); }
 
         static MPI_Datatype GetMPIType()

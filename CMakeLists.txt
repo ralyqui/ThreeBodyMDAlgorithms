@@ -100,6 +100,7 @@ if(BENCHMARK_3BMDA)
       benchmarks/MPIBenchmark.cpp
       benchmarks/AUTAContext.cpp
       benchmarks/NATAContext.cpp
+      benchmarks/P3BCAContext.cpp
       benchmarks/Context.cpp
       benchmarks/SingleIteration.cpp
       topology/Topology.cpp

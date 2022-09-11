@@ -7,10 +7,9 @@
 
 #include <Eigen/Dense>
 #include <chrono>
-#include <thread>
-
-#include <ryml_std.hpp>
 #include <ryml.hpp>
+#include <ryml_std.hpp>
+#include <thread>
 
 #include "../algorithm/AUTA.hpp"
 #include "../algorithm/Algorithm.hpp"
@@ -36,5 +35,7 @@
 #include "MPIBenchmark.hpp"
 #include "SingleIteration.hpp"
 #include "utils.hpp"
+
+const char* execCommand = "./benchmain";
 
 #endif

@@ -29,20 +29,26 @@
 #include "../topology/RingTopology.hpp"
 #include "../topology/Topology.hpp"
 #include "../utility/utility.hpp"
+#include "AUTAContext.hpp"
+#include "Context.hpp"
+#include "NATAContext.hpp"
+#include "P3BCAContext.hpp"
 
 class MPIBenchmark {
 protected:
     std::string name;
+    std::shared_ptr<Context> context;
 
 public:
-    MPIBenchmark(std::string name);
+    MPIBenchmark(std::string name, std::shared_ptr<Context> context);
     ~MPIBenchmark();
 
     virtual void BeforeBench(benchmark::State &state) = 0;
-    virtual void DoStuff(benchmark::State &state) = 0;
+    virtual void RunWorkToBench(benchmark::State &state) = 0;
     virtual void AfterBench(benchmark::State &state) = 0;
 
     std::string GetName();
+    void SetParticles(std::vector<Utility::Particle> &particles);
 };
 
 #endif

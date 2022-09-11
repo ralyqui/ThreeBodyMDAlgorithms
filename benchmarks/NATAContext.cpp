@@ -2,9 +2,7 @@
 
 #include "NATAContext.hpp"
 
-NATAContext::NATAContext(std::vector<Utility::Particle> &particles, MPI_Datatype &mpiParticleType)
-    : Context(particles, mpiParticleType)
-{}
+NATAContext::NATAContext(MPI_Datatype &mpiParticleType) : Context(mpiParticleType) {}
 
 NATAContext::~NATAContext() {}
 
@@ -31,5 +29,7 @@ void NATAContext::Init(ContextArgs args)
         std::make_shared<Simulation>(args.iterations, nata, ringTopology, axilrodTeller, atomDecomposition,
                                      &this->mpiParticleType, this->particles, args.deltaT, args.gForce);
 }
+
+void NATAContext::AfterBench(benchmark::State &state __attribute__((unused))) {}
 
 #endif

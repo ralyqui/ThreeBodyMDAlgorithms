@@ -4,11 +4,11 @@
 
 #include "Context.hpp"
 
-class AUTAContext : public Context {
+class P3BCAContext : public Context {
 private:
 public:
-    AUTAContext(MPI_Datatype &mpiParticleType);
-    ~AUTAContext();
+    P3BCAContext(MPI_Datatype &mpiParticleType);
+    ~P3BCAContext();
 
     void Init(ContextArgs args) override;
     void AfterBench(benchmark::State &state) override;

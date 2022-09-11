@@ -18,7 +18,7 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
     double cellSize = decomposition->GetCellSize();
 
     // all boxed are included that are fully or partially covered by the cutoff distance
-    this->numCutoffBoxes = (int)(this->cutoff / cellSize) + 1;
+    this->numCutoffBoxes = (int)std::ceil((this->cutoff / cellSize));
 
     this->worldRank = this->cartTopology->GetWorldRank();
 
@@ -26,18 +26,12 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
                      6 * (this->numCutoffBoxes * this->numCutoffBoxes) + 3 * this->numCutoffBoxes + 1;
 
     if (this->numCutoffBoxes < 1 || (double)this->numCutoffBoxes >= ((double)this->dim / 2.0)) {
-        std::cerr << "invalid cutoff: " << this->numCutoffBoxes << ", with dim: " << this->dim << std::endl;
-        exit(1);
-    }
-
-    /*if (this->worldRank == 0) {
-        std::cout << "dim: " << this->dim << ", numProc: " << this->cartTopology->GetWorldSize()
-                  << ", physical Domain Size: " << decomposition->GetPhysicalDomainSize() << ", cellsize: " << cellSize
-                  << ", numCutoffBoxes: " << numCutoffBoxes << std::endl;
-        if (this->numCutoffBoxes < 1 || this->numCutoffBoxes >= this->dim / 2) {
-            std::cout << "invalid cutoff" << std::endl;
+        if (this->worldRank == 0) {
+            std::cerr << "invalid cutoff: " << this->cutoff << ", with " << this->numCutoffBoxes
+                      << " cutoff boxes, dim: " << this->dim << ", and a cell size of " << cellSize << std::endl;
+            exit(1);
         }
-    }*/
+    }
 }
 
 // a mapping from an int to a cartesian coordinate (int, int, int)
@@ -283,7 +277,7 @@ int P3BCA::SimulationStep()
             }*/
 
             // calculateInteractions();
-            this->CalculateInteractions(this->b0, this->b1, this->b2);
+            this->CalculateInteractions(this->b0, this->b1, this->b2, this->cutoff);
             counter++;
 
 #ifdef TESTS_3BMDA
@@ -330,3 +324,5 @@ int P3BCA::SimulationStep()
 }
 
 int P3BCA::GetNumCutoffBoxes() { return this->numCutoffBoxes; }
+
+double P3BCA::GetCutoff() { return this->cutoff; }

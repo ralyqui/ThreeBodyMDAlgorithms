@@ -9,7 +9,6 @@
 
 class SingleIteration : public MPIBenchmark {
 private:
-    std::shared_ptr<Context> context;
     std::shared_ptr<Simulation> simulation;
 
 public:
@@ -17,7 +16,7 @@ public:
     ~SingleIteration();
 
     void BeforeBench(benchmark::State &state) override;
-    void DoStuff(benchmark::State &state) override;
+    void RunWorkToBench(benchmark::State &state) override;
     void AfterBench(benchmark::State &state) override;
 };
 

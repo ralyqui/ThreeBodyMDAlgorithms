@@ -3,6 +3,7 @@
 #ifdef BENCHMARK_3BMDA
 
 #include <Eigen/Dense>
+#include <benchmark/benchmark.h>
 #include <memory>
 
 #include "../algorithm/AUTA.hpp"
@@ -37,12 +38,14 @@ protected:
     MPI_Datatype mpiParticleType;
 
 public:
-    Context(std::vector<Utility::Particle> &particles, MPI_Datatype &mpiParticleType);
+    Context(MPI_Datatype &mpiParticleType);
     ~Context();
 
     virtual void Init(ContextArgs args) = 0;
+    virtual void AfterBench(benchmark::State &state) = 0;
     std::shared_ptr<Simulation> GetSimulation();
     void DeInit();
+    void SetParticles(std::vector<Utility::Particle> &particles);
 };
 
 #endif

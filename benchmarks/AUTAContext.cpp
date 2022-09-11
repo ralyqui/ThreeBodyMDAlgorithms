@@ -2,8 +2,8 @@
 
 #include "AUTAContext.hpp"
 
-AUTAContext::AUTAContext(std::vector<Utility::Particle> &particles, MPI_Datatype &mpiParticleType)
-    : Context(particles, mpiParticleType)
+AUTAContext::AUTAContext(MPI_Datatype &mpiParticleType)
+    : Context(mpiParticleType)
 {}
 
 AUTAContext::~AUTAContext() {}
@@ -31,5 +31,7 @@ void AUTAContext::Init(ContextArgs args)
         std::make_shared<Simulation>(args.iterations, auta, ringTopology, axilrodTeller, atomDecomposition,
                                      &this->mpiParticleType, this->particles, args.deltaT, args.gForce);
 }
+
+void AUTAContext::AfterBench(benchmark::State &state __attribute__((unused))) {}
 
 #endif
