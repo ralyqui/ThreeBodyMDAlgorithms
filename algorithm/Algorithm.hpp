@@ -26,10 +26,11 @@ public:
     virtual ~Algorithm();
 
     virtual void Init(std::shared_ptr<Simulation> simulation);
-    virtual int SimulationStep() = 0;
+    virtual std::tuple<int, int> SimulationStep() = 0;
 
-    void CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
-                               std::vector<Utility::Particle> &b2, double cutoff = -1);
+    int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                              std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner,
+                              int b0Start = 0, int b0NumSteps = -1, double cutoff = -1);
     void SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                         std::vector<Utility::Particle> &b2);
 

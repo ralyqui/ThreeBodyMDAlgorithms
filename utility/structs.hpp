@@ -28,6 +28,14 @@ namespace Utility
         {}
         void ResetForce() { fX = fY = fZ = 0.0; }
 
+        std::string toString()
+        {
+            std::string result = "";
+            result.append("(" + std::to_string(pX) + ", " + std::to_string(pY) + ", " + std::to_string(pZ) +
+                          ", isDummy: " + (isDummy ? "true" : "false") + ")");
+            return result;
+        }
+
         void Update(double dt, Eigen::Vector3d gForce)
         {
             // we use velocity Verlet integration

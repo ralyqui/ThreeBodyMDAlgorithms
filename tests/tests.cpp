@@ -507,7 +507,7 @@ TEST(nata, test_num_interactions)
         }
     }
 
-    int numInteractionsAct = simulation->GetAlgorithm()->SimulationStep();
+    int numInteractionsAct = std::get<0>(simulation->GetAlgorithm()->SimulationStep());
 
     GTEST_ASSERT_EQ(numInteractionsExp, numInteractionsAct);
 }
@@ -527,9 +527,49 @@ TEST(auta, test_num_interactions)
         numInteractionsExp += 1;
     }
 
-    int numInteractionsAct = simulation->GetAlgorithm()->SimulationStep();
+    int numInteractionsAct = std::get<0>(simulation->GetAlgorithm()->SimulationStep());
 
     GTEST_ASSERT_EQ(numInteractionsExp, numInteractionsAct);
+}
+
+TEST(nata, test_num_particle_interactions)
+{
+    std::shared_ptr<Simulation> simulation = createNATAContext(0, 0.001, Eigen::Vector3d(0, 0, 0));
+    simulation->Init();
+
+    int numParticles = simulation->GetAllParticles().size();
+
+    int numInteractionsTotalExp = Utility::BinomialCoefficient(numParticles, 3);
+
+    int numMyInteractionsAct = std::get<1>(simulation->GetAlgorithm()->SimulationStep());
+
+    int numInteractionsTotalAct;
+
+    // elements from each process are gathered in order of their rank
+    MPI_Allreduce(&numMyInteractionsAct, &numInteractionsTotalAct, 1, MPI_INT, MPI_SUM,
+                  simulation->GetTopology()->GetComm());
+
+    GTEST_ASSERT_EQ(numInteractionsTotalExp, numInteractionsTotalAct);
+}
+
+TEST(auta, test_num_particle_interactions)
+{
+    std::shared_ptr<Simulation> simulation = createAUTAContext(0, 0.001, Eigen::Vector3d(0, 0, 0));
+    simulation->Init();
+
+    int numParticles = simulation->GetAllParticles().size();
+
+    int numInteractionsTotalExp = Utility::BinomialCoefficient(numParticles, 3);
+
+    int numMyInteractionsAct = std::get<1>(simulation->GetAlgorithm()->SimulationStep());
+
+    int numInteractionsTotalAct;
+
+    // elements from each process are gathered in order of their rank
+    MPI_Allreduce(&numMyInteractionsAct, &numInteractionsTotalAct, 1, MPI_INT, MPI_SUM,
+                  simulation->GetTopology()->GetComm());
+
+    GTEST_ASSERT_EQ(numInteractionsTotalExp, numInteractionsTotalAct);
 }
 
 TEST(nata, test_processed_triplets)
@@ -550,30 +590,34 @@ TEST(nata, test_processed_triplets)
 
     std::vector<Utility::Triplet> summedProcessed;
 
-    summedProcessed.resize(expectedTriplets.size());
-
     int numProcessed = processed.size();
 
     std::vector<int> allNumProcessed;
 
     allNumProcessed.resize(numProcessors);
 
-    std::vector<int> displacements;
-    for (int i = 0; i < numProcessors; i++) {
-        displacements.push_back(i);
-    }
-
     // elements from each process are gathered in order of their rank
     MPI_Allgather(&numProcessed, 1, MPI_INT, allNumProcessed.data(), 1, MPI_INT, simulation->GetTopology()->GetComm());
+
+    std::vector<int> displacements;
+    int sumDispl = 0;
+    for (int i = 0; i < numProcessors; i++) {
+        displacements.push_back(sumDispl);
+        sumDispl += allNumProcessed[i];
+    }
+
+    summedProcessed.resize(sumDispl);
 
     MPI_Allgatherv(processed.data(), processed.size(), tripletType, summedProcessed.data(), allNumProcessed.data(),
                    displacements.data(), tripletType, simulation->GetTopology()->GetComm());
 
     bool result = true;
-
     for (std::vector<Utility::Triplet>::iterator it = summedProcessed.begin(); it != summedProcessed.end();) {
-        if (std::find(expectedTriplets.begin(), expectedTriplets.end(), *it) != expectedTriplets.end()) {
+        std::vector<Utility::Triplet>::iterator itExp =
+            std::find(expectedTriplets.begin(), expectedTriplets.end(), *it);
+        if (itExp != expectedTriplets.end()) {
             it = summedProcessed.erase(it);
+            expectedTriplets.erase(itExp);
         } else {
             // a triplet has not been calculated
             result = false;
@@ -585,6 +629,7 @@ TEST(nata, test_processed_triplets)
 
     // test if we have calculated all neccesary triplets, but not less
     GTEST_ASSERT_EQ(summedProcessed.size(), 0);
+    GTEST_ASSERT_EQ(expectedTriplets.size(), 0);
     GTEST_ASSERT_TRUE(result);
 }
 
@@ -606,30 +651,34 @@ TEST(auta, test_processed_triplets)
 
     std::vector<Utility::Triplet> summedProcessed;
 
-    summedProcessed.resize(expectedTriplets.size());
-
     int numProcessed = processed.size();
 
     std::vector<int> allNumProcessed;
 
     allNumProcessed.resize(numProcessors);
 
-    std::vector<int> displacements;
-    for (int i = 0; i < numProcessors; i++) {
-        displacements.push_back(i);
-    }
-
     // elements from each process are gathered in order of their rank
     MPI_Allgather(&numProcessed, 1, MPI_INT, allNumProcessed.data(), 1, MPI_INT, simulation->GetTopology()->GetComm());
+
+    std::vector<int> displacements;
+    int sumDispl = 0;
+    for (int i = 0; i < numProcessors; i++) {
+        displacements.push_back(sumDispl);
+        sumDispl += allNumProcessed[i];
+    }
+
+    summedProcessed.resize(sumDispl);
 
     MPI_Allgatherv(processed.data(), processed.size(), tripletType, summedProcessed.data(), allNumProcessed.data(),
                    displacements.data(), tripletType, simulation->GetTopology()->GetComm());
 
     bool result = true;
-
     for (std::vector<Utility::Triplet>::iterator it = summedProcessed.begin(); it != summedProcessed.end();) {
-        if (std::find(expectedTriplets.begin(), expectedTriplets.end(), *it) != expectedTriplets.end()) {
+        std::vector<Utility::Triplet>::iterator itExp =
+            std::find(expectedTriplets.begin(), expectedTriplets.end(), *it);
+        if (itExp != expectedTriplets.end()) {
             it = summedProcessed.erase(it);
+            expectedTriplets.erase(itExp);
         } else {
             // a triplet has not been calculated
             result = false;
@@ -639,8 +688,9 @@ TEST(auta, test_processed_triplets)
 
     MPI_Type_free(&tripletType);
 
-    // test if we have calculated all neccesary triplets, but not less
+    // test if we have calculated all neccesary triplets, but not less or more
     GTEST_ASSERT_EQ(summedProcessed.size(), 0);
+    GTEST_ASSERT_EQ(expectedTriplets.size(), 0);
     GTEST_ASSERT_TRUE(result);
 }
 

@@ -12,6 +12,8 @@ private:
     int rightNeighbor;
     int worldRank;
     int worldSize;
+    int b1Owner;
+    int b2Owner;
 
     std::shared_ptr<RingTopology> ringTopology;
 
@@ -31,5 +33,5 @@ public:
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 
-    int SimulationStep() override;
+    std::tuple<int, int> SimulationStep() override;
 };

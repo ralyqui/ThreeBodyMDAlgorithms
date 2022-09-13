@@ -24,8 +24,8 @@ private:
     int b2Owner;
 
     int shiftRight(std::vector<Utility::Particle>& buf, int owner);
-    void calculateOneThirdOfInteractions(int thirdID);
-    std::vector<Utility::Particle>& pickBuffer(int i);
+    int calculateOneThirdOfInteractions(int thirdID);
+    std::vector<Utility::Particle>* pickBuffer(int i);
     int& getBufOwner(int i);
     void sendBackParticles();
 
@@ -35,5 +35,5 @@ public:
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 
-    int SimulationStep() override;
+    std::tuple<int, int> SimulationStep() override;
 };

@@ -14,18 +14,17 @@ void AtomDecomposition::Init(std::shared_ptr<Simulation> simulation)
 
     int numParticles = (int)particles.size();
     int offset;
-    bool lastPartProc = false;
 
-    if (numParticles % worldSize != 0 && worldRank != worldSize - 1) {
-        numOfMyParticles = numParticles / worldSize + 1;
-        offset = worldRank * numOfMyParticles;
-    } else if (numParticles % worldSize != 0) {
-        numOfMyParticles = numParticles % (numParticles / worldSize + 1);
-        offset = worldRank * (numParticles / worldSize + 1);
-        lastPartProc = true;
+    int numProcNormal = worldSize - (numParticles % worldSize);
+    int numParticlesProcNormal = numParticles / worldSize;
+    int numParticlesLastProcs = numParticlesProcNormal + 1;
+
+    if (worldRank < numProcNormal) {
+        numOfMyParticles = numParticlesProcNormal;
+        offset = worldRank * numParticlesProcNormal;
     } else {
-        numOfMyParticles = numParticles / worldSize;
-        offset = worldRank * numOfMyParticles;
+        numOfMyParticles = numParticlesLastProcs;
+        offset = numProcNormal * numParticlesProcNormal + (worldRank - numProcNormal) * numOfMyParticles;
     }
 
     myParticles.clear();
@@ -35,11 +34,8 @@ void AtomDecomposition::Init(std::shared_ptr<Simulation> simulation)
     }
 
     // add dummy particles for padding
-    if (lastPartProc) {
-        int rest = (numParticles / worldSize + 1) - numParticles % (numParticles / worldSize + 1);
-        for (int i = 0; i < rest; ++i) {
-            myParticles.push_back(Utility::Particle(true));
-        }
+    if (worldRank < numProcNormal && (numParticles % worldSize) != 0) {
+        myParticles.push_back(Utility::Particle(true));
     }
 }
 

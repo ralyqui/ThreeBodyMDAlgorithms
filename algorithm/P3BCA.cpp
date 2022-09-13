@@ -230,11 +230,16 @@ int& P3BCA::getBufOwner(int i)
     }
 }
 
-int P3BCA::SimulationStep()
+std::tuple<int, int> P3BCA::SimulationStep()
 {
     this->simulation->GetDecomposition()->ResetForces();
 
-    int counter = 0;
+#ifdef TESTS_3BMDA
+    processed.clear();
+#endif
+
+    int numBufferInteractions = 0;
+    int numParticleInteractions = 0;
 
     std::array<int, 3> offsetVectorOuter = {0, 0, 0};
     std::array<int, 3> offsetVectorInner = {0, 0, 0};
@@ -276,9 +281,9 @@ int P3BCA::SimulationStep()
                           << "(" << b2Coords2[0] << ", " << b2Coords2[1] << ", " << b2Coords2[2] << ")" << std::endl;
             }*/
 
-            // calculateInteractions();
-            this->CalculateInteractions(this->b0, this->b1, this->b2, this->cutoff);
-            counter++;
+            numParticleInteractions += this->CalculateInteractions(this->b0, this->b1, this->b2, this->worldRank,
+                                                                   this->b1Owner, this->b2Owner, this->cutoff);
+            numBufferInteractions++;
 
 #ifdef TESTS_3BMDA
             // TESTS_3BMDA is defined
@@ -315,12 +320,11 @@ int P3BCA::SimulationStep()
 
     sendBackParticles();
 
-    // sumUpParticles();
     this->SumUpParticles(this->b0, this->b1, this->b2);
 
     // Utility::writeStepToCSV("P3BCA_Step" + std::to_string(iteration) + ".csv", *this->b0);
 
-    return counter;
+    return std::tuple(numBufferInteractions, numParticleInteractions);
 }
 
 int P3BCA::GetNumCutoffBoxes() { return this->numCutoffBoxes; }

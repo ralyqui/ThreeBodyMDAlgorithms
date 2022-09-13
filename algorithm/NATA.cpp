@@ -42,7 +42,6 @@ void NATA::calculateProcessed(int step, bool &calculate)
 
 int NATA::shiftRight(std::vector<Utility::Particle> &buf)
 {
-    // Deadlockprevention:
     // https://moodle.rrze.uni-erlangen.de/pluginfile.php/13157/mod_resource/content/1/06_MPI_Advanced.pdf Page 12
     MPI_Sendrecv_replace(buf.data(), buf.size(), *this->mpiParticleType, this->rightNeighbor, 0, this->leftNeighbor, 0,
                          this->ringTopology->GetComm(), MPI_STATUS_IGNORE);
@@ -50,7 +49,7 @@ int NATA::shiftRight(std::vector<Utility::Particle> &buf)
     return 0;
 }
 
-int NATA::SimulationStep()
+std::tuple<int, int> NATA::SimulationStep()
 {
     // reset all forces in b0 to 0
     this->simulation->GetDecomposition()->ResetForces();
@@ -59,19 +58,30 @@ int NATA::SimulationStep()
     b1 = b0;
     b2 = b0;
 
-    int counter = 0;
+    this->b1Owner = this->worldRank;
+    this->b2Owner = this->worldRank;
+
+#ifdef TESTS_3BMDA
+    processed.clear();
+#endif
+
+    int numBufferInteractions = 0;
+    int numParticleInteractions = 0;
 
     bool calculate = false;
     alreadyProcessed.clear();
     int step = 0;
     for (int i = 0; i < this->worldSize; i++) {
+        this->b1Owner = Utility::mod(this->worldRank - (step / this->worldSize), this->worldSize);
         for (int j = 0; j < this->worldSize; j++) {
+            this->b2Owner = Utility::mod(this->worldRank - step, this->worldSize);
+
             calculate = false;
             calculateProcessed(step, calculate);
             if (calculate) {
-                // calculateInteractions();
-                this->CalculateInteractions(this->b0, this->b1, this->b2);
-                counter++;
+                numParticleInteractions += this->CalculateInteractions(this->b0, this->b1, this->b2, this->worldRank,
+                                                                       this->b1Owner, this->b2Owner);
+                numBufferInteractions++;
 #ifdef TESTS_3BMDA
                 // TESTS_3BMDA is defined
                 processed.push_back(Utility::Triplet(this->worldRank,
@@ -89,10 +99,9 @@ int NATA::SimulationStep()
         }
     }
 
-    // sumUpParticles();
     this->SumUpParticles(this->b0, this->b1, this->b2);
 
     // Utility::writeStepToCSV("NATA_Step" + std::to_string(iteration) + ".csv", *this->b0);
 
-    return counter;
+    return std::tuple(numBufferInteractions, numParticleInteractions);
 }

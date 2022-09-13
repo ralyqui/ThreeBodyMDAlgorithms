@@ -11,19 +11,28 @@ void Algorithm::Init(std::shared_ptr<Simulation> simulation)
     this->potential = this->simulation->GetPotential();
 }
 
-void Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
-                                      std::vector<Utility::Particle> &b2, double cutoff)
+int Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                                     std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner,
+                                     int b0Start, int b0NumSteps, double cutoff)
 {
+    int counter = 0;
     double sqrCutoff = cutoff * cutoff;
-    for (size_t i = 0; i < b0.size(); ++i) {
+    for (size_t i = b0Start; i < (b0NumSteps != -1 ? (size_t)b0NumSteps : b0.size()); ++i) {
         if (b0[i].isDummy) {
             continue;
         }
-        for (size_t j = 0; j < b1.size(); ++j) {
+        int b1LoopIndex = b1Owner == b0Owner ? i + 1 : 0;
+        for (size_t j = b1LoopIndex; j < b1.size(); ++j) {
             if (b1[j].isDummy) {
                 continue;
             }
-            for (size_t k = 0; k < b2.size(); ++k) {
+            int b2LoopIndex = 0;
+            if (b2Owner == b1Owner) {
+                b2LoopIndex = j + 1;
+            } else if (b2Owner == b0Owner) {
+                b2LoopIndex = i + 1;
+            }
+            for (size_t k = b2LoopIndex; k < b2.size(); ++k) {
                 if (b2[k].isDummy) {
                     continue;
                 }
@@ -31,16 +40,15 @@ void Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::v
                 if (cutoff > 0) {
                     if (b0[i].GetSqrDist(b1[j]) > sqrCutoff || b0[i].GetSqrDist(b2[k]) > sqrCutoff ||
                         b1[j].GetSqrDist(b2[k]) > sqrCutoff) {
-                        // std::cout << "do not calculate, cutoff: " << cutoff << ", dist0: " << b0[i].GetDist(b1[j])
-                        //          << ", dist1: " << b0[i].GetDist(b2[k]) << ", dist2: " << b1[j].GetDist(b2[k])
-                        //          << std::endl;
                         continue;
                     }
                 }
                 this->potential->CalculateForces(b0[i], b1[j], b2[k]);
+                counter++;
             }
         }
     }
+    return counter;
 }
 
 // void __attribute__((optimize("O0"))) P3BCA::sumUpParticles()

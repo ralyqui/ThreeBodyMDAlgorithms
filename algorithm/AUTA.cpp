@@ -25,7 +25,6 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
 {
     MPI_Status status;
 
-    // Deadlockprevention:
     // https://moodle.rrze.uni-erlangen.de/pluginfile.php/13157/mod_resource/content/1/06_MPI_Advanced.pdf Page 12
     MPI_Sendrecv_replace(buf.data(), buf.size(), *this->mpiParticleType, this->rightNeighbor, owner, this->leftNeighbor,
                          MPI_ANY_TAG, this->ringTopology->GetComm(), &status);
@@ -33,7 +32,7 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
     return status.MPI_TAG;
 }
 
-void AUTA::calculateOneThirdOfInteractions(int thirdID)
+int AUTA::calculateOneThirdOfInteractions(int thirdID)
 {
     std::vector<Utility::Particle>* b0Sorted = nullptr;
     std::vector<Utility::Particle>* b1Sorted = nullptr;
@@ -80,7 +79,10 @@ void AUTA::calculateOneThirdOfInteractions(int thirdID)
         numSteps += b0Sorted->size() % 3;
     }
 
-    for (int i = start; i < numSteps; ++i) {
+    return this->CalculateInteractions(*b0Sorted, *b1Sorted, *b2Sorted, this->b0Owner, this->b1Owner, this->b2Owner,
+                                       start, numSteps);
+
+    /*for (int i = start; i < numSteps; ++i) {
         if ((*b0Sorted)[i].isDummy) {
             continue;
         }
@@ -96,15 +98,15 @@ void AUTA::calculateOneThirdOfInteractions(int thirdID)
                 this->potential->CalculateForces((*b0Sorted)[i], (*b2Sorted)[j], (*b2Sorted)[k]);
             }
         }
-    }
+    }*/
 }
 
-std::vector<Utility::Particle>& AUTA::pickBuffer(int i)
+std::vector<Utility::Particle>* AUTA::pickBuffer(int i)
 {
     switch (i) {
-        case 0: return this->b0; break;
-        case 1: return this->b1; break;
-        case 2: return this->b2; break;
+        case 0: return &this->b0; break;
+        case 1: return &this->b1; break;
+        case 2: return &this->b2; break;
 
         default: exit(1);
     }
@@ -189,7 +191,7 @@ void AUTA::sendBackParticles()
     this->b2Owner = this->worldRank;
 }
 
-int AUTA::SimulationStep()
+std::tuple<int, int> AUTA::SimulationStep()
 {
     // reset all forces in b0 to 0
     this->simulation->GetDecomposition()->ResetForces();
@@ -198,39 +200,47 @@ int AUTA::SimulationStep()
     b1 = b0;
     b2 = b0;
 
-    int i = 2;
-    std::vector<Utility::Particle>& bi = pickBuffer(i);
+    this->b0Owner = this->worldRank;
+    this->b1Owner = this->worldRank;
+    this->b2Owner = this->worldRank;
 
-    int counter = 0;
+    int i = 2;
+    std::vector<Utility::Particle>* bi = pickBuffer(i);
+
+    int numBufferInteractions = 0;
+    int numParticleInteractions = 0;
+
+#ifdef TESTS_3BMDA
+    processed.clear();
+#endif
 
     for (int s = this->worldSize; s > 0; s -= 3) {
         for (int j = 0; j < s; ++j) {
             if (j != 0 || s != this->worldSize) {
-                getBufOwner(i) = shiftRight(bi, getBufOwner(i));
+                getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
             }
-            // calculateInteractions();
-            this->CalculateInteractions(this->b0, this->b1, this->b2);
-            counter++;
+            numParticleInteractions +=
+                this->CalculateInteractions(this->b0, this->b1, this->b2, this->b0Owner, this->b1Owner, this->b2Owner);
+            numBufferInteractions++;
 #ifdef TESTS_3BMDA
             // TESTS_3BMDA is defined
-            processed.push_back(Utility::Triplet(this->worldRank, getBufOwner(1), getBufOwner(2)));
+            processed.push_back(Utility::Triplet(this->b0Owner, this->b1Owner, this->b2Owner));
 #endif
         }
         i = (i + 1) % 3;
         bi = pickBuffer(i);
-        // if (this->worldRank == 0) std::cout << "s: " << s << std::endl;
     }
     if (this->worldSize % 3 == 0) {
-        getBufOwner(i) = shiftRight(bi, getBufOwner(i));
+        getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
 
         int thirdID = this->worldRank / (this->worldSize / 3);
 
         // Calculate one third of the interactions
-        counter++;
-        calculateOneThirdOfInteractions(thirdID);
+        numBufferInteractions++;
+        numParticleInteractions += calculateOneThirdOfInteractions(thirdID);
 #ifdef TESTS_3BMDA
         // TESTS_3BMDA is defined
-        processed.push_back(Utility::Triplet(this->worldRank, getBufOwner(1), getBufOwner(2)));
+        processed.push_back(Utility::Triplet(getBufOwner(0), getBufOwner(1), getBufOwner(2)));
 #endif
     }
 
@@ -240,10 +250,9 @@ int AUTA::SimulationStep()
     }
 
     // sum up particles
-    // sumUpParticles();
     this->SumUpParticles(this->b0, this->b1, this->b2);
 
     // Utility::writeStepToCSV("AUTA_Step" + std::to_string(iteration) + ".csv", this->b0);
 
-    return counter;
+    return std::tuple(numBufferInteractions, numParticleInteractions);
 }

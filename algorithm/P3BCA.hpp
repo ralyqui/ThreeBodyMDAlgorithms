@@ -39,7 +39,7 @@ public:
 
     void Init(std::shared_ptr<Simulation> simulation) override;
 
-    int SimulationStep() override;
+    std::tuple<int, int> SimulationStep() override;
     int SimulationStepNew();
     int SimulationStepNewNew();
     int GetNumCutoffBoxes();

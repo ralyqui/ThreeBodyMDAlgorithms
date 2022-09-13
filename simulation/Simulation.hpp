@@ -15,7 +15,7 @@ private:
     std::vector<Utility::Particle>& particles;
     double dt;
     Eigen::Vector3d gForce;
-    std::vector<int> numInteractions;
+    std::vector<std::tuple<int, int>> numInteractions;
 
 public:
     Simulation(int iterations, std::shared_ptr<Algorithm> algorithm, std::shared_ptr<Topology> topology,
@@ -35,7 +35,8 @@ public:
     std::vector<Utility::Particle>& GetAllParticles();
     double GetDeltaT();
     int GetNumIterations();
-    int GetNumInteractions(int step);
+    int GetNumBufferInteractions(int step);
+    int GetNumParticleInteractions(int step);
 
     Eigen::Vector3d GetGForce();
 };
