@@ -15,6 +15,14 @@
 #include "topology/RingTopology.hpp"
 #include "utility/cli.hpp"
 
+#ifdef PROFILE_3BMDA
+#include <numeric>
+
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+#endif
+
 Utility::cliArguments a;
 std::vector<Utility::Particle> particles;
 MPI_Datatype mpiParticleType;
@@ -94,6 +102,36 @@ std::shared_ptr<Simulation> createAUTAContext()
     return simulation;
 }
 
+#ifdef PROFILE_3BMDA
+void doTimingStuff(std::shared_ptr<Simulation> simulation)
+{
+    std::map<std::string, std::vector<std::chrono::nanoseconds>> times = simulation->GetAlgorithm()->GetTimes();
+    int numTimes = times["SumUpParticles"].size();
+    std::vector<int64_t> accTimes;
+    accTimes.resize(numTimes);
+    MPI_Reduce(times["SumUpParticles"].data(), accTimes.data(), numTimes, MPI_INT64_T, MPI_SUM, 0,
+               simulation->GetTopology()->GetComm());
+    int sum = std::accumulate(accTimes.begin(), accTimes.end(), 0);
+    double avgTime =
+        (double)sum / ((double)simulation->GetTopology()->GetWorldSize() * (double)simulation->GetNumIterations());
+    if (simulation->GetTopology()->GetWorldRank() == 0) {
+        rapidjson::Document d;
+        d.SetObject();
+        rapidjson::Value o(rapidjson::kObjectType);
+        rapidjson::Value times(rapidjson::kArrayType);
+        times.PushBack(rapidjson::Value(avgTime), d.GetAllocator());
+        o.AddMember("SumUpParticles", times, d.GetAllocator());
+        d.AddMember("times", o, d.GetAllocator());
+
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+        d.Accept(writer);
+
+        std::cout << buffer.GetString() << std::endl;
+    }
+}
+#endif
+
 int main(int argc, char *argv[])
 {
     // init MPI
@@ -128,6 +166,10 @@ int main(int argc, char *argv[])
 
     // execute simulation
     simulation->Start();
+
+#ifdef PROFILE_3BMDA
+    doTimingStuff(simulation);
+#endif
 
     // finalize
     MPI_Type_free(&mpiParticleType);

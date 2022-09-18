@@ -4,7 +4,7 @@
 
 class CartTopology final : public Topology {
 protected:
-    int dims[3] = {8, 8, 8};
+    int dims[3];
     int periods[3] = {1, 1, 1};
     std::tuple<int, int, int> cartRank;
 

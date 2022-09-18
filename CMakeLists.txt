@@ -28,8 +28,15 @@ target_include_directories(main PRIVATE utility algorithm decomposition
 target_link_libraries(main ${MPI_C_LIBRARIES})
 target_link_libraries(main Eigen3::Eigen)
 
+if(PROFILE_3BMDA)
+  target_compile_definitions(main PUBLIC PROFILE_3BMDA)
+endif()
+
 set_target_properties(main PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                       ${CMAKE_BINARY_DIR}/executables)
+
+target_include_directories(
+  main PUBLIC ${CMAKE_SOURCE_DIR}/src/external/rapidjson/include)
 
 # TESTS
 

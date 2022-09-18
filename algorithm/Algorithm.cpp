@@ -55,6 +55,11 @@ int Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::ve
 void Algorithm::SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                                std::vector<Utility::Particle> &b2)
 {
+#ifdef PROFILE_3BMDA
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
+#endif
     for (size_t i = 0; i < b0.size(); i++) {
         b0[i].fX += b1[i].fX + b2[i].fX;
         b0[i].fY += b1[i].fY + b2[i].fY;
@@ -72,8 +77,21 @@ void Algorithm::SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<U
         b0[i].fZ = v0.get_z();
         */
     }
+#ifdef PROFILE_3BMDA
+    end = std::chrono::system_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    bool hasKey = this->times.count("SumUpParticles");
+    if (!hasKey) {
+        this->times["SumUpParticles"] = std::vector<std::chrono::nanoseconds>();
+    }
+    this->times["SumUpParticles"].push_back(elapsed_time);
+#endif
 }
 
 #ifdef TESTS_3BMDA
 std::vector<Utility::Triplet> Algorithm::GetProcessed() { return this->processed; }
+#endif
+
+#ifdef PROFILE_3BMDA
+std::map<std::string, std::vector<std::chrono::nanoseconds>> Algorithm::GetTimes() { return this->times; }
 #endif

@@ -2,6 +2,10 @@
 
 #include <memory>
 
+//#ifdef PROFILE_3BMDA
+#include <chrono>
+//#endif
+
 #include "../decomposition/DomainDecomposition.hpp"
 #include "../fwd.hpp"
 #include "../potential/Potential.hpp"
@@ -21,6 +25,10 @@ protected:
     std::vector<Utility::Triplet> processed;
 #endif
 
+#ifdef PROFILE_3BMDA
+    std::map<std::string, std::vector<std::chrono::nanoseconds>> times;
+#endif
+
 public:
     Algorithm();
     virtual ~Algorithm();
@@ -36,5 +44,8 @@ public:
 
 #ifdef TESTS_3BMDA
     std::vector<Utility::Triplet> GetProcessed();
+#endif
+#ifdef PROFILE_3BMDA
+    std::map<std::string, std::vector<std::chrono::nanoseconds>> GetTimes();
 #endif
 };
