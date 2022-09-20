@@ -33,33 +33,14 @@ namespace Utility
         }
     }
 
-    /*void calculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
-                               std::vector<Utility::Particle> &b2, std::shared_ptr<Potential> potential)
-    {
-        for (size_t i = 0; i < b0.size(); ++i) {
-            if (b0[i].isDummy) {
-                continue;
-            }
-            for (size_t j = 0; j < b1.size(); ++j) {
-                if (b1[j].isDummy) {
-                    continue;
-                }
-                for (size_t k = 0; k < b2.size(); ++k) {
-                    if (b2[k].isDummy) {
-                        continue;
-                    }
-                    double u = potential->CalculatePotential(b0[i], b1[j], b2[k]);
-                }
-            }
-        }
-    }*/
-
     void writeStepToCSV(std::string file, std::vector<Particle> &particles)
     {
         std::ofstream csvFile;
         csvFile.open(file);
         csvFile << "pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m\n";
+        // std::cout << particles.size();
         for (size_t i = 0; i < particles.size(); i++) {
+            if (particles[i].isDummy) continue;
             csvFile << particles[i].pX << ", " << particles[i].pY << ", " << particles[i].pZ << ", " << particles[i].vX
                     << ", " << particles[i].vY << ", " << particles[i].vZ << ", " << particles[i].aX << ", "
                     << particles[i].aY << ", " << particles[i].aZ << ", " << particles[i].mass << "\n";

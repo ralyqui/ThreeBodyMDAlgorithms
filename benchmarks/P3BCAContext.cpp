@@ -27,8 +27,12 @@ void P3BCAContext::Init(ContextArgs args)
 
 void P3BCAContext::AfterBench(benchmark::State &state __attribute__((unused)))
 {
-    state.counters["cutoff_window"] =
+    std::array<int, 3> cutoffBoxes =
         std::static_pointer_cast<P3BCA>(this->simulation->GetAlgorithm())->GetNumCutoffBoxes();
+    state.counters["cutoff_window_x"] = cutoffBoxes[0];
+    state.counters["cutoff_window_y"] = cutoffBoxes[1];
+    state.counters["cutoff_window_z"] = cutoffBoxes[2];
+    std::static_pointer_cast<P3BCA>(this->simulation->GetAlgorithm())->GetNumCutoffBoxes();
     state.counters["cutoff_specified"] = std::static_pointer_cast<P3BCA>(this->simulation->GetAlgorithm())->GetCutoff();
 }
 

@@ -19,6 +19,8 @@ void AtomDecomposition::Init(std::shared_ptr<Simulation> simulation)
     int numParticlesProcNormal = numParticles / worldSize;
     int numParticlesLastProcs = numParticlesProcNormal + 1;
 
+    int numOfMyParticles;
+
     if (worldRank < numProcNormal) {
         numOfMyParticles = numParticlesProcNormal;
         offset = worldRank * numParticlesProcNormal;

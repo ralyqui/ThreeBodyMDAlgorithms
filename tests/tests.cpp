@@ -21,7 +21,7 @@ std::vector<Utility::Particle> clusteredgaussParticles;
 void generateParticles()
 {
     int numParticles = 1000;
-    std::array<double, 3> velocity = {0, -0.1, 0};
+    std::array<double, 3> velocity = {0, 0, 0};
     std::array<double, 3> boxLength = {10, 10, 10};
     std::array<double, 3> bottomLeftCorner = {0, 0, 0};
     double mass = 0.0001;
@@ -216,7 +216,6 @@ Eigen::Array3i periodicDistanceA3i(Eigen::Array3i x, Eigen::Array3i y, int dim)
 }
 
 bool vLtS(Eigen::Array3i v, int scalar) { return (v.x() <= scalar) && (v.y() <= scalar) && (v.z() <= scalar); }
-bool vLtS2(int scalar, Eigen::Array3i v) { return scalar <= (v.x()) && (scalar <= v.y()) && (scalar <= v.z()); }
 
 bool vLtV(Eigen::Array3i x, Eigen::Array3i y)
 {
@@ -245,13 +244,13 @@ int periodicDiff(int x, int y, int dim)
     return (abs(x - y) <= (dim / 2)) ? (x - y) : (sgn(y - x) * periodicDistance(x, y, dim));
 }
 
-Eigen::Array3i periodicDiffA3i(Eigen::Array3i x, Eigen::Array3i y, int dim)
+Eigen::Array3i periodicDiffA3i(Eigen::Array3i x, Eigen::Array3i y, std::array<int, 3> dim)
 {
-    return Eigen::Array3i(periodicDiff(x.x(), y.x(), dim), periodicDiff(x.y(), y.y(), dim),
-                          periodicDiff(x.z(), y.z(), dim));
+    return Eigen::Array3i(periodicDiff(x.x(), y.x(), dim[0]), periodicDiff(x.y(), y.y(), dim[1]),
+                          periodicDiff(x.z(), y.z(), dim[2]));
 }
 
-bool customLt(Eigen::Array3i r, Eigen::Array3i u, Eigen::Array3i v, int dim)
+bool customLt(Eigen::Array3i r, Eigen::Array3i u, Eigen::Array3i v, std::array<int, 3> dim)
 {
     Eigen::Vector3i diff0 = periodicDiffA3i(u, r, dim);
     Eigen::Vector3i diff1 = periodicDiffA3i(v, r, dim);
@@ -273,15 +272,15 @@ std::vector<Eigen::Array3i> getIntersectedCutoofWindow(std::vector<Eigen::Array3
     return intersected;
 }
 
-void p3bca(std::vector<std::tuple<std::tuple<int, int, int>, std::vector<CartRankTriplet>>>& interactions, int dim,
-           int b)
+void p3bca(std::vector<std::tuple<std::tuple<int, int, int>, std::vector<CartRankTriplet>>>& interactions,
+           std::array<int, 3> dims, std::array<int, 3> cutoffBoxes)
 {
     std::vector<std::tuple<Eigen::Array3i, std::vector<Eigen::Array3i>>> U;  // all processor ranks and cutoffwindows
 
     // generate all processor ranks
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < dim; j++) {
-            for (int k = 0; k < dim; k++) {
+    for (int i = 0; i < dims[0]; i++) {
+        for (int j = 0; j < dims[1]; j++) {
+            for (int k = 0; k < dims[2]; k++) {
                 U.push_back(std::make_tuple<Eigen::Array3i, std::vector<Eigen::Array3i>>(
                     Eigen::Array3i(i, j, k), std::vector<Eigen::Array3i>()));
             }
@@ -291,9 +290,9 @@ void p3bca(std::vector<std::tuple<std::tuple<int, int, int>, std::vector<CartRan
     // generate all cutoff windows of all processors
     for (std::tuple<Eigen::Array3i, std::vector<Eigen::Array3i>>& r0 : U) {
         for (std::tuple<Eigen::Array3i, std::vector<Eigen::Array3i>>& r1 : U) {
-            if (periodicDistance(std::get<0>(r1).x(), std::get<0>(r0).x(), dim) <= b &&
-                periodicDistance(std::get<0>(r1).y(), std::get<0>(r0).y(), dim) <= b &&
-                periodicDistance(std::get<0>(r1).z(), std::get<0>(r0).z(), dim) <= b) {
+            if (periodicDistance(std::get<0>(r1).x(), std::get<0>(r0).x(), dims[0]) <= cutoffBoxes[0] &&
+                periodicDistance(std::get<0>(r1).y(), std::get<0>(r0).y(), dims[1]) <= cutoffBoxes[1] &&
+                periodicDistance(std::get<0>(r1).z(), std::get<0>(r0).z(), dims[2]) <= cutoffBoxes[2]) {
                 std::get<1>(r0).push_back(std::get<0>(r1));
             }
         }
@@ -308,7 +307,7 @@ void p3bca(std::vector<std::tuple<std::tuple<int, int, int>, std::vector<CartRan
         std::vector<Eigen::Array3i>& w_i = std::get<1>(rw);
         interactions.push_back(std::make_tuple(std::make_tuple(r.x(), r.y(), r.z()), std::vector<CartRankTriplet>()));
         for (Eigen::Array3i& i_2 : w_i) {
-            if (customLt(r, r, i_2, dim)) {
+            if (customLt(r, r, i_2, dims)) {
                 std::vector<Eigen::Array3i> w_2;
                 for (std::tuple<Eigen::Array3i, std::vector<Eigen::Array3i>>& rw_2 : U) {
                     if ((std::get<0>(rw_2) == i_2).all()) {
@@ -319,7 +318,7 @@ void p3bca(std::vector<std::tuple<std::tuple<int, int, int>, std::vector<CartRan
 
                 std::vector<Eigen::Array3i> w_r_i2 = getIntersectedCutoofWindow(w_i, w_2);
                 for (Eigen::Array3i& i_3 : w_r_i2) {
-                    if (customLt(r, i_2, i_3, dim)) {
+                    if (customLt(r, i_2, i_3, dims)) {
                         // interact my particles
                         std::get<1>(interactions.back())
                             .push_back(CartRankTriplet(r.x(), r.y(), r.z(), i_2.x(), i_2.y(), i_2.z(), i_3.x(), i_3.y(),
@@ -347,81 +346,59 @@ std::vector<Utility::Triplet> generateAllUniqueTriplets(int numProc)
     return triplets;
 }
 
-int numInteractionsP3BCA(int b)
-{
-    int result = 0;
-    int bP = b + 1;
-    int factor = bP;
-    int numBoxes = bP;
-
-    for (int i = 0; i < bP; i++) {
-        for (int j = 0; j < bP; j++) {
-            for (int k = 0; k < bP; k++) {
-                int sum = 0;
-                for (int l = k; l < bP; l++) {
-                    sum += numBoxes;
-                }
-                result += sum * factor;
-            }
-            numBoxes--;
-        }
-        factor--;
-        numBoxes = bP;
-    }
-
-    return result;
-}
-
 /**
- * @brief Test the Atom Decomposition if we have the same particles in each step
+ * @brief Test the Atom Decomposition if we have the same particles in each step without simulationstep and without
+ * gravity
  *
  */
-TEST(nata, test_topology)
+TEST(nata, test_decomposition)
 {
     std::shared_ptr<Simulation> simulation = createNATAContext(0, 0.001, Eigen::Vector3d(0, 0, 0));
     simulation->Init();
 
-    int myParticlesOldSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
 
-    int myParticlesNewSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     GTEST_ASSERT_EQ(myParticlesOldSize, myParticlesNewSize);
 }
 
 /**
- * @brief Test the Atom Decomposition if we have the same particles in each step
+ * @brief Test the Atom Decomposition if we have the same particles in each step without simulationstep and without
+ * gravity
  *
  */
-TEST(auta, test_topology)
+TEST(auta, test_decomposition)
 {
     std::shared_ptr<Simulation> simulation = createAUTAContext(0, 0.001, Eigen::Vector3d(0, 0, 0));
     simulation->Init();
 
-    int myParticlesOldSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
 
-    int myParticlesNewSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     GTEST_ASSERT_EQ(myParticlesOldSize, myParticlesNewSize);
 }
 
 /**
- * @brief Test the Atom Decomposition if we have the same particles in each step
+ * @brief Test the Grid Decomposition if we have the same particles in each step without simulationstep and without
+ * gravity
  *
  */
-TEST(p3bca, test_topology)
+TEST(p3bca, test_decomposition)
 {
-    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 0.001, Eigen::Vector3d(0, 0, 0), 0.5);
+    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 1., Eigen::Vector3d(0, 0, 0), 0.5);
     simulation->Init();
 
-    int myParticlesOldSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
 
-    int myParticlesNewSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     GTEST_ASSERT_EQ(myParticlesOldSize, myParticlesNewSize);
 }
@@ -430,19 +407,19 @@ TEST(p3bca, test_topology)
  * @brief Test the Atom Decomposition if we have the same particles in each step with one simulation step
  *
  */
-TEST(nata, test_topology_with_step)
+TEST(nata, test_decomposition_with_step)
 {
     std::shared_ptr<Simulation> simulation = createNATAContext(0, 0.001, Eigen::Vector3d(0, 0, 0));
     simulation->Init();
 
-    int myParticlesOldSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     simulation->GetAlgorithm()->SimulationStep();
     MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
     MPI_Barrier(simulation->GetTopology()->GetComm());
 
-    int myParticlesNewSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     GTEST_ASSERT_EQ(myParticlesOldSize, myParticlesNewSize);
 }
@@ -451,40 +428,40 @@ TEST(nata, test_topology_with_step)
  * @brief Test the Atom Decomposition if we have the same particles in each step with one simulation step
  *
  */
-TEST(auta, test_topology_with_step)
+TEST(auta, test_decomposition_with_step)
 {
     std::shared_ptr<Simulation> simulation = createAUTAContext(0, 0.001, Eigen::Vector3d(0, 0, 0));
     simulation->Init();
 
-    int myParticlesOldSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     simulation->GetAlgorithm()->SimulationStep();
     MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
     MPI_Barrier(simulation->GetTopology()->GetComm());
 
-    int myParticlesNewSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     GTEST_ASSERT_EQ(myParticlesOldSize, myParticlesNewSize);
 }
 
 /**
- * @brief Test the Atom Decomposition if we have the same particles in each step
+ * @brief Test the Grid Decomposition if we have the same particles in each step
  *
  */
-TEST(p3bca, test_topology_with_step)
+TEST(p3bca, test_decomposition_with_step)
 {
-    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 0.001, Eigen::Vector3d(0, 0, 0), 0.5);
+    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 1., Eigen::Vector3d(0, -9.81, 0), 0.5);
     simulation->Init();
 
-    int myParticlesOldSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     simulation->GetAlgorithm()->SimulationStep();
     MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
     MPI_Barrier(simulation->GetTopology()->GetComm());
 
-    int myParticlesNewSize = (*simulation->GetDecomposition()->GetMyParticles()).size();
+    int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
 
     GTEST_ASSERT_EQ(myParticlesOldSize, myParticlesNewSize);
 }
@@ -719,7 +696,9 @@ TEST(p3bca, test_processed_triplets)
     // calculate all triplets that have to be processed
     std::vector<std::tuple<std::tuple<int, int, int>, std::vector<CartRankTriplet>>> expectedTriplets;
 
-    p3bca(expectedTriplets, decomposition->GetDim(), algorithm->GetNumCutoffBoxes());
+    p3bca(expectedTriplets,
+          std::array<int, 3>({decomposition->GetDimX(), decomposition->GetDimY(), decomposition->GetDimZ()}),
+          algorithm->GetNumCutoffBoxes());
 
     std::vector<Utility::Triplet> processed = simulation->GetAlgorithm()->GetProcessed();
 
@@ -741,7 +720,8 @@ TEST(p3bca, test_processed_triplets)
     std::tuple<std::tuple<int, int, int>, std::vector<CartRankTriplet>> expectedOfMyRank;
     for (auto e : expectedTriplets) {
         auto eRank = std::get<0>(e);
-        auto myRank = topology->GetCartRank();
+        std::array<int, 3UL> cR = topology->GetCartRank().GetRank();
+        auto myRank = std::make_tuple(cR[0], cR[1], cR[2]);
         if (eRank == myRank) {
             expectedOfMyRank = e;
             break;
@@ -770,7 +750,9 @@ TEST(p3bca, test_processed_triplets)
     redCount = 0;
     std::vector<CartRankTriplet> allExpected;
     for (auto& e : expectedTriplets) {
-        if (std::get<0>(e) != topology->GetCartRank()) {
+        std::array<int, 3UL> cR = topology->GetCartRank().GetRank();
+        auto myRank = std::make_tuple(cR[0], cR[1], cR[2]);
+        if (std::get<0>(e) != myRank) {
             auto expected = std::get<1>(e);
             allExpected.insert(allExpected.end(), expected.begin(), expected.end());
         }
@@ -781,7 +763,8 @@ TEST(p3bca, test_processed_triplets)
 
         for (size_t j = 0; j < expectedTriplets.size(); j++) {
             auto eRank = std::get<0>(expectedTriplets[j]);
-            auto myRank = topology->GetCartRank();
+            std::array<int, 3UL> cR = topology->GetCartRank().GetRank();
+            auto myRank = std::make_tuple(cR[0], cR[1], cR[2]);
             if (eRank != myRank) {
                 for (auto& e : std::get<1>(expectedTriplets[j])) {
                     if (e == t0) {

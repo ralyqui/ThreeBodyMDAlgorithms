@@ -46,6 +46,10 @@ namespace Utility
             Eigen::Vector3d f(fX, fY, fZ);
 
             Eigen::Vector3d newPos = pos + vel * dt + acc * (dt * dt * 0.5);
+            // std::cout << "(" << vel[0] << ", " << vel[1] << ", " << vel[2] << "), ";
+            // std::cout << "(" << acc[0] << ", " << acc[1] << ", " << acc[2] << "), ";
+            // std::cout << "(" << pos[0] << ", " << pos[1] << ", " << pos[2] << "), ";
+            // std::cout << "(" << newPos[0] << ", " << newPos[1] << ", " << newPos[2] << ")\n----------" << std::endl;
 
             Eigen::Vector3d dragForce = 0.5 * f.cwiseProduct(vel.cwiseProduct(vel.cwiseAbs()));
             Eigen::Vector3d dragAcc = dragForce / mass;
@@ -56,6 +60,8 @@ namespace Utility
             pX = newPos.x();
             pY = newPos.y();
             pZ = newPos.z();
+
+            // std::cout << "(" << pX << ", " << pY << ", " << pZ << ")\n----------" << std::endl;
 
             vX = newVel.x();
             vY = newVel.y();

@@ -27,7 +27,7 @@ Utility::cliArguments a;
 std::vector<Utility::Particle> particles;
 MPI_Datatype mpiParticleType;
 
-std::shared_ptr<Simulation> createNATAContext()
+std::shared_ptr<Simulation> createNATAContext(std::string csvOut)
 {
     // create topology
     std::shared_ptr<RingTopology> ringTopology = std::make_shared<RingTopology>();
@@ -48,11 +48,11 @@ std::shared_ptr<Simulation> createNATAContext()
     // Eigen::Vector3d gForce
     std::shared_ptr<Simulation> simulation =
         std::make_shared<Simulation>(a.iterations, nata, ringTopology, axilrodTeller, atomDecomposition,
-                                     &mpiParticleType, particles, a.deltaT, a.gForce);
+                                     &mpiParticleType, particles, a.deltaT, a.gForce, csvOut);
     return simulation;
 }
 
-std::shared_ptr<Simulation> createP3BCAContext()
+std::shared_ptr<Simulation> createP3BCAContext(std::string csvOut)
 {
     // create topology
     std::shared_ptr<CartTopology> cartTopology = std::make_shared<CartTopology>();
@@ -73,11 +73,11 @@ std::shared_ptr<Simulation> createP3BCAContext()
     // Eigen::Vector3d gForce
     std::shared_ptr<Simulation> simulation =
         std::make_shared<Simulation>(a.iterations, p3bca, cartTopology, axilrodTeller, regularGridDecomposition,
-                                     &mpiParticleType, particles, a.deltaT, a.gForce);
+                                     &mpiParticleType, particles, a.deltaT, a.gForce, csvOut);
     return simulation;
 }
 
-std::shared_ptr<Simulation> createAUTAContext()
+std::shared_ptr<Simulation> createAUTAContext(std::string csvOut)
 {
     // create topology
     std::shared_ptr<RingTopology> ringTopology = std::make_shared<RingTopology>();
@@ -98,7 +98,7 @@ std::shared_ptr<Simulation> createAUTAContext()
     // Eigen::Vector3d gForce
     std::shared_ptr<Simulation> simulation =
         std::make_shared<Simulation>(a.iterations, auta, ringTopology, axilrodTeller, atomDecomposition,
-                                     &mpiParticleType, particles, a.deltaT, a.gForce);
+                                     &mpiParticleType, particles, a.deltaT, a.gForce, csvOut);
     return simulation;
 }
 
@@ -156,10 +156,10 @@ int main(int argc, char *argv[])
     std::shared_ptr<Simulation> simulation;
 
     switch (a.algorithm) {
-        case AlgorithmType::NATAType: simulation = createNATAContext(); break;
-        case AlgorithmType::P3BCAType: simulation = createP3BCAContext(); break;
-        case AlgorithmType::AUTAType: simulation = createAUTAContext(); break;
-        default: simulation = createNATAContext(); break;
+        case AlgorithmType::NATAType: simulation = createNATAContext(a.outputCSV); break;
+        case AlgorithmType::P3BCAType: simulation = createP3BCAContext(a.outputCSV); break;
+        case AlgorithmType::AUTAType: simulation = createAUTAContext(a.outputCSV); break;
+        default: simulation = createNATAContext(a.outputCSV); break;
     }
 
     simulation->Init();

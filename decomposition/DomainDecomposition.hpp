@@ -12,7 +12,6 @@ class DomainDecomposition {
 protected:
     std::shared_ptr<Simulation> simulation;
     std::vector<Utility::Particle> myParticles;
-    int numOfMyParticles;
 
     void updateMyParticles(double dt, Eigen::Vector3d gForce);
 
@@ -24,6 +23,7 @@ public:
 
     virtual void Update(double dt, Eigen::Vector3d gForce) = 0;
     void ResetForces();
-    std::vector<Utility::Particle>* GetMyParticles();
-    int GetNumParticles();
+    std::vector<Utility::Particle> GetMyParticles();
+    void SetMyParticles(std::vector<Utility::Particle> &particles);
+    int GetNumOfMyParticles();
 };

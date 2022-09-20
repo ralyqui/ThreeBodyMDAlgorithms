@@ -9,7 +9,7 @@ private:
     double cutoff;
     int worldRank;
     // int numCutoffBoxes;
-    // int dim;
+    int numDims;
     int dimX;
     int dimY;
     int dimZ;
@@ -32,30 +32,45 @@ private:
 
     void calcSteps(int dimension);
 
+    int shiftLeft(std::vector<Utility::Particle>& buf, int owner, int& nextSrcRank, int& nextDstRank, int& offsetVector,
+                  int& diff);
+    int shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<int, 2>& nextSrcRank,
+                  std::array<int, 2>& nextDstRank, std::array<int, 2>& offsetVector, std::array<int, 2>& diff);
     int shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<int, 3>& nextSrcRank,
                   std::array<int, 3>& nextDstRank, std::array<int, 3>& offsetVector, std::array<int, 3>& diff);
-    void handleOffsetVector3D(int owner, std::array<int, 3>& nextSrcRank, std::array<int, 3>& nextDstRank,
-                              std::array<int, 3>& offsetVector, std::array<int, 3>& diff, std::array<int, 3>& coordsSrc,
-                              std::array<int, 3>& coordsDst);
+    int mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int dst);
 
     void sendBackParticles();
 
     int& getBufOwner(int i);
 
+    // 1D
     void schedule1D(int i, int& myCartRank, int& src);
     void calcDestFromSrc1D(int& myCartRank, int& src, int& dst);
+    void schedule1DHelper(int i2, int i3, int& cartRank, int& src, int& dst, int& diff);
+    void calcDiff1D(int& cartRank, int& src, int& diff, int i);
+    void handleOffsetVector1D(int owner, int& nextSrcRank, int& nextDstRank, int& offsetVector, int& diff,
+                              int& coordsSrc, int& coordsDst);
 
+    // 2D
     void schedule2D(int i, std::array<int, 2>& myCartRank, std::array<int, 2>& src);
     void calcDestFromSrc2D(std::array<int, 2>& myCartRank, std::array<int, 2>& src, std::array<int, 2>& dst);
     void schedule2DHelper(int i2, int& i3, std::array<int, 2>& cartRank, std::array<int, 2>& src,
                           std::array<int, 2>& dst, std::array<int, 2>& diff);
     void calcDiff2D(std::array<int, 2>& cartRank, std::array<int, 2>& src, std::array<int, 2>& diff, int i);
+    void handleOffsetVector2D(int owner, std::array<int, 2>& nextSrcRank, std::array<int, 2>& nextDstRank,
+                              std::array<int, 2>& offsetVector, std::array<int, 2>& diff, std::array<int, 2>& coordsSrc,
+                              std::array<int, 2>& coordsDst);
 
+    // 3D
     void schedule3D(int i, std::array<int, 3>& myCartRank, std::array<int, 3>& src);
     void calcDestFromSrc3D(std::array<int, 3>& myCartRank, std::array<int, 3>& src, std::array<int, 3>& dst);
     void schedule3DHelper(int i2, int& i3, std::array<int, 3>& cartRank, std::array<int, 3>& src,
                           std::array<int, 3>& dst, std::array<int, 3>& diff);
     void calcDiff3D(std::array<int, 3>& cartRank, std::array<int, 3>& src, std::array<int, 3>& diff, int i);
+    void handleOffsetVector3D(int owner, std::array<int, 3>& nextSrcRank, std::array<int, 3>& nextDstRank,
+                              std::array<int, 3>& offsetVector, std::array<int, 3>& diff, std::array<int, 3>& coordsSrc,
+                              std::array<int, 3>& coordsDst);
 
 public:
     P3BCA(double cutoff);
@@ -66,6 +81,6 @@ public:
     std::tuple<int, int> SimulationStep() override;
     int SimulationStepNew();
     int SimulationStepNewNew();
-    int GetNumCutoffBoxes();
+    std::array<int, 3> GetNumCutoffBoxes();
     double GetCutoff();
 };

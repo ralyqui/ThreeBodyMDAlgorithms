@@ -8,7 +8,7 @@ void NATA::Init(std::shared_ptr<Simulation> simulation)
 {
     Algorithm::Init(simulation);
 
-    this->b0 = *(this->simulation->GetDecomposition()->GetMyParticles());
+    this->b0 = this->simulation->GetDecomposition()->GetMyParticles();
     this->ringTopology = (std::static_pointer_cast<RingTopology>(this->simulation->GetTopology()));
     this->leftNeighbor = ringTopology->GetLeftNeighbor();
     this->rightNeighbor = ringTopology->GetRightNeighbor();
@@ -53,6 +53,8 @@ std::tuple<int, int> NATA::SimulationStep()
 {
     // reset all forces in b0 to 0
     this->simulation->GetDecomposition()->ResetForces();
+
+    this->b0 = this->simulation->GetDecomposition()->GetMyParticles();
 
     // use assignment operator to copy vector
     b1 = b0;
@@ -101,7 +103,7 @@ std::tuple<int, int> NATA::SimulationStep()
 
     this->SumUpParticles(this->b0, this->b1, this->b2);
 
-    // Utility::writeStepToCSV("NATA_Step" + std::to_string(iteration) + ".csv", *this->b0);
+    this->simulation->GetDecomposition()->SetMyParticles(this->b0);
 
     return std::tuple(numBufferInteractions, numParticleInteractions);
 }
