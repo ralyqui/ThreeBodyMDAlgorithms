@@ -11,9 +11,9 @@ private:
     std::array<int, 3> rank;
 
 public:
-    CartRank() : dimensions(0), rank({-1, -1, -1}) {}
-    CartRank(int x) : dimensions(1), rank({x, -1, -1}) {}
-    CartRank(int x, int y) : dimensions(2), rank({x, y, -1}) {}
+    CartRank() : dimensions(0), rank({0, 0, 0}) {}
+    CartRank(int x) : dimensions(1), rank({x, 0, 0}) {}
+    CartRank(int x, int y) : dimensions(2), rank({x, y, 0}) {}
     CartRank(int x, int y, int z) : dimensions(3), rank({x, y, z}) {}
     std::array<int, 3> GetRank() { return rank; }
     int GetDimensions() { return dimensions; }

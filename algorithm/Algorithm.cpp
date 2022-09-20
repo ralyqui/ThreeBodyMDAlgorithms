@@ -12,8 +12,35 @@ void Algorithm::Init(std::shared_ptr<Simulation> simulation)
 }
 
 int Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                                     std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner)
+{
+    return calculateInteractions(b0, b1, b2, b0Owner, b1Owner, b2Owner, 0, -1, -1, Eigen::Array3d(-1));
+}
+
+int Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                                      std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner,
-                                     int b0Start, int b0NumSteps, double cutoff)
+                                     int b0Start, int b0NumSteps)
+{
+    return calculateInteractions(b0, b1, b2, b0Owner, b1Owner, b2Owner, b0Start, b0NumSteps, -1, Eigen::Array3d(-1));
+}
+
+int Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                                     std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner,
+                                     double cutoff)
+{
+    return calculateInteractions(b0, b1, b2, b0Owner, b1Owner, b2Owner, 0, -1, cutoff, Eigen::Array3d(-1));
+}
+
+int Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                                     std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner,
+                                     double cutoff, Eigen::Array3d localCellWidth)
+{
+    return calculateInteractions(b0, b1, b2, b0Owner, b1Owner, b2Owner, 0, -1, cutoff, localCellWidth);
+}
+
+int Algorithm::calculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                                     std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner,
+                                     int b0Start, int b0NumSteps, double cutoff, Eigen::Array3d localCellWidth)
 {
     int counter = 0;
     double sqrCutoff = cutoff * cutoff;
@@ -38,12 +65,17 @@ int Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0, std::ve
                 }
                 // only calculate if this triplet is inside the cutoff
                 if (cutoff > 0) {
+                    if ((localCellWidth > 0).all()) {
+                        // special case 1 processor p3bca... we caculate periodic distance
+                        // TODO
+                    }
                     if (b0[i].GetSqrDist(b1[j]) > sqrCutoff || b0[i].GetSqrDist(b2[k]) > sqrCutoff ||
                         b1[j].GetSqrDist(b2[k]) > sqrCutoff) {
                         continue;
                     }
                 }
                 this->potential->CalculateForces(b0[i], b1[j], b2[k]);
+                // std::cout << "calculate particle triplet (" << i << ", " << j << ", " << k << ")" << std::endl;
                 counter++;
             }
         }

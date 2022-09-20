@@ -29,6 +29,10 @@ protected:
     std::map<std::string, std::vector<std::chrono::nanoseconds>> times;
 #endif
 
+    int calculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                              std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner, int b0Start,
+                              int b0NumSteps, double cutoff, Eigen::Array3d localCellWidth);
+
 public:
     Algorithm();
     virtual ~Algorithm();
@@ -37,8 +41,16 @@ public:
     virtual std::tuple<int, int> SimulationStep() = 0;
 
     int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
-                              std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner,
-                              int b0Start = 0, int b0NumSteps = -1, double cutoff = -1);
+                              std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner);
+    int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                              std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner, int b0Start,
+                              int b0NumSteps);
+    int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                              std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner, double cutoff);
+    int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                              std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner, double cutoff,
+                              Eigen::Array3d localCellWidth);
+
     void SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                         std::vector<Utility::Particle> &b2);
 

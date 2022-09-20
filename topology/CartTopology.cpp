@@ -24,10 +24,10 @@ void CartTopology::Init(std::shared_ptr<Simulation> simulation)
     this->dimX = decomp[0];
     this->dimY = 1;
     this->dimZ = 1;
-    if (decomp.size() > 1) {
+    if (numDims > 1) {
         dimY = decomp[1];
     }
-    if (decomp.size() > 2) {
+    if (numDims > 2) {
         dimZ = decomp[2];
     }
 

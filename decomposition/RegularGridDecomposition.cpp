@@ -52,6 +52,12 @@ void RegularGridDecomposition::Init(std::shared_ptr<Simulation> simulation)
     this->localCellMin = domainMin + (cartRankE * localCellWidth);
     this->localCellMax = localCellMin + localCellWidth;
 
+    // std::cout << "(" << domainMin[0] << ", " << domainMin[1] << ", " << domainMin[2] << ")" << std::endl;
+    // std::cout << "(" << localCellMin[0] << ", " << localCellMin[1] << ", " << localCellMin[2] << ")" << std::endl;
+    // std::cout << "(" << localCellMax[0] << ", " << localCellMax[1] << ", " << localCellMax[2] << ")" << std::endl;
+    // std::cout << "(" << localCellWidth[0] << ", " << localCellWidth[1] << ", " << localCellWidth[2] << ")" <<
+    // std::endl;
+
     binParticles(this->simulation->GetAllParticles());
 }
 
@@ -66,7 +72,9 @@ void RegularGridDecomposition::binParticles(std::vector<Utility::Particle>& part
 
 void RegularGridDecomposition::exchangeParticles()
 {
-    for (size_t i = 0; i < 3; i++) {
+    // avoid that we are trying to send a particle to our self.. so only exchange particle in dimensions where #proc is
+    // > 1
+    for (int i = 0; i < this->numDims; i++) {
         exchangeParticlesDim(i);
     }
 }
@@ -190,8 +198,10 @@ void RegularGridDecomposition::Update(double dt, Eigen::Vector3d gForce)
     // update all my particles
     this->updateMyParticles(dt, gForce);
 
-    // recalculate boundaries
-    exchangeParticles();
+    // recalculate boundaries.. but only if we have more than one processor
+    if (cartTopology->GetWorldSize() > 1) {
+        exchangeParticles();
+    }
 }
 
 Eigen::Array3d RegularGridDecomposition::GetCellSize() { return this->localCellWidth; }
