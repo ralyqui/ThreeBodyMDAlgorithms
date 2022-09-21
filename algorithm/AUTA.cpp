@@ -32,7 +32,7 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
     return status.MPI_TAG;
 }
 
-int AUTA::calculateOneThirdOfInteractions(int thirdID)
+std::tuple<int, int> AUTA::calculateOneThirdOfInteractions(int thirdID)
 {
     std::vector<Utility::Particle>* b0Sorted = nullptr;
     std::vector<Utility::Particle>* b1Sorted = nullptr;
@@ -210,10 +210,15 @@ std::tuple<int, int> AUTA::SimulationStep()
     std::vector<Utility::Particle>* bi = pickBuffer(i);
 
     int numBufferInteractions = 0;
-    int numParticleInteractions = 0;
+    int numParticleInteractionsAcc = 0;
 
 #ifdef TESTS_3BMDA
     processed.clear();
+#endif
+
+#ifdef PROFILE_3BMDA
+    this->hitrate = 0;
+    int hitRateDivider = 0;
 #endif
 
     for (int s = this->worldSize; s > 0; s -= 3) {
@@ -221,12 +226,22 @@ std::tuple<int, int> AUTA::SimulationStep()
             if (j != 0 || s != this->worldSize) {
                 getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
             }
-            numParticleInteractions +=
+            std::tuple<int, int> numParticleInteractions =
                 this->CalculateInteractions(this->b0, this->b1, this->b2, this->b0Owner, this->b1Owner, this->b2Owner);
+            numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
+
             numBufferInteractions++;
 #ifdef TESTS_3BMDA
             // TESTS_3BMDA is defined
             processed.push_back(Utility::Triplet(this->b0Owner, this->b1Owner, this->b2Owner));
+#endif
+#ifdef PROFILE_3BMDA
+            // only accumulate if there are possible particle interactions to avoid div by 0
+            if (std::get<1>(numParticleInteractions) > 0) {
+                this->hitrate +=
+                    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+                hitRateDivider++;
+            }
 #endif
         }
         i = (i + 1) % 3;
@@ -239,10 +254,20 @@ std::tuple<int, int> AUTA::SimulationStep()
 
         // Calculate one third of the interactions
         numBufferInteractions++;
-        numParticleInteractions += calculateOneThirdOfInteractions(thirdID);
+        std::tuple<int, int> numParticleInteractions = calculateOneThirdOfInteractions(thirdID);
+        numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
 #ifdef TESTS_3BMDA
         // TESTS_3BMDA is defined
         processed.push_back(Utility::Triplet(getBufOwner(0), getBufOwner(1), getBufOwner(2)));
+#endif
+
+#ifdef PROFILE_3BMDA
+        // only accumulate if there are possible particle interactions to avoid div by 0
+        if (std::get<1>(numParticleInteractions) > 0) {
+            this->hitrate +=
+                (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+            hitRateDivider++;
+        }
 #endif
     }
 
@@ -251,10 +276,14 @@ std::tuple<int, int> AUTA::SimulationStep()
         sendBackParticles();
     }
 
+#ifdef PROFILE_3BMDA
+    this->hitrate /= hitRateDivider;
+#endif
+
     // sum up particles
     this->SumUpParticles(this->b0, this->b1, this->b2);
 
     this->simulation->GetDecomposition()->SetMyParticles(this->b0);
 
-    return std::tuple(numBufferInteractions, numParticleInteractions);
+    return std::tuple(numBufferInteractions, numParticleInteractionsAcc);
 }

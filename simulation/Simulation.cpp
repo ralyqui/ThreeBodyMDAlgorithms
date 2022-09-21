@@ -48,6 +48,10 @@ void Simulation::Start()
             std::cout << "sum after: " << sumAfter << std::endl;
         }*/
 
+#ifdef PROFILE_3BMDA
+        calcOverallHitrate(i, this->algorithm->GetHitrate());
+#endif
+
 #if !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && !defined(PROFILE_3BMDA)
         if (this->csvOutput.compare("") != 0) {
             writeSimulationStepToCSV(this->csvOutput.substr(0, this->csvOutput.find_last_of('.')) + "_" +
@@ -135,3 +139,15 @@ void Simulation::writeSimulationStepToCSV(std::string file)
         Utility::writeStepToCSV(file, receivedParticlesForCSVOutput);
     }
 }
+
+#ifdef PROFILE_3BMDA
+void Simulation::calcOverallHitrate(int step, double hitrate)
+{
+    double accHitrate;
+    MPI_Reduce(&hitrate, &accHitrate, 1, MPI_DOUBLE, MPI_SUM, 0, topology->GetComm());
+    if (topology->GetWorldRank() == 0) {
+        accHitrate /= (double)topology->GetWorldSize();
+        std::cout << "overall hitrate of step " << step << ": " << accHitrate << std::endl;
+    }
+}
+#endif

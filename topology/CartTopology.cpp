@@ -12,7 +12,8 @@ void CartTopology::Init(std::shared_ptr<Simulation> simulation)
     MPI_Comm_size(MPI_COMM_WORLD, &numProc);
 
     std::vector<int> decomp;
-    for (std::pair<int, std::vector<int>> e : decompositions) {
+    std::vector<std::pair<int, std::vector<int>>> decompositionsToUse = decompositions;
+    for (std::pair<int, std::vector<int>> e : decompositionsToUse) {
         if (e.first == numProc) {
             decomp = e.second;
             break;

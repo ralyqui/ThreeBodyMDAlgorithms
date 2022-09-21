@@ -488,8 +488,13 @@ std::tuple<int, int> P3BCA::SimulationStep()
     processed.clear();
 #endif
 
+#ifdef PROFILE_3BMDA
+    this->hitrate = 0;
+    int hitRateDivider = 0;
+#endif
+
     int numBufferInteractions = 0;
-    int numParticleInteractions = 0;
+    int numParticleInteractionsAcc = 0;
 
     // copy b0 to b1 and b2
     b1 = b0;
@@ -579,19 +584,30 @@ std::tuple<int, int> P3BCA::SimulationStep()
                           << "), b1: (" << b1Coords2[0] << ", " << b1Coords2[1] << ", " << b1Coords2[2] << "), b2: "
                           << "(" << b2Coords2[0] << ", " << b2Coords2[1] << ", " << b2Coords2[2] << ")" << std::endl;
             }*/
-            if (cartTopology->GetWorldSize() == 2 && i2 < 1)
-                numParticleInteractions += this->CalculateInteractions(this->b0, this->b1, this->b2, this->worldRank,
-                                                                       this->b1Owner, this->b2Owner, this->cutoff);
+            // if (cartTopology->GetWorldSize() == 2 && i2 < 1)
+
+            std::tuple<int, int> numParticleInteractions = this->CalculateInteractions(
+                this->b0, this->b1, this->b2, this->worldRank, this->b1Owner, this->b2Owner, this->cutoff);
+            numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
 
             // if (worldRank == 0) {
-            std::cout << "calculate interactions between (" << worldRank << ", " << this->b1Owner << ", "
-                      << this->b2Owner << ")" << std::endl;
+            // std::cout << "calculate interactions between (" << worldRank << ", " << this->b1Owner << ", "
+            //          << this->b2Owner << ")" << std::endl;
             //}
             numBufferInteractions++;
 
 #ifdef TESTS_3BMDA
             // TESTS_3BMDA is defined
             processed.push_back(Utility::Triplet(this->worldRank, this->b1Owner, this->b2Owner));
+#endif
+
+#ifdef PROFILE_3BMDA
+            // only accumulate if there are possible particle interactions to avoid div by 0
+            if (std::get<1>(numParticleInteractions) > 0) {
+                this->hitrate +=
+                    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+                hitRateDivider++;
+            }
 #endif
 
             if (i3 < numSteps - 1) {
@@ -676,13 +692,17 @@ std::tuple<int, int> P3BCA::SimulationStep()
 
     MPI_Barrier(this->simulation->GetTopology()->GetComm());
 
+#ifdef PROFILE_3BMDA
+    this->hitrate /= hitRateDivider;
+#endif
+
     sendBackParticles();
 
     this->SumUpParticles(this->b0, this->b1, this->b2);
 
     this->simulation->GetDecomposition()->SetMyParticles(this->b0);
 
-    return std::tuple(numBufferInteractions, numParticleInteractions);
+    return std::tuple(numBufferInteractions, numParticleInteractionsAcc);
 }
 
 std::array<int, 3> P3BCA::GetNumCutoffBoxes() { return std::array<int, 3>({this->nCbX, this->nCbY, this->nCbZ}); }

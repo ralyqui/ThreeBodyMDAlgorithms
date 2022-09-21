@@ -24,7 +24,7 @@ private:
     int b2Owner;
 
     int shiftRight(std::vector<Utility::Particle>& buf, int owner);
-    int calculateOneThirdOfInteractions(int thirdID);
+    std::tuple<int, int> calculateOneThirdOfInteractions(int thirdID);
     std::vector<Utility::Particle>* pickBuffer(int i);
     int& getBufOwner(int i);
     void sendBackParticles();

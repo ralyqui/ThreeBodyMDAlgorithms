@@ -27,9 +27,10 @@ protected:
 
 #ifdef PROFILE_3BMDA
     std::map<std::string, std::vector<std::chrono::nanoseconds>> times;
+    double hitrate;
 #endif
 
-    int calculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+    std::tuple<int, int> calculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                               std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner, int b0Start,
                               int b0NumSteps, double cutoff, Eigen::Array3d localCellWidth);
 
@@ -40,14 +41,14 @@ public:
     virtual void Init(std::shared_ptr<Simulation> simulation);
     virtual std::tuple<int, int> SimulationStep() = 0;
 
-    int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+    std::tuple<int, int> CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                               std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner);
-    int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+    std::tuple<int, int> CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                               std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner, int b0Start,
                               int b0NumSteps);
-    int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+    std::tuple<int, int> CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                               std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner, double cutoff);
-    int CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+    std::tuple<int, int> CalculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                               std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner, int b2Owner, double cutoff,
                               Eigen::Array3d localCellWidth);
 
@@ -59,5 +60,6 @@ public:
 #endif
 #ifdef PROFILE_3BMDA
     std::map<std::string, std::vector<std::chrono::nanoseconds>> GetTimes();
+    double GetHitrate();
 #endif
 };

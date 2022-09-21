@@ -66,9 +66,13 @@ std::tuple<int, int> NATA::SimulationStep()
 #ifdef TESTS_3BMDA
     processed.clear();
 #endif
+#ifdef PROFILE_3BMDA
+    this->hitrate = 0;
+    int hitRateDivider = 0;
+#endif
 
     int numBufferInteractions = 0;
-    int numParticleInteractions = 0;
+    int numParticleInteractionsAcc = 0;
 
     bool calculate = false;
     alreadyProcessed.clear();
@@ -81,14 +85,25 @@ std::tuple<int, int> NATA::SimulationStep()
             calculate = false;
             calculateProcessed(step, calculate);
             if (calculate) {
-                numParticleInteractions += this->CalculateInteractions(this->b0, this->b1, this->b2, this->worldRank,
-                                                                       this->b1Owner, this->b2Owner);
+                std::tuple<int, int> numParticleInteractions = this->CalculateInteractions(
+                    this->b0, this->b1, this->b2, this->worldRank, this->b1Owner, this->b2Owner);
+
+                numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
                 numBufferInteractions++;
 #ifdef TESTS_3BMDA
                 // TESTS_3BMDA is defined
                 processed.push_back(Utility::Triplet(this->worldRank,
                                                      Utility::mod(i + this->worldRank, this->worldSize),
                                                      Utility::mod(j + this->worldRank, this->worldSize)));
+#endif
+
+#ifdef PROFILE_3BMDA
+                // only accumulate if there are possible particle interactions to avoid div by 0
+                if (std::get<1>(numParticleInteractions) > 0) {
+                    this->hitrate +=
+                        (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+                    hitRateDivider++;
+                }
 #endif
             }
             if (this->worldSize > 1) {
@@ -101,9 +116,13 @@ std::tuple<int, int> NATA::SimulationStep()
         }
     }
 
+#ifdef PROFILE_3BMDA
+    this->hitrate /= hitRateDivider;
+#endif
+
     this->SumUpParticles(this->b0, this->b1, this->b2);
 
     this->simulation->GetDecomposition()->SetMyParticles(this->b0);
 
-    return std::tuple(numBufferInteractions, numParticleInteractions);
+    return std::tuple(numBufferInteractions, numParticleInteractionsAcc);
 }
