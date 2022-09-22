@@ -17,6 +17,7 @@ namespace Utility
         std::string outputCSV;
         AlgorithmType algorithm;
         Eigen::Vector3d gForce;
+        bool optimalDecomposition;
 
         void printHelp();
     };
@@ -35,6 +36,7 @@ namespace Utility
             << "\t-gz,--gravityZ\t\tgravitational force in z-direction\n"
             << "\t-csv,--csv\t\tcsv file with particles\n"
             << "\t-o,--out\t\tcsv bas file name that will be used to create all csv outputs from each simulation step\n"
+            << "\t-decomp,--decomp\t\t(optimal | naive) decomposition strategy for cart topology\n"
             << "\t-c,--cutoff\t\tcutoff distance" << std::endl;
     }
 
@@ -75,6 +77,21 @@ namespace Utility
                             a.algorithm = AlgorithmType::P3BCAType;
                         } else if (value.compare("auta") == 0) {
                             a.algorithm = AlgorithmType::AUTAType;
+                        } else {
+                            a.printHelp();
+                            exit(1);
+                        }
+                        i++;
+                    } else if (flag.compare("decomp") == 0 || flag.compare("-decomp") == 0) {
+                        if (args.size() <= (size_t)(i + 1)) {
+                            a.printHelp();
+                            exit(1);
+                        }
+                        value = args[i + 1];
+                        if (value.compare("optimal") == 0) {
+                            a.optimalDecomposition = true;
+                        } else if (value.compare("naive") == 0) {
+                            a.optimalDecomposition = false;
                         } else {
                             a.printHelp();
                             exit(1);

@@ -1,35 +1,22 @@
 #include "CartTopology.hpp"
 
-CartTopology::CartTopology() {}
+CartTopology::CartTopology(std::vector<int> decomposition) : decomposition(decomposition) {}
 CartTopology::~CartTopology() {}
 
 void CartTopology::Init(std::shared_ptr<Simulation> simulation)
 {
     Topology::Init(simulation);
 
-    // get num of processors in each dimension
-    int numProc;
-    MPI_Comm_size(MPI_COMM_WORLD, &numProc);
+    int numDims = this->decomposition.size();
 
-    std::vector<int> decomp;
-    std::vector<std::pair<int, std::vector<int>>> decompositionsToUse = decompositions;
-    for (std::pair<int, std::vector<int>> e : decompositionsToUse) {
-        if (e.first == numProc) {
-            decomp = e.second;
-            break;
-        }
-    }
-
-    int numDims = decomp.size();
-
-    this->dimX = decomp[0];
+    this->dimX = this->decomposition[0];
     this->dimY = 1;
     this->dimZ = 1;
     if (numDims > 1) {
-        dimY = decomp[1];
+        dimY = this->decomposition[1];
     }
     if (numDims > 2) {
-        dimZ = decomp[2];
+        dimZ = this->decomposition[2];
     }
 
     if (numDims == 1) {

@@ -2,7 +2,9 @@
 
 #include "MPIBenchmark.hpp"
 
-MPIBenchmark::MPIBenchmark(std::string name, std::shared_ptr<Context> context) : name(name), context(context) {}
+MPIBenchmark::MPIBenchmark(std::string name, std::shared_ptr<Context> context, ContextArgs contextArgs)
+    : name(name), context(context), contextArgs(contextArgs)
+{}
 
 MPIBenchmark::~MPIBenchmark() {}
 

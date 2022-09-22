@@ -3,7 +3,6 @@
 #include <numeric>
 
 #include "Topology.hpp"
-#include "decompositions.hpp"
 
 struct CartRank {
 private:
@@ -25,6 +24,7 @@ protected:
     // int periods[3] = {1, 1, 1};
     int dimX, dimY, dimZ;
     CartRank cartRank;
+    std::vector<int> decomposition;
 
     // TODO: finish this functions
     std::vector<int> primeFactors(int n);
@@ -40,7 +40,7 @@ protected:
             decompositions);
 
 public:
-    CartTopology();
+    CartTopology(std::vector<int> decomposition);
     virtual ~CartTopology();
 
     CartRank GetCartRank();
@@ -50,6 +50,7 @@ public:
     int GetRightNeighbor(int dim);
 
     void Init(std::shared_ptr<Simulation> simulation) override;
+
 
     std::array<int, 3> GetDims();
 };

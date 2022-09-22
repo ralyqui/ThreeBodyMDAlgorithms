@@ -4,6 +4,7 @@
 
 #include "../external/rapidcsv/src/rapidcsv.h"
 #include "structs.hpp"
+#include "decompositions.hpp"
 
 namespace Utility
 {
@@ -26,5 +27,7 @@ namespace Utility
     int BinomialCoefficient(const int n, const int k);
 
     std::string get_file_contents(const char *filename);
+
+    std::vector<int> getDecomposition(int worldSize, bool optimal);
 
 }  // namespace Utility

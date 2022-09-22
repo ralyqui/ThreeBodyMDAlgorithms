@@ -2,8 +2,9 @@
 
 #ifdef BENCHMARK_3BMDA
 
-#include <Eigen/Dense>
 #include <benchmark/benchmark.h>
+
+#include <Eigen/Dense>
 #include <memory>
 
 #include "../algorithm/AUTA.hpp"
@@ -25,9 +26,11 @@ struct ContextArgs {
     double deltaT;
     Eigen::Vector3d gForce;
     double cutoff;
+    std::vector<int> decomposition;
 
-    ContextArgs(int iterations, double deltaT, Eigen::Vector3d gForce, double cutoff)
-        : iterations(iterations), deltaT(deltaT), gForce(gForce), cutoff(cutoff)
+    ContextArgs() {}
+    ContextArgs(int iterations, double deltaT, Eigen::Vector3d gForce, double cutoff, std::vector<int> decomposition)
+        : iterations(iterations), deltaT(deltaT), gForce(gForce), cutoff(cutoff), decomposition(decomposition)
     {}
 };
 

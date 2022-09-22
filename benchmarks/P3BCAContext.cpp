@@ -9,7 +9,7 @@ P3BCAContext::~P3BCAContext() {}
 void P3BCAContext::Init(ContextArgs args)
 {
     // create topology
-    std::shared_ptr<CartTopology> cartTopology = std::make_shared<CartTopology>();
+    std::shared_ptr<CartTopology> cartTopology = std::make_shared<CartTopology>(args.decomposition);
 
     // domain decomposition
     std::shared_ptr<RegularGridDecomposition> regularGridDecomposition = std::make_shared<RegularGridDecomposition>();

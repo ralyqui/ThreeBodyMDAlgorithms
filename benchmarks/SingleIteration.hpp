@@ -12,7 +12,7 @@ private:
     std::shared_ptr<Simulation> simulation;
 
 public:
-    SingleIteration(std::string name, std::shared_ptr<Context> context);
+    SingleIteration(std::string name, std::shared_ptr<Context> context, ContextArgs contextArgs);
     ~SingleIteration();
 
     void BeforeBench(benchmark::State &state) override;

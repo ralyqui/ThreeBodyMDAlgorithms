@@ -38,9 +38,10 @@ class MPIBenchmark {
 protected:
     std::string name;
     std::shared_ptr<Context> context;
+    ContextArgs contextArgs;
 
 public:
-    MPIBenchmark(std::string name, std::shared_ptr<Context> context);
+    MPIBenchmark(std::string name, std::shared_ptr<Context> context, ContextArgs contextArgs);
     ~MPIBenchmark();
 
     virtual void BeforeBench(benchmark::State &state) = 0;

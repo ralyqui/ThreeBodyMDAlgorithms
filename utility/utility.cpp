@@ -74,4 +74,16 @@ namespace Utility
         return contents.str();
     }
 
+    std::vector<int> getDecomposition(int worldSize, bool optimal)
+    {
+        std::vector<int> result;
+        for (std::pair<int, std::vector<int>> e : (optimal ? decompositions : decompositionsNaive)) {
+            if (e.first == worldSize) {
+                result = e.second;
+                break;
+            }
+        }
+        return result;
+    }
+
 }  // namespace Utility

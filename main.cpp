@@ -14,6 +14,7 @@
 #include "topology/CartTopology.hpp"
 #include "topology/RingTopology.hpp"
 #include "utility/cli.hpp"
+#include "utility/decompositions.hpp"
 
 #ifdef PROFILE_3BMDA
 #include <numeric>
@@ -52,10 +53,10 @@ std::shared_ptr<Simulation> createNATAContext(std::string csvOut)
     return simulation;
 }
 
-std::shared_ptr<Simulation> createP3BCAContext(std::string csvOut)
+std::shared_ptr<Simulation> createP3BCAContext(std::string csvOut, std::vector<int> decomposition)
 {
     // create topology
-    std::shared_ptr<CartTopology> cartTopology = std::make_shared<CartTopology>();
+    std::shared_ptr<CartTopology> cartTopology = std::make_shared<CartTopology>(decomposition);
 
     // domain decomposition
     std::shared_ptr<RegularGridDecomposition> regularGridDecomposition = std::make_shared<RegularGridDecomposition>();
@@ -137,6 +138,9 @@ int main(int argc, char *argv[])
     // init MPI
     MPI_Init(&argc, &argv);
 
+    int worldSize;
+    MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+
     // parse cli arguments
     std::vector<std::string> args;
 
@@ -157,7 +161,9 @@ int main(int argc, char *argv[])
 
     switch (a.algorithm) {
         case AlgorithmType::NATAType: simulation = createNATAContext(a.outputCSV); break;
-        case AlgorithmType::P3BCAType: simulation = createP3BCAContext(a.outputCSV); break;
+        case AlgorithmType::P3BCAType:
+            simulation = createP3BCAContext(a.outputCSV, Utility::getDecomposition(worldSize, a.optimalDecomposition));
+            break;
         case AlgorithmType::AUTAType: simulation = createAUTAContext(a.outputCSV); break;
         default: simulation = createNATAContext(a.outputCSV); break;
     }

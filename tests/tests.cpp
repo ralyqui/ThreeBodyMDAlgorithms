@@ -158,10 +158,11 @@ std::shared_ptr<Simulation> createNATAContext(int iterations, double deltaT, Eig
     return simulation;
 }
 
-std::shared_ptr<Simulation> createP3BCAContext(int iterations, double deltaT, Eigen::Vector3d gForce, double cutoff)
+std::shared_ptr<Simulation> createP3BCAContext(int iterations, double deltaT, Eigen::Vector3d gForce, double cutoff,
+                                               std::vector<int> decomposition)
 {
     // create topology
-    std::shared_ptr<CartTopology> cartTopology = std::make_shared<CartTopology>();
+    std::shared_ptr<CartTopology> cartTopology = std::make_shared<CartTopology>(decomposition);
 
     // domain decomposition
     std::shared_ptr<RegularGridDecomposition> regularGridDecomposition = std::make_shared<RegularGridDecomposition>();
@@ -391,7 +392,11 @@ TEST(auta, test_decomposition)
  */
 TEST(p3bca, test_decomposition)
 {
-    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 1., Eigen::Vector3d(0, 0, 0), 0.5);
+    int worldSize;
+    MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+
+    std::shared_ptr<Simulation> simulation =
+        createP3BCAContext(0, 1., Eigen::Vector3d(0, 0, 0), 0.5, Utility::getDecomposition(worldSize, true));
     simulation->Init();
 
     int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
@@ -451,7 +456,11 @@ TEST(auta, test_decomposition_with_step)
  */
 TEST(p3bca, test_decomposition_with_step)
 {
-    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 1., Eigen::Vector3d(0, -9.81, 0), 0.5);
+    int worldSize;
+    MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+    
+    std::shared_ptr<Simulation> simulation =
+        createP3BCAContext(0, 1., Eigen::Vector3d(0, -9.81, 0), 0.5, Utility::getDecomposition(worldSize, true));
     simulation->Init();
 
     int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
@@ -673,6 +682,9 @@ TEST(auta, test_processed_triplets)
 
 TEST(p3bca, test_processed_triplets)
 {
+    int worldSize;
+    MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+    
     bool noRedundancyInMyParticles = false;
     bool noRedundancyInAllParticles = false;
     bool correctNumberOfInteractions = false;
@@ -682,7 +694,8 @@ TEST(p3bca, test_processed_triplets)
     MPI_Datatype tripletType = Utility::Triplet::GetMPIType();
     MPI_Type_commit(&tripletType);
 
-    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 0.001, Eigen::Vector3d(0, 0, 0), 0.5);
+    std::shared_ptr<Simulation> simulation =
+        createP3BCAContext(0, 0.001, Eigen::Vector3d(0, 0, 0), 0.5, Utility::getDecomposition(worldSize, true));
 
     simulation->Init();
 
