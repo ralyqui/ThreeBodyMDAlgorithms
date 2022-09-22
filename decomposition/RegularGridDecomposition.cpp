@@ -111,35 +111,37 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
 
     int numRecv;
     MPI_Status status0, status1;
-    MPI_Request request0, request1;
+    MPI_Request requestSend0, requestSend1;
+    MPI_Request requestRecv0, requestRecv1;
 
     MPI_Datatype pType = *this->simulation->GetMPIParticleType();
 
     MPI_Isend(sendToLeftNeighbor.data(), sendToLeftNeighbor.size(), pType, leftNeighbor, 0,
-              this->cartTopology->GetComm(), &request0);
-
-    MPI_Wait(&request0, MPI_STATUS_IGNORE);
+              this->cartTopology->GetComm(), &requestSend0);
 
     MPI_Probe(rightNeighbor, 0, this->cartTopology->GetComm(), &status0);
     MPI_Get_count(&status0, pType, &numRecv);
 
     recvFromRightNeighbor.resize(numRecv);
 
-    MPI_Recv(recvFromRightNeighbor.data(), numRecv, pType, rightNeighbor, 0, this->cartTopology->GetComm(),
-             MPI_STATUS_IGNORE);
+    MPI_Irecv(recvFromRightNeighbor.data(), numRecv, pType, rightNeighbor, 0, this->cartTopology->GetComm(),
+              &requestRecv0);
 
     MPI_Isend(sendToRightNeighbor.data(), sendToRightNeighbor.size(), pType, rightNeighbor, 0,
-              this->cartTopology->GetComm(), &request1);
-
-    MPI_Wait(&request1, MPI_STATUS_IGNORE);
+              this->cartTopology->GetComm(), &requestSend1);
 
     MPI_Probe(leftNeighbor, 0, this->cartTopology->GetComm(), &status1);
     MPI_Get_count(&status1, pType, &numRecv);
 
     recvFromLeftNeighbor.resize(numRecv);
 
-    MPI_Recv(recvFromLeftNeighbor.data(), numRecv, pType, leftNeighbor, 0, this->cartTopology->GetComm(),
-             MPI_STATUS_IGNORE);
+    MPI_Irecv(recvFromLeftNeighbor.data(), numRecv, pType, leftNeighbor, 0, this->cartTopology->GetComm(),
+              &requestRecv1);
+
+    MPI_Wait(&requestSend0, MPI_STATUS_IGNORE);
+    MPI_Wait(&requestSend1, MPI_STATUS_IGNORE);
+    MPI_Wait(&requestRecv0, MPI_STATUS_IGNORE);
+    MPI_Wait(&requestRecv1, MPI_STATUS_IGNORE);
 
     // merge Particles
     for (Utility::Particle& p : recvFromLeftNeighbor) {

@@ -394,18 +394,20 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
     int numRecv;
     MPI_Status status;
     MPI_Request requestSend;
+    MPI_Request requestRecv;
 
     MPI_Isend(buf.data(), buf.size(), *this->mpiParticleType, dst, owner, this->cartTopology->GetComm(), &requestSend);
-
-    MPI_Wait(&requestSend, MPI_STATUS_IGNORE);
 
     MPI_Probe(src, MPI_ANY_TAG, this->cartTopology->GetComm(), &status);
     MPI_Get_count(&status, *this->simulation->GetMPIParticleType(), &numRecv);
 
     this->tmpRecv.resize(numRecv);
 
-    MPI_Recv(this->tmpRecv.data(), numRecv, *this->mpiParticleType, src, status.MPI_TAG, this->cartTopology->GetComm(),
-             &status);
+    MPI_Irecv(this->tmpRecv.data(), numRecv, *this->mpiParticleType, src, status.MPI_TAG, this->cartTopology->GetComm(),
+              &requestRecv);
+
+    MPI_Wait(&requestSend, MPI_STATUS_IGNORE);
+    MPI_Wait(&requestRecv, MPI_STATUS_IGNORE);
 
     // assign particles to buf
     buf = this->tmpRecv;
@@ -416,6 +418,7 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
 void P3BCA::sendBackParticles()
 {
     MPI_Request requestSend1, requestSend2;
+    MPI_Request requestRecv1, requestRecv2;
     MPI_Status statusRecv1, statusRecv2;
     bool b1Sent = false, b2Sent = false;
 
@@ -430,9 +433,6 @@ void P3BCA::sendBackParticles()
         b2Sent = true;
     }
 
-    if (b1Sent) MPI_Wait(&requestSend1, MPI_STATUS_IGNORE);
-    if (b2Sent) MPI_Wait(&requestSend2, MPI_STATUS_IGNORE);
-
     int numRecv1;
     int numRecv2;
 
@@ -443,8 +443,8 @@ void P3BCA::sendBackParticles()
 
         this->b1Tmp.resize(numRecv1);
 
-        MPI_Recv(b1Tmp.data(), numRecv1, *this->mpiParticleType, statusRecv1.MPI_SOURCE, 1,
-                 this->cartTopology->GetComm(), MPI_STATUS_IGNORE);
+        MPI_Irecv(b1Tmp.data(), numRecv1, *this->mpiParticleType, statusRecv1.MPI_SOURCE, 1,
+                  this->cartTopology->GetComm(), &requestRecv1);
     }
     if (this->b2Owner != this->worldRank) {
         MPI_Probe(MPI_ANY_SOURCE, 2, this->cartTopology->GetComm(), &statusRecv2);
@@ -453,8 +453,17 @@ void P3BCA::sendBackParticles()
 
         this->b2Tmp.resize(numRecv2);
 
-        MPI_Recv(b2Tmp.data(), numRecv2, *this->mpiParticleType, statusRecv2.MPI_SOURCE, 2,
-                 this->cartTopology->GetComm(), MPI_STATUS_IGNORE);
+        MPI_Irecv(b2Tmp.data(), numRecv2, *this->mpiParticleType, statusRecv2.MPI_SOURCE, 2,
+                  this->cartTopology->GetComm(), &requestRecv2);
+    }
+
+    if (b1Sent) {
+        MPI_Wait(&requestSend1, MPI_STATUS_IGNORE);
+        MPI_Wait(&requestRecv1, MPI_STATUS_IGNORE);
+    }
+    if (b2Sent) {
+        MPI_Wait(&requestSend2, MPI_STATUS_IGNORE);
+        MPI_Wait(&requestRecv2, MPI_STATUS_IGNORE);
     }
 
     if (b1Sent) {
@@ -627,26 +636,26 @@ std::tuple<int, int> P3BCA::SimulationStep()
                         getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner2D, nextDstRankInner2D,
                                                    offsetVectorInner2D, diffInner2D);
                     } else {
-                        /*if (this->worldRank == 0) {
-                            std::cout << "before shiftLeft b2 in 1D schedule: nextSrcRankInner1D = "
-                                      << nextSrcRankInner1D << ", nextDstRankInner1D = " << nextDstRankInner1D
-                                      << ", diff = " << diffInner1D << ", offset = " << offsetVectorInner1D
-                                      << std::endl;
+                        /* if (this->worldRank == 0) {
+                        std::cout << "my rank: " << this->worldRank
+                                  << "before shiftLeft b2 in 1D schedule: nextSrcRankInner1D = "
+                                  << Utility::mod(worldRank + 1, this->dimX)
+                                  << ", nextDstRankInner1D = " << Utility::mod(worldRank - 1, this->dimX) << std::endl;
                         }*/
                         // getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner1D, nextDstRankInner1D,
                         //                           offsetVectorInner1D, diffInner1D);
                         getBufOwner(2) = mpiShift(this->b2, getBufOwner(2), Utility::mod(worldRank + 1, this->dimX),
                                                   Utility::mod(worldRank - 1, this->dimX));
-                        /*if (this->worldRank == 0) {
-                            std::cout << "after shiftLeft b2 in 1D schedule" << std::endl;
-                        }*/
+                        // if (this->worldRank == 0) {
+                        // std::cout << "after shiftLeft b2 in 1D schedule" << std::endl;
+                        //}
                     }
                 }
             }
         }
 
         // only shift if not the last step
-        if (i2 < this->numSteps - 1) {
+        if (i2 < ((cartTopology->GetWorldSize() == 2 ? 1 : this->numSteps) - 1)) {
             if (this->numDims == 3) {
                 schedule3D(i2 + 1, myCoordsArray3D, nextSrcRankOuter3D);
                 calcDestFromSrc3D(myCoordsArray3D, nextSrcRankOuter3D, nextDstRankOuter3D);

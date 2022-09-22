@@ -126,6 +126,7 @@ int& AUTA::getBufOwner(int i)
 void AUTA::sendBackParticles()
 {
     MPI_Request requestSend0, requestSend1, requestSend2;
+    MPI_Request requestRecv0, requestRecv1, requestRecv2;
     MPI_Status statusRecv0, statusRecv1, statusRecv2;
     bool b0Sent = false, b1Sent = false, b2Sent = false;
 
@@ -151,25 +152,34 @@ void AUTA::sendBackParticles()
     if (this->b0Owner != this->worldRank) {
         this->b0Tmp.resize(numRecv);
 
-        MPI_Recv(b0Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 0, this->ringTopology->GetComm(),
-                 &statusRecv0);
+        MPI_Irecv(b0Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 0, this->ringTopology->GetComm(),
+                  &requestRecv0);
     }
     if (this->b1Owner != this->worldRank) {
         this->b1Tmp.resize(numRecv);
 
-        MPI_Recv(b1Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 1, this->ringTopology->GetComm(),
-                 &statusRecv1);
+        MPI_Irecv(b1Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 1, this->ringTopology->GetComm(),
+                  &requestRecv1);
     }
     if (this->b2Owner != this->worldRank) {
         this->b2Tmp.resize(numRecv);
 
-        MPI_Recv(b2Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 2, this->ringTopology->GetComm(),
-                 &statusRecv2);
+        MPI_Irecv(b2Tmp.data(), numRecv, *this->mpiParticleType, MPI_ANY_SOURCE, 2, this->ringTopology->GetComm(),
+                  &requestRecv2);
     }
 
-    if (b0Sent) MPI_Wait(&requestSend0, MPI_STATUS_IGNORE);
-    if (b1Sent) MPI_Wait(&requestSend1, MPI_STATUS_IGNORE);
-    if (b2Sent) MPI_Wait(&requestSend2, MPI_STATUS_IGNORE);
+    if (b0Sent) {
+        MPI_Wait(&requestSend0, MPI_STATUS_IGNORE);
+        MPI_Wait(&requestRecv0, MPI_STATUS_IGNORE);
+    }
+    if (b1Sent) {
+        MPI_Wait(&requestSend1, MPI_STATUS_IGNORE);
+        MPI_Wait(&requestRecv1, MPI_STATUS_IGNORE);
+    }
+    if (b2Sent) {
+        MPI_Wait(&requestSend2, MPI_STATUS_IGNORE);
+        MPI_Wait(&requestRecv2, MPI_STATUS_IGNORE);
+    }
 
     if (b0Sent) {
         this->b0 = this->b0Tmp;
