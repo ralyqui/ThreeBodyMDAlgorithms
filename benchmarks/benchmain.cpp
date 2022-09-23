@@ -20,7 +20,7 @@ auto MPIBench = [](benchmark::State &state, std::shared_ptr<MPIBenchmark> bm) {
     bm->BeforeBench(state);
 
     for (auto _ : state) {
-        // Do the work and time it on each proc
+        // Do the work and record time on each proc
         auto start = std::chrono::high_resolution_clock::now();
         bm->RunWorkToBench(state);
         auto end = std::chrono::high_resolution_clock::now();
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
     MPI_Comm_get_parent(&parent);
 
     if (parent == MPI_COMM_NULL) {
-        MPI_Comm interComm0;
+        MPI_Comm interComm;
 
         static const struct option long_options[] = {
             {"yaml", required_argument, 0, 'y'}, {"out", required_argument, 0, 'o'}, {0, 0, 0, 0}};
@@ -173,9 +173,9 @@ int main(int argc, char **argv)
                     MPI_Info array_of_info[2] = {MPI_INFO_NULL, MPI_INFO_NULL};
 
                     MPI_Comm_spawn_multiple(2, array_of_commands, array_of_argv, array_of_maxprocs, array_of_info, 0,
-                                            MPI_COMM_WORLD, &interComm0, MPI_ERRCODES_IGNORE);
+                                            MPI_COMM_WORLD, &interComm, MPI_ERRCODES_IGNORE);
                 } else {
-                    MPI_Comm_spawn(argv[0], newArgv.data(), v.numProcs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &interComm0,
+                    MPI_Comm_spawn(argv[0], newArgv.data(), v.numProcs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &interComm,
                                    MPI_ERRCODES_IGNORE);
                 }
             }
@@ -183,19 +183,20 @@ int main(int argc, char **argv)
             // send config  to children
             {
                 configlen = config.size();
-                MPI_Bcast(&configlen, 1, MPI_INT, MPI_ROOT, interComm0);
-                MPI_Bcast(&config[0], configlen, MPI_CHAR, MPI_ROOT, interComm0);
+                MPI_Bcast(&configlen, 1, MPI_INT, MPI_ROOT, interComm);
+                MPI_Bcast(&config[0], configlen, MPI_CHAR, MPI_ROOT, interComm);
             }
 
             // send particles to children
             {
                 // bcast the yaml config
-                MPI_Bcast(&numParticles, 1, MPI_INT, MPI_ROOT, interComm0);
-                MPI_Bcast(particles.data(), numParticles, mpiParticleType, MPI_ROOT, interComm0);
+                MPI_Bcast(&numParticles, 1, MPI_INT, MPI_ROOT, interComm);
+                MPI_Bcast(particles.data(), numParticles, mpiParticleType, MPI_ROOT, interComm);
             }
 
             // wait until benchmarks are done
-            MPI_Barrier(interComm0);
+            MPI_Barrier(interComm);
+            MPI_Comm_disconnect(&interComm);
 
             ++i;
         }
@@ -257,6 +258,7 @@ int main(int argc, char **argv)
         benchmark::Shutdown();
 
         MPI_Barrier(parent);
+        MPI_Comm_disconnect(&parent);
     }
 
     // finalize

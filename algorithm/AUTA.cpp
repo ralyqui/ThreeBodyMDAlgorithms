@@ -127,7 +127,7 @@ void AUTA::sendBackParticles()
 {
     MPI_Request requestSend0, requestSend1, requestSend2;
     MPI_Request requestRecv0, requestRecv1, requestRecv2;
-    MPI_Status statusRecv0, statusRecv1, statusRecv2;
+
     bool b0Sent = false, b1Sent = false, b2Sent = false;
 
     if (this->b0Owner != this->worldRank) {

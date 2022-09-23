@@ -10,7 +10,7 @@ SingleIteration::~SingleIteration() {}
 
 void SingleIteration::BeforeBench(benchmark::State &state __attribute__((unused)))
 {
-    this->context->Init(this->contextArgs /*ContextArgs{1, 0.001, Eigen::Vector3d{0, 0, 0}, 5., std::vector<int>({1})}*/);
+    this->context->Init(this->contextArgs);
     this->simulation = this->context->GetSimulation();
 }
 

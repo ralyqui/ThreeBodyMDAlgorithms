@@ -47,7 +47,7 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
                                                       std::vector<Utility::Particle> &b1,
                                                       std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner,
                                                       int b2Owner, int b0Start, int b0NumSteps, double cutoff,
-                                                      Eigen::Array3d localCellWidth)
+                                                      Eigen::Array3d localCellWidth __attribute__((unused)))
 {
     int numActParticleInteractions = 0;
     int numPossibleParticleInteractions = 0;
