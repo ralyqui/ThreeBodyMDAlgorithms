@@ -34,6 +34,7 @@
 #include "../utility/utility.hpp"
 #include "MPIBenchmark.hpp"
 #include "SingleIteration.hpp"
+#include "SingleIterationOnlySimStep.hpp"
 #include "utils.hpp"
 
 const char* execCommand = "./benchmain";

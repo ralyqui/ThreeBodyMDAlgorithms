@@ -27,6 +27,7 @@ target_include_directories(main PRIVATE utility algorithm decomposition
 
 target_link_libraries(main ${MPI_C_LIBRARIES})
 target_link_libraries(main Eigen3::Eigen)
+target_link_libraries(main OpenMP::OpenMP_CXX)
 
 if(PROFILE_3BMDA)
   target_compile_definitions(main PUBLIC PROFILE_3BMDA)
@@ -110,6 +111,7 @@ if(BENCHMARK_3BMDA)
       benchmarks/P3BCAContext.cpp
       benchmarks/Context.cpp
       benchmarks/SingleIteration.cpp
+      benchmarks/SingleIterationOnlySimStep.cpp
       topology/Topology.cpp
       topology/RingTopology.cpp
       topology/CartTopology.cpp

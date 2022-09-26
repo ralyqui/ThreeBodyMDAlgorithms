@@ -21,7 +21,7 @@ private:
     void writeSimulationStepToCSV(std::string file);
 
 #ifdef PROFILE_3BMDA
-    void calcOverallHitrate(int step, double hitrate);
+    //void calcOverallHitrate(int step, double hitrate);
 #endif
 
 public:

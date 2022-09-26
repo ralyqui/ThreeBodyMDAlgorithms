@@ -6,6 +6,12 @@ AxilrodTeller::~AxilrodTeller() {}
 
 void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k)
 {
+#ifdef PROFILE_3BMDA
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
+#endif
+
     // see "The Role of Three-Body Interactions on the Equilibrium and Non-Equilibrium Properties of Fluids from
     // Molecular Simulation" for that
 
@@ -72,17 +78,58 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
              1. / (d2c * d3b * d5a) - 1. / (d2c * d5b * d3a) - 3. / (d4c * d1b * d5a) - 3. / (d4c * d5b * d1a) -
              5. / (d6c * d1b * d3a) - 5. / (d6c * d3b * d1a) + 6. / (d4c * d3b * d3a));
 
-    i.fX = i.fX - dXa * dVdRa - dXb * dVdRb;
-    i.fY = i.fY - dYa * dVdRa - dYb * dVdRb;
-    i.fZ = i.fZ - dZa * dVdRa - dZb * dVdRb;
+    double newIfXContrib = dXa * dVdRa + dXb * dVdRb;
+    double newIfYContrib = dYa * dVdRa + dYb * dVdRb;
+    double newIfZContrib = dZa * dVdRa + dZb * dVdRb;
 
-    j.fX = j.fX - dXa * (-dVdRa) - dXc * dVdRc;
-    j.fY = j.fY - dYa * (-dVdRa) - dYc * dVdRc;
-    j.fZ = j.fZ - dZa * (-dVdRa) - dZc * dVdRc;
+    double newJfXContrib = dXa * (-dVdRa) + dXc * dVdRc;
+    double newJfYContrib = dYa * (-dVdRa) + dYc * dVdRc;
+    double newJfZContrib = dZa * (-dVdRa) + dZc * dVdRc;
 
-    k.fX = j.fX - dXb * (-dVdRb) - dXc * (-dVdRc);
-    k.fY = j.fY - dYb * (-dVdRb) - dYc * (-dVdRc);
-    k.fZ = j.fZ - dZb * (-dVdRb) - dZc * (-dVdRc);
+    double newKfXContrib = dXb * (-dVdRb) + dXc * (-dVdRc);
+    double newKfYContrib = dYb * (-dVdRb) + dYc * (-dVdRc);
+    double newKfZContrib = dZb * (-dVdRb) + dZc * (-dVdRc);
+
+    //#pragma omp critical
+    {
+        //#pragma omp atomic
+        i.fX -= newIfXContrib;
+        //#pragma omp atomic
+        i.fY -= newIfYContrib;
+        //#pragma omp atomic
+        i.fZ -= newIfZContrib;
+
+        //#pragma omp atomic
+        j.fX -= newJfXContrib;
+        //#pragma omp atomic
+        j.fY -= newJfYContrib;
+        //#pragma omp atomic
+        j.fZ -= newJfZContrib;
+
+        //#pragma omp atomic
+        k.fX -= newKfXContrib;
+        //#pragma omp atomic
+        k.fY -= newKfYContrib;
+        //#pragma omp atomic
+        k.fZ -= newKfZContrib;
+    }
+
+#ifdef PROFILE_3BMDA
+    end = std::chrono::system_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+
+    // check for over & underflow. https://stackoverflow.com/a/1514309
+    if (elapsed_time.count() > 0 && this->timeAcc > std::numeric_limits<int64_t>::max() - elapsed_time.count()) {
+        std::cout << "Overflow Warning for profiling in CalculateForces" << std::endl;
+    }
+    if (elapsed_time.count() < 0 && this->timeAcc < std::numeric_limits<int64_t>::max() - elapsed_time.count()) {
+        std::cout << "Underflow Warning for profiling in CalculateForces" << std::endl;
+    }
+
+    this->timeAcc += elapsed_time.count();
+
+    this->counter++;
+#endif
 }
 
 void AxilrodTeller::Init(std::shared_ptr<Simulation> simulation) { Potential::Init(simulation); }

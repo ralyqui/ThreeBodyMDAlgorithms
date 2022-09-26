@@ -384,6 +384,12 @@ int P3BCA::shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<
 
 int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int dst)
 {
+#ifdef PROFILE_3BMDA
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
+#endif
+
     // if (this->worldRank == 0) {
     //    std::cout << "myRank: " << this->worldRank << ", shift buffer from " << owner << " to " << dst
     //              << ", and import from " << src << std::endl;
@@ -412,11 +418,26 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
     // assign particles to buf
     buf = this->tmpRecv;
 
+#ifdef PROFILE_3BMDA
+    end = std::chrono::system_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    bool hasKey = this->times.count("mpiShift");
+    if (!hasKey) {
+        this->times["mpiShift"] = std::make_pair(2, std::vector<int64_t>());
+    }
+    this->times["mpiShift"].second.push_back(elapsed_time.count());
+#endif
+
     return status.MPI_TAG;
 }
 
 void P3BCA::sendBackParticles()
 {
+#ifdef PROFILE_3BMDA
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
+#endif
     MPI_Request requestSend1, requestSend2;
     MPI_Request requestRecv1, requestRecv2;
     MPI_Status statusRecv1, statusRecv2;
@@ -475,6 +496,15 @@ void P3BCA::sendBackParticles()
         this->b2 = this->b2Tmp;
         this->b2Tmp.clear();
     }
+#ifdef PROFILE_3BMDA
+    end = std::chrono::system_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    bool hasKey = this->times.count("sendBackParticles");
+    if (!hasKey) {
+        this->times["sendBackParticles"] = std::make_pair(1, std::vector<int64_t>());
+    }
+    this->times["sendBackParticles"].second.push_back(elapsed_time.count());
+#endif
 }
 
 int& P3BCA::getBufOwner(int i)
@@ -703,6 +733,8 @@ std::tuple<int, int> P3BCA::SimulationStep()
 
 #ifdef PROFILE_3BMDA
     this->hitrate /= hitRateDivider;
+    this->hitrates.push_back(this->hitrate);
+    //std::cout << this->hitrate << std::endl;
 #endif
 
     sendBackParticles();

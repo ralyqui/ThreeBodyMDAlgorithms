@@ -18,26 +18,28 @@ namespace Utility
         AlgorithmType algorithm;
         Eigen::Vector3d gForce;
         bool optimalDecomposition;
+        std::string outputProfile;
 
         void printHelp();
     };
 
     void cliArguments::printHelp()
     {
-        std::cout
-            << "Help: \n"
-            << "Options:\n"
-            << "\t-h,--help\t\tShow this help message\n"
-            << "\t-a,--algorithm\t\talgorithm to use (\"nata\", \"p3bca\", \"auta\")\n"
-            << "\t-i,--iterations\t\tnum of iterations to simulate\n"
-            << "\t-d,--delta\t\tduration of one simulation step\n"
-            << "\t-gx,--gravityZ\t\tgravitational force in x-direction\n"
-            << "\t-gy,--gravityY\t\tgravitational force in y-direction\n"
-            << "\t-gz,--gravityZ\t\tgravitational force in z-direction\n"
-            << "\t-csv,--csv\t\tcsv file with particles\n"
-            << "\t-o,--out\t\tcsv bas file name that will be used to create all csv outputs from each simulation step\n"
-            << "\t-decomp,--decomp\t\t(optimal | naive) decomposition strategy for cart topology\n"
-            << "\t-c,--cutoff\t\tcutoff distance" << std::endl;
+        std::cout << "Help: \n"
+                  << "Options:\n"
+                  << "\t-h,--help\t\tShow this help message\n"
+                  << "\t-a,--algorithm\t\talgorithm to use (\"nata\", \"p3bca\", \"auta\")\n"
+                  << "\t-i,--iterations\t\tnum of iterations to simulate\n"
+                  << "\t-d,--delta\t\tduration of one simulation step\n"
+                  << "\t-gx,--gravityZ\t\tgravitational force in x-direction\n"
+                  << "\t-gy,--gravityY\t\tgravitational force in y-direction\n"
+                  << "\t-gz,--gravityZ\t\tgravitational force in z-direction\n"
+                  << "\t-csv,--csv\t\tcsv file with particles\n"
+                  << "\t-o,--out\t\tcsv base file name that will be used to create all csv outputs from each "
+                     "simulation step\n"
+                  << "\t-op,--outProfile\t\tjson file to save profile output\n"
+                  << "\t-decomp,--decomp\t\t(optimal | naive) decomposition strategy for cart topology\n"
+                  << "\t-c,--cutoff\t\tcutoff distance" << std::endl;
     }
 
     cliArguments cliParse(std::vector<std::string> args)
@@ -120,6 +122,14 @@ namespace Utility
                         }
                         value = args[i + 1];
                         a.outputCSV = value;
+                        i++;
+                    } else if (flag.compare("op") == 0 || flag.compare("-outProfile") == 0) {
+                        if (args.size() <= (size_t)(i + 1)) {
+                            a.printHelp();
+                            exit(1);
+                        }
+                        value = args[i + 1];
+                        a.outputProfile = value;
                         i++;
                     } else if (flag.compare("gx") == 0 || flag.compare("-gravityX") == 0) {
                         if (args.size() <= (size_t)(i + 1)) {

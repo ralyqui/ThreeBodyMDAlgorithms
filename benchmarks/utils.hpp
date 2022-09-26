@@ -16,7 +16,15 @@
 #include "../utility/decompositions.hpp"
 #include "../utility/utility.hpp"
 
-enum Bench { SingleIteration_NATA, SingleIteration_AUTA, SingleIteration_P3BCA, NoBench };
+enum Bench {
+    SingleIteration_NATA,
+    SingleIteration_AUTA,
+    SingleIteration_P3BCA,
+    SingleIterationOnlySimStep_NATA,
+    SingleIterationOnlySimStep_AUTA,
+    SingleIterationOnlySimStep_P3BCA,
+    NoBench
+};
 
 struct BenchVariant {
     int numParticles;
@@ -101,6 +109,17 @@ Bench getBenchFromString(std::string &type, std::string &subtype)
             return Bench::SingleIteration_NATA;
         } else if (subtype.compare("P3BCA") == 0) {
             return Bench::SingleIteration_P3BCA;
+        } else {
+            return Bench::NoBench;
+        }
+    }
+    if (type.compare("SingleIterationOnlySimStep") == 0) {
+        if (subtype.compare("AUTA") == 0) {
+            return Bench::SingleIterationOnlySimStep_AUTA;
+        } else if (subtype.compare("NATA") == 0) {
+            return Bench::SingleIterationOnlySimStep_NATA;
+        } else if (subtype.compare("P3BCA") == 0) {
+            return Bench::SingleIterationOnlySimStep_P3BCA;
         } else {
             return Bench::NoBench;
         }
@@ -192,16 +211,28 @@ std::vector<std::shared_ptr<MPIBenchmark>> generateBenchmarksFromConfig(ryml::Tr
         Bench b = getBenchFromString(type, subtype);
         switch (b) {
             case Bench::SingleIteration_AUTA:
-                benchmark = std::make_shared<SingleIteration>(name, std::make_shared<AUTAContext>(mpiParticleType),
-                                                              args);
+                benchmark =
+                    std::make_shared<SingleIteration>(name, std::make_shared<AUTAContext>(mpiParticleType), args);
                 break;
             case Bench::SingleIteration_NATA:
-                benchmark = std::make_shared<SingleIteration>(name, std::make_shared<NATAContext>(mpiParticleType),
-                                                              args);
+                benchmark =
+                    std::make_shared<SingleIteration>(name, std::make_shared<NATAContext>(mpiParticleType), args);
                 break;
             case Bench::SingleIteration_P3BCA:
-                benchmark = std::make_shared<SingleIteration>(name, std::make_shared<P3BCAContext>(mpiParticleType),
-                                                              args);
+                benchmark =
+                    std::make_shared<SingleIteration>(name, std::make_shared<P3BCAContext>(mpiParticleType), args);
+                break;
+            case Bench::SingleIterationOnlySimStep_AUTA:
+                benchmark =
+                    std::make_shared<SingleIterationOnlySimStep>(name, std::make_shared<AUTAContext>(mpiParticleType), args);
+                break;
+            case Bench::SingleIterationOnlySimStep_NATA:
+                benchmark =
+                    std::make_shared<SingleIterationOnlySimStep>(name, std::make_shared<NATAContext>(mpiParticleType), args);
+                break;
+            case Bench::SingleIterationOnlySimStep_P3BCA:
+                benchmark =
+                    std::make_shared<SingleIterationOnlySimStep>(name, std::make_shared<P3BCAContext>(mpiParticleType), args);
                 break;
             case Bench::NoBench: exit(1); break;
 

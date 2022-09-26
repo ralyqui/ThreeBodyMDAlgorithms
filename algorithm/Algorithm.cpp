@@ -49,9 +49,15 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
                                                       int b2Owner, int b0Start, int b0NumSteps, double cutoff,
                                                       Eigen::Array3d localCellWidth __attribute__((unused)))
 {
+#ifdef PROFILE_3BMDA
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
+#endif
     int numActParticleInteractions = 0;
     int numPossibleParticleInteractions = 0;
     double sqrCutoff = cutoff * cutoff;
+    //#pragma omp parallel for num_threads(2)
     for (size_t i = b0Start; i < (b0NumSteps != -1 ? (size_t)b0NumSteps : b0.size()); ++i) {
         if (b0[i].isDummy) {
             continue;
@@ -83,12 +89,23 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
                         continue;
                     }
                 }
+
                 this->potential->CalculateForces(b0[i], b1[j], b2[k]);
+
                 // std::cout << "calculate particle triplet (" << i << ", " << j << ", " << k << ")" << std::endl;
                 numActParticleInteractions++;
             }
         }
     }
+#ifdef PROFILE_3BMDA
+    end = std::chrono::system_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    bool hasKey = this->times.count("calculateInteractions");
+    if (!hasKey) {
+        this->times["calculateInteractions"] = std::make_pair(2, std::vector<int64_t>());
+    }
+    this->times["calculateInteractions"].second.push_back(elapsed_time.count());
+#endif
     return std::tuple(numActParticleInteractions, numPossibleParticleInteractions);
 }
 
@@ -123,9 +140,9 @@ void Algorithm::SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<U
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("SumUpParticles");
     if (!hasKey) {
-        this->times["SumUpParticles"] = std::vector<std::chrono::nanoseconds>();
+        this->times["SumUpParticles"] = std::make_pair(0, std::vector<int64_t>());
     }
-    this->times["SumUpParticles"].push_back(elapsed_time);
+    this->times["SumUpParticles"].second.push_back(elapsed_time.count());
 #endif
 }
 
@@ -134,7 +151,7 @@ std::vector<Utility::Triplet> Algorithm::GetProcessed() { return this->processed
 #endif
 
 #ifdef PROFILE_3BMDA
-std::map<std::string, std::vector<std::chrono::nanoseconds>> Algorithm::GetTimes() { return this->times; }
+std::map<std::string, std::pair<char, std::vector<int64_t>>> Algorithm::GetTimes() { return this->times; }
 
-double Algorithm::GetHitrate() { return this->hitrate; }
+std::vector<double> Algorithm::GetHitrates() { return this->hitrates; }
 #endif

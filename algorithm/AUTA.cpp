@@ -23,11 +23,27 @@ void AUTA::Init(std::shared_ptr<Simulation> simulation)
 
 int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
 {
+#ifdef PROFILE_3BMDA
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
+#endif
+
     MPI_Status status;
 
     // https://moodle.rrze.uni-erlangen.de/pluginfile.php/13157/mod_resource/content/1/06_MPI_Advanced.pdf Page 12
     MPI_Sendrecv_replace(buf.data(), buf.size(), *this->mpiParticleType, this->rightNeighbor, owner, this->leftNeighbor,
                          MPI_ANY_TAG, this->ringTopology->GetComm(), &status);
+
+#ifdef PROFILE_3BMDA
+    end = std::chrono::system_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    bool hasKey = this->times.count("shiftRight");
+    if (!hasKey) {
+        this->times["shiftRight"] = std::make_pair(2, std::vector<int64_t>());
+    }
+    this->times["shiftRight"].second.push_back(elapsed_time.count());
+#endif
 
     return status.MPI_TAG;
 }
@@ -125,6 +141,11 @@ int& AUTA::getBufOwner(int i)
 
 void AUTA::sendBackParticles()
 {
+#ifdef PROFILE_3BMDA
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
+#endif
     MPI_Request requestSend0, requestSend1, requestSend2;
     MPI_Request requestRecv0, requestRecv1, requestRecv2;
 
@@ -199,6 +220,15 @@ void AUTA::sendBackParticles()
     this->b0Owner = this->worldRank;
     this->b1Owner = this->worldRank;
     this->b2Owner = this->worldRank;
+#ifdef PROFILE_3BMDA
+    end = std::chrono::system_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    bool hasKey = this->times.count("sendBackParticles");
+    if (!hasKey) {
+        this->times["sendBackParticles"] = std::make_pair(2, std::vector<int64_t>());
+    }
+    this->times["sendBackParticles"].second.push_back(elapsed_time.count());
+#endif
 }
 
 std::tuple<int, int> AUTA::SimulationStep()
@@ -288,6 +318,7 @@ std::tuple<int, int> AUTA::SimulationStep()
 
 #ifdef PROFILE_3BMDA
     this->hitrate /= hitRateDivider;
+    this->hitrates.push_back(this->hitrate);
 #endif
 
     // sum up particles
