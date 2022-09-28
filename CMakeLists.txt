@@ -32,6 +32,10 @@ target_link_libraries(main OpenMP::OpenMP_CXX)
 if(PROFILE_3BMDA)
   target_compile_definitions(main PUBLIC PROFILE_3BMDA)
 endif()
+if(USE_OMP)
+  message(STATUS "add USE_OMP compile definition")
+  target_compile_definitions(main PUBLIC USE_OMP)
+endif()
 
 set_target_properties(main PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                       ${CMAKE_BINARY_DIR}/executables)
@@ -81,6 +85,10 @@ if(TESTS_3BMDA)
   target_link_libraries(tests Eigen3::Eigen)
 
   target_compile_definitions(tests PUBLIC TESTS_3BMDA)
+  if(USE_OMP)
+    message(STATUS "add USE_OMP compile definition")
+    target_compile_definitions(tests PUBLIC USE_OMP)
+  endif()
 
   # https://stackoverflow.com/questions/71971858/ctest-and-mpi-parallel-tests
   # solving the problem when gtest executes tests without mpi set_property(
@@ -144,6 +152,10 @@ if(BENCHMARK_3BMDA)
   target_link_libraries(benchmain ryml)
 
   target_compile_definitions(benchmain PUBLIC BENCHMARK_3BMDA)
+  if(USE_OMP)
+    message(STATUS "add USE_OMP compile definition")
+    target_compile_definitions(tests PUBLIC USE_OMP)
+  endif()
 
   set_target_properties(
     benchrunner benchmain PROPERTIES RUNTIME_OUTPUT_DIRECTORY

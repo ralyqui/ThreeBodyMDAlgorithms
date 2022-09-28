@@ -31,6 +31,7 @@
 #include "../topology/CartTopology.hpp"
 #include "../topology/RingTopology.hpp"
 #include "../topology/Topology.hpp"
+#include "../utility/decompositions.hpp"
 #include "../utility/utility.hpp"
 #include "MPIBenchmark.hpp"
 #include "SingleIteration.hpp"

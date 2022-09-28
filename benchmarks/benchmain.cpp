@@ -220,7 +220,7 @@ int main(int argc, char **argv)
         MPI_Bcast(particles.data(), numParticles, mpiParticleType, 0, parent);
 
         // create benchmark objects
-        benchmarks = generateBenchmarksFromConfig(tree, mpiParticleType);
+        benchmarks = generateBenchmarksFromConfig(tree, mpiParticleType, decompositions, decompositionsNaive);
 
         int iterations;
         benchmark::TimeUnit tu;

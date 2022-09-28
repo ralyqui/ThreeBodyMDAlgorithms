@@ -17,6 +17,7 @@ private:
     int nCbY;
     int nCbZ;
     int numSteps;
+    Eigen::Array3d physicalDomainSize;
 
     int b1Owner;
     int b2Owner;

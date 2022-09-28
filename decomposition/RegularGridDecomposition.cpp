@@ -36,7 +36,7 @@ void RegularGridDecomposition::Init(std::shared_ptr<Simulation> simulation)
 
     Eigen::Array3d diff = (std::get<1>(domainMinMax) - std::get<0>(domainMinMax)).abs();
 
-    // this->physicalDomainSize = std::max(diff.z(), std::max(diff.x(), diff.y()));
+    this->physicalDomainSize = diff;
 
     // Eigen::Array3d physicalDomainCenter((std::get<1>(domainMinMax).x() + std::get<0>(domainMinMax).x()) / 2.0,
     //                                    (std::get<1>(domainMinMax).y() + std::get<0>(domainMinMax).y()) / 2.0,
@@ -207,6 +207,7 @@ void RegularGridDecomposition::Update(double dt, Eigen::Vector3d gForce)
 }
 
 Eigen::Array3d RegularGridDecomposition::GetCellSize() { return this->localCellWidth; }
+Eigen::Array3d RegularGridDecomposition::GetPhysicalDomainSize() { return this->physicalDomainSize; }
 int RegularGridDecomposition::GetDimX() { return this->dimX; }
 int RegularGridDecomposition::GetDimY() { return this->dimY; }
 int RegularGridDecomposition::GetDimZ() { return this->dimZ; }

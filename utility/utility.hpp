@@ -3,8 +3,11 @@
 #include <memory>
 
 #include "../external/rapidcsv/src/rapidcsv.h"
+//#include "decompositions.hpp"
+//#include "rapidjson/document.h"
+//#include "rapidjson/stringbuffer.h"
+//#include "rapidjson/writer.h"
 #include "structs.hpp"
-#include "decompositions.hpp"
 
 namespace Utility
 {
@@ -28,6 +31,9 @@ namespace Utility
 
     std::string get_file_contents(const char *filename);
 
-    std::vector<int> getDecomposition(int worldSize, bool optimal);
+    std::vector<int> getDecomposition(int worldSize,
+                                      const std::vector<std::pair<int, std::vector<int>>> &decompositions);
+    // std::tuple<std::vector<std::pair<int, std::vector<int>>>, std::vector<std::pair<int, std::vector<int>>>>
+    // jsonToDecompositionArray(const char *filename, std::string type);
 
 }  // namespace Utility

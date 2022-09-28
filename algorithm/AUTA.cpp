@@ -37,10 +37,10 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
 
 #ifdef PROFILE_3BMDA
     end = std::chrono::system_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     bool hasKey = this->times.count("shiftRight");
     if (!hasKey) {
-        this->times["shiftRight"] = std::make_pair(2, std::vector<int64_t>());
+        this->times["shiftRight"] = std::make_pair(1, std::vector<int64_t>());
     }
     this->times["shiftRight"].second.push_back(elapsed_time.count());
 #endif
@@ -222,10 +222,10 @@ void AUTA::sendBackParticles()
     this->b2Owner = this->worldRank;
 #ifdef PROFILE_3BMDA
     end = std::chrono::system_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     bool hasKey = this->times.count("sendBackParticles");
     if (!hasKey) {
-        this->times["sendBackParticles"] = std::make_pair(2, std::vector<int64_t>());
+        this->times["sendBackParticles"] = std::make_pair(1, std::vector<int64_t>());
     }
     this->times["sendBackParticles"].second.push_back(elapsed_time.count());
 #endif

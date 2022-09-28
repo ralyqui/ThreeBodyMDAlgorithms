@@ -14,13 +14,16 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
     std::shared_ptr<RegularGridDecomposition> decomposition =
         std::static_pointer_cast<RegularGridDecomposition>(this->simulation->GetDecomposition());
 
+    this->physicalDomainSize = decomposition->GetPhysicalDomainSize();
+
     this->dimX = decomposition->GetDimX();
     this->dimY = decomposition->GetDimY();
     this->dimZ = decomposition->GetDimZ();
 
-    double cellSizeX = decomposition->GetCellSize()[0];
-    double cellSizeY = decomposition->GetCellSize()[1];
-    double cellSizeZ = decomposition->GetCellSize()[2];
+    Eigen::Array3d localCellSize = decomposition->GetCellSize();
+    double cellSizeX = localCellSize[0];
+    double cellSizeY = localCellSize[1];
+    double cellSizeZ = localCellSize[2];
 
     this->numDims = this->cartTopology->GetCartRank().GetDimensions();
 
@@ -38,10 +41,6 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
     }
 
     this->worldRank = this->cartTopology->GetWorldRank();
-
-    if (this->worldRank == 0) {
-        std::cout << "numDims: " << numDims << std::endl;
-    }
 
     calcSteps(numDims);
 
@@ -63,9 +62,12 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
             exit(1);
         }
 
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
+        std::cout << "numDims: " << numDims << std::endl;
         std::cout << "specified cutoff: " << this->cutoff << ", calculated cutoff boxes: [" << this->nCbX << ", "
                   << this->nCbY << ", " << this->nCbZ << "], cell size: [" << cellSizeX << ", " << cellSizeY << ", "
                   << cellSizeZ << "]" << std::endl;
+#endif
     }
 }
 
@@ -420,10 +422,10 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
 
 #ifdef PROFILE_3BMDA
     end = std::chrono::system_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     bool hasKey = this->times.count("mpiShift");
     if (!hasKey) {
-        this->times["mpiShift"] = std::make_pair(2, std::vector<int64_t>());
+        this->times["mpiShift"] = std::make_pair(1, std::vector<int64_t>());
     }
     this->times["mpiShift"].second.push_back(elapsed_time.count());
 #endif
@@ -625,13 +627,17 @@ std::tuple<int, int> P3BCA::SimulationStep()
             }*/
             // if (cartTopology->GetWorldSize() == 2 && i2 < 1)
 
-            std::tuple<int, int> numParticleInteractions = this->CalculateInteractions(
-                this->b0, this->b1, this->b2, this->worldRank, this->b1Owner, this->b2Owner, this->cutoff);
+            std::tuple<int, int> numParticleInteractions =
+                this->CalculateInteractions(this->b0, this->b1, this->b2, this->worldRank, this->b1Owner, this->b2Owner,
+                                            this->cutoff, physicalDomainSize);
             numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
 
             // if (worldRank == 0) {
-            // std::cout << "calculate interactions between (" << worldRank << ", " << this->b1Owner << ", "
-            //          << this->b2Owner << ")" << std::endl;
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+            std::cout << "I'm proc " << simulation->GetTopology()->GetWorldRank()
+                      << " and calculate interactions between (" << worldRank << ", " << this->b1Owner << ", "
+                      << this->b2Owner << ")" << std::endl;
+#endif
             //}
             numBufferInteractions++;
 
@@ -734,7 +740,7 @@ std::tuple<int, int> P3BCA::SimulationStep()
 #ifdef PROFILE_3BMDA
     this->hitrate /= hitRateDivider;
     this->hitrates.push_back(this->hitrate);
-    //std::cout << this->hitrate << std::endl;
+    // std::cout << this->hitrate << std::endl;
 #endif
 
     sendBackParticles();

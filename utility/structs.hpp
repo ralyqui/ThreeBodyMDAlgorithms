@@ -77,6 +77,17 @@ namespace Utility
             return (o.pX - pX) * (o.pX - pX) + (o.pY - pY) * (o.pY - pY) + (o.pZ - pZ) * (o.pZ - pZ);
         }
 
+        double GetSqrDistPeriodic(Particle o, Eigen::Array3d physicalDomainSize)
+        {
+            double absXDist = std::abs(o.pX - pX);
+            double absYDist = std::abs(o.pY - pY);
+            double absZDist = std::abs(o.pZ - pZ);
+            double xDistP = std::min(absXDist, physicalDomainSize[0] - absXDist);
+            double yDistP = std::min(absYDist, physicalDomainSize[1] - absYDist);
+            double zDistP = std::min(absZDist, physicalDomainSize[2] - absZDist);
+            return xDistP * xDistP + yDistP * yDistP + zDistP * zDistP;
+        }
+
         double GetDist(Particle o)
         {
             return std::sqrt((o.pX - pX) * (o.pX - pX) + (o.pY - pY) * (o.pY - pY) + (o.pZ - pZ) * (o.pZ - pZ));

@@ -19,6 +19,7 @@ protected:
     std::vector<Utility::Particle> sendToLeftNeighbor, sendToRightNeighbor;
     std::vector<Utility::Particle> recvFromLeftNeighbor, recvFromRightNeighbor;
     Eigen::Array3d localCellWidth;
+    Eigen::Array3d physicalDomainSize;
     // double physicalDomainSize;
     int dimX;
     int dimY;
@@ -40,6 +41,7 @@ public:
     void Update(double dt, Eigen::Vector3d gForce) override;
 
     Eigen::Array3d GetCellSize();
+    Eigen::Array3d GetPhysicalDomainSize();
     int GetDimX();
     int GetDimY();
     int GetDimZ();

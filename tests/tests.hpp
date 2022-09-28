@@ -28,6 +28,7 @@
 #include "../topology/Topology.hpp"
 #include "../utility/cli.hpp"
 #include "../utility/utility.hpp"
+#include "../utility/decompositions.hpp"
 #include "gtest_mpi_listener.hpp"
 
 #endif
