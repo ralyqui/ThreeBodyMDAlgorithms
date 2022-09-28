@@ -627,18 +627,17 @@ std::tuple<int, int> P3BCA::SimulationStep()
             }*/
             // if (cartTopology->GetWorldSize() == 2 && i2 < 1)
 
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+            std::cout << "I'm proc " << simulation->GetTopology()->GetWorldRank()
+                      << " and going to calculate interactions between (" << worldRank << ", " << this->b1Owner << ", "
+                      << this->b2Owner << ")" << std::endl;
+#endif
+
             std::tuple<int, int> numParticleInteractions =
                 this->CalculateInteractions(this->b0, this->b1, this->b2, this->worldRank, this->b1Owner, this->b2Owner,
                                             this->cutoff, physicalDomainSize);
             numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
 
-            // if (worldRank == 0) {
-#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-            std::cout << "I'm proc " << simulation->GetTopology()->GetWorldRank()
-                      << " and calculate interactions between (" << worldRank << ", " << this->b1Owner << ", "
-                      << this->b2Owner << ")" << std::endl;
-#endif
-            //}
             numBufferInteractions++;
 
 #ifdef TESTS_3BMDA

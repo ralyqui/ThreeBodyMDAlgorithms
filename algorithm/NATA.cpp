@@ -113,6 +113,13 @@ std::tuple<int, int> NATA::SimulationStep()
             calculate = false;
             calculateProcessed(step, calculate);
             if (calculate) {
+
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+                std::cout << "I'm proc " << simulation->GetTopology()->GetWorldRank()
+                          << " and going to calculate interactions between (" << worldRank << ", " << this->b1Owner << ", "
+                          << this->b2Owner << ")" << std::endl;
+#endif
+
                 std::tuple<int, int> numParticleInteractions = this->CalculateInteractions(
                     this->b0, this->b1, this->b2, this->worldRank, this->b1Owner, this->b2Owner);
 

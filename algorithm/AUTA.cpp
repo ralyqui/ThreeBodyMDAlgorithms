@@ -266,6 +266,13 @@ std::tuple<int, int> AUTA::SimulationStep()
             if (j != 0 || s != this->worldSize) {
                 getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
             }
+
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+            std::cout << "I'm proc " << simulation->GetTopology()->GetWorldRank()
+                      << " and going to calculate interactions between (" << this->b0Owner << ", " << this->b1Owner
+                      << ", " << this->b2Owner << ")" << std::endl;
+#endif
+
             std::tuple<int, int> numParticleInteractions =
                 this->CalculateInteractions(this->b0, this->b1, this->b2, this->b0Owner, this->b1Owner, this->b2Owner);
             numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
@@ -293,9 +300,17 @@ std::tuple<int, int> AUTA::SimulationStep()
         int thirdID = this->worldRank / (this->worldSize / 3);
 
         // Calculate one third of the interactions
+
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+        std::cout << "I'm proc " << simulation->GetTopology()->GetWorldRank()
+                  << " and going to calculate interactions between (" << this->b0Owner << ", " << this->b1Owner << ", "
+                  << this->b2Owner << ")" << std::endl;
+#endif
+
         numBufferInteractions++;
         std::tuple<int, int> numParticleInteractions = calculateOneThirdOfInteractions(thirdID);
         numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
+
 #ifdef TESTS_3BMDA
         // TESTS_3BMDA is defined
         processed.push_back(Utility::Triplet(getBufOwner(0), getBufOwner(1), getBufOwner(2)));
