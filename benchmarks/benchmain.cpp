@@ -222,7 +222,7 @@ int main(int argc, char **argv)
         // create benchmark objects
         benchmarks = generateBenchmarksFromConfig(tree, mpiParticleType, decompositions, decompositionsNaive);
 
-        int iterations;
+        int iterations = 1;
         benchmark::TimeUnit tu;
         std::string tuStr;
 

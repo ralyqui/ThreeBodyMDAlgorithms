@@ -154,7 +154,7 @@ if(BENCHMARK_3BMDA)
   target_compile_definitions(benchmain PUBLIC BENCHMARK_3BMDA)
   if(USE_OMP)
     message(STATUS "add USE_OMP compile definition")
-    target_compile_definitions(tests PUBLIC USE_OMP)
+    target_compile_definitions(benchmain PUBLIC USE_OMP)
   endif()
 
   set_target_properties(
