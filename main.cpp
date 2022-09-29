@@ -264,24 +264,64 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 
     // hitrate calculation
     {
-        std::vector<double> accHitrates;
-        accHitrates.resize(hitrates.size());
-
-        MPI_Reduce(hitrates.data(), accHitrates.data(), hitrates.size(), MPI_DOUBLE, MPI_SUM, 0,
+        std::vector<double> allHitrates;
+        int numMyHitrates = hitrates.size();
+        std::vector<int> numAllHitrates;
+        numAllHitrates.resize(simulation->GetTopology()->GetWorldSize());
+        // elements from each process are gathered in order of their rank
+        MPI_Gather(&numMyHitrates, 1, MPI_INT, numAllHitrates.data(), 1, MPI_INT, 0,
                    simulation->GetTopology()->GetComm());
+
+        int maxNumElements = *(std::max_element(numAllHitrates.begin(), numAllHitrates.end()));
+
+        int sumNumAllHitrates = 0;
+        for (int& nHr : numAllHitrates) {
+            sumNumAllHitrates += nHr;
+        }
+
+        std::vector<int> displacements;
+        int sumDispl = 0;
+        for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
+            displacements.push_back(sumDispl);
+            sumDispl += maxNumElements;
+        }
+
+        allHitrates.resize(sumDispl);
+        std::fill(allHitrates.begin(), allHitrates.end(), 0.0);
+
+        MPI_Gatherv(hitrates.data(), hitrates.size(), MPI_DOUBLE, allHitrates.data(), numAllHitrates.data(),
+                    displacements.data(), MPI_DOUBLE, 0, simulation->GetTopology()->GetComm());
+
+        std::vector<double> accHitrates;
+        accHitrates.resize(maxNumElements);
+
+        // std::cout << "hitrate: " << hitrates[0] << std::endl;
+
+        // MPI_Reduce(hitrates.data(), accHitrates.data(), hitrates.size(), MPI_DOUBLE, MPI_SUM, 0,
+        //           simulation->GetTopology()->GetComm());
 
         if (simulation->GetTopology()->GetWorldRank() == 0) {
             rapidjson::Value hitratesPerSimStepRJ(rapidjson::kArrayType);
-            double sum = 0;
-            for (double& accHr : accHitrates) {
-                sum += accHr;
+
+            for (int j = 0; j < maxNumElements; j++) {
+                double accHrPerSimStep = 0;
+                for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
+                    // std::cout << "hr of proc " << i << " in step " << j << ": " << allHitrates[displacements[i] + j]
+                    //          << std::endl;
+                    accHrPerSimStep += allHitrates[displacements[i] + j];
+                }
+                // Note: this works only if we have just one sim step
+                accHitrates[j] = accHrPerSimStep / (double)sumNumAllHitrates;
+                // std::cout << "divided hr by " << sumNumAllHitrates << std::endl;
             }
-            hitratesPerSimStepRJ.PushBack(rapidjson::Value(sum / (double)simulation->GetTopology()->GetWorldSize()),
-                                          d.GetAllocator());
-            rapidjson::Value hitrateRJ(rapidjson::kNumberType);
-            hitrateRJ.SetDouble(
-                sum / ((double)simulation->GetTopology()->GetWorldSize() * (double)simulation->GetNumIterations()));
-            hr.AddMember("avg hitrate over all sim steps", hitrateRJ, d.GetAllocator());
+
+            // Note: this works only if we have just one sim step
+            hitratesPerSimStepRJ.PushBack(rapidjson::Value(accHitrates[0]), d.GetAllocator());
+
+            // rapidjson::Value hitrateRJ(rapidjson::kNumberType);
+            // hitrateRJ.SetDouble(
+            //    sum / ((double)simulation->GetTopology()->GetWorldSize() * (double)simulation->GetNumIterations()));
+            // hr.AddMember("avg hitrate over all sim steps", hitrateRJ, d.GetAllocator());
             hr.AddMember("avg hitrate per sim step", hitratesPerSimStepRJ, d.GetAllocator());
         }
     }

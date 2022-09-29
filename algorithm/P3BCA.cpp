@@ -737,9 +737,11 @@ std::tuple<int, int> P3BCA::SimulationStep()
     MPI_Barrier(this->simulation->GetTopology()->GetComm());
 
 #ifdef PROFILE_3BMDA
-    this->hitrate /= hitRateDivider;
-    this->hitrates.push_back(this->hitrate);
-    // std::cout << this->hitrate << std::endl;
+    if (hitRateDivider > 0) {
+        this->hitrate /= hitRateDivider;
+        this->hitrates.push_back(this->hitrate);
+    }
+
 #endif
 
     sendBackParticles();
