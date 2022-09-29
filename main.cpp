@@ -134,7 +134,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
     // fetch profiling data
     std::map<std::string, std::pair<char, std::vector<int64_t>>> times = simulation->GetAlgorithm()->GetTimes();
     std::vector<double> hitrates = simulation->GetAlgorithm()->GetHitrates();
-    std::map<std::string, std::pair<char, double>> calcTimes = simulation->GetPotential()->GetAvgCalcTime();
+    // std::map<std::string, std::pair<char, double>> calcTimes = simulation->GetPotential()->GetAvgCalcTime();
 
     std::vector<float> valuesForSTVR;
 

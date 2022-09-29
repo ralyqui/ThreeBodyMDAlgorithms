@@ -36,7 +36,7 @@ void Simulation::Start()
         }*/
 
 #ifdef PROFILE_3BMDA
-        this->potential->ResetTime();
+        // this->potential->ResetTime();
 #endif
 
         // do step and record the number of interactions

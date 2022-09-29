@@ -6,11 +6,13 @@ AxilrodTeller::~AxilrodTeller() {}
 
 void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k)
 {
-#ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::time_point<std::chrono::system_clock> end;
-    start = std::chrono::system_clock::now();
-#endif
+    /*
+    #ifdef PROFILE_3BMDA
+        std::chrono::time_point<std::chrono::system_clock> start;
+        std::chrono::time_point<std::chrono::system_clock> end;
+        start = std::chrono::system_clock::now();
+    #endif
+    */
 
     // see "The Role of Three-Body Interactions on the Equilibrium and Non-Equilibrium Properties of Fluids from
     // Molecular Simulation" for that
@@ -92,44 +94,45 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
 
     //#pragma omp critical
     {
-        //#pragma omp atomic
+#pragma omp atomic
         i.fX -= newIfXContrib;
-        //#pragma omp atomic
+#pragma omp atomic
         i.fY -= newIfYContrib;
-        //#pragma omp atomic
+#pragma omp atomic
         i.fZ -= newIfZContrib;
 
-        //#pragma omp atomic
+#pragma omp atomic
         j.fX -= newJfXContrib;
-        //#pragma omp atomic
+#pragma omp atomic
         j.fY -= newJfYContrib;
-        //#pragma omp atomic
+#pragma omp atomic
         j.fZ -= newJfZContrib;
 
-        //#pragma omp atomic
+#pragma omp atomic
         k.fX -= newKfXContrib;
-        //#pragma omp atomic
+#pragma omp atomic
         k.fY -= newKfYContrib;
-        //#pragma omp atomic
+#pragma omp atomic
         k.fZ -= newKfZContrib;
     }
+    /*
+    #ifdef PROFILE_3BMDA
+        end = std::chrono::system_clock::now();
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
-#ifdef PROFILE_3BMDA
-    end = std::chrono::system_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+        // check for over & underflow. https://stackoverflow.com/a/1514309
+        if (elapsed_time.count() > 0 && this->timeAcc > std::numeric_limits<int64_t>::max() - elapsed_time.count()) {
+            std::cout << "Overflow Warning for profiling in CalculateForces" << std::endl;
+        }
+        if (elapsed_time.count() < 0 && this->timeAcc < std::numeric_limits<int64_t>::max() - elapsed_time.count()) {
+            std::cout << "Underflow Warning for profiling in CalculateForces" << std::endl;
+        }
 
-    // check for over & underflow. https://stackoverflow.com/a/1514309
-    if (elapsed_time.count() > 0 && this->timeAcc > std::numeric_limits<int64_t>::max() - elapsed_time.count()) {
-        std::cout << "Overflow Warning for profiling in CalculateForces" << std::endl;
-    }
-    if (elapsed_time.count() < 0 && this->timeAcc < std::numeric_limits<int64_t>::max() - elapsed_time.count()) {
-        std::cout << "Underflow Warning for profiling in CalculateForces" << std::endl;
-    }
+        this->timeAcc += elapsed_time.count();
 
-    this->timeAcc += elapsed_time.count();
-
-    this->counter++;
-#endif
+        this->counter++;
+    #endif
+    */
 }
 
 void AxilrodTeller::Init(std::shared_ptr<Simulation> simulation) { Potential::Init(simulation); }

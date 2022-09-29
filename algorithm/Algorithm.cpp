@@ -125,9 +125,11 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
     // std::cout << "defined(USE_OMP) && defined(OPENMPAVAIL)" << std::endl;
     // TODO: write custom omp reduction
+    /*
     std::vector<Utility::Particle> b0Copy = b0;
     std::vector<Utility::Particle> b1Copy = b1;
     std::vector<Utility::Particle> b2Copy = b2;
+    */
 #endif
 
 #ifdef PROFILE_3BMDA
@@ -139,7 +141,7 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
 #pragma omp parallel for num_threads(2)
     for (auto it = particleTripletsToCalculate.begin(); it < particleTripletsToCalculate.end(); it++) {
-        int tid = omp_get_thread_num();
+        /*int tid = omp_get_thread_num();
         std::vector<Utility::Particle> *b0ToUse;
         std::vector<Utility::Particle> *b1ToUse;
         std::vector<Utility::Particle> *b2ToUse;
@@ -151,11 +153,11 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
             b0ToUse = &b0Copy;
             b1ToUse = &b1Copy;
             b2ToUse = &b2Copy;
-        }
+        }*/
 
-        this->potential->CalculateForces((*b0ToUse)[std::get<0>((*it))], (*b1ToUse)[std::get<1>((*it))],
-                                         (*b2ToUse)[std::get<2>((*it))]);
-        // this->potential->CalculateForces(b0[std::get<0>((*it))], b1[std::get<1>((*it))], b2[std::get<2>((*it))]);
+        // this->potential->CalculateForces((*b0ToUse)[std::get<0>((*it))], (*b1ToUse)[std::get<1>((*it))],
+        //                                 (*b2ToUse)[std::get<2>((*it))]);
+        this->potential->CalculateForces(b0[std::get<0>((*it))], b1[std::get<1>((*it))], b2[std::get<2>((*it))]);
     }
 #else
 
@@ -175,7 +177,7 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
 #endif
 
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
-    for (size_t i = 0; i < b0.size(); i++) {
+    /*for (size_t i = 0; i < b0.size(); i++) {
         b0[i].fX += b0Copy[i].fX;
         b0[i].fY += b0Copy[i].fY;
         b0[i].fZ += b0Copy[i].fZ;
@@ -189,11 +191,10 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
         b2[i].fX += b2Copy[i].fX;
         b2[i].fY += b2Copy[i].fY;
         b2[i].fZ += b2Copy[i].fZ;
-    }
+    }*/
 #endif
 }
 
-// TODO: use omp for that
 // void __attribute__((optimize("O0"))) P3BCA::sumUpParticles()
 void Algorithm::SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                                std::vector<Utility::Particle> &b2)
