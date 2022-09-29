@@ -92,7 +92,7 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
     double newKfYContrib = dYb * (-dVdRb) + dYc * (-dVdRc);
     double newKfZContrib = dZb * (-dVdRb) + dZc * (-dVdRc);
 
-    //#pragma omp critical
+#if defined(USE_OMP) && defined(OPENMPAVAIL)
     {
 #pragma omp atomic
         i.fX -= newIfXContrib;
@@ -115,6 +115,19 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
 #pragma omp atomic
         k.fZ -= newKfZContrib;
     }
+#else
+    i.fX -= newIfXContrib;
+    i.fY -= newIfYContrib;
+    i.fZ -= newIfZContrib;
+
+    j.fX -= newJfXContrib;
+    j.fY -= newJfYContrib;
+    j.fZ -= newJfZContrib;
+
+    k.fX -= newKfXContrib;
+    k.fY -= newKfYContrib;
+    k.fZ -= newKfZContrib;
+#endif
     /*
     #ifdef PROFILE_3BMDA
         end = std::chrono::system_clock::now();
