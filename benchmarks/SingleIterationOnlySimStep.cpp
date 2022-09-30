@@ -23,7 +23,8 @@ void SingleIterationOnlySimStep::RunWorkToBench(benchmark::State &state __attrib
 
 void SingleIterationOnlySimStep::AfterBench(benchmark::State &state __attribute__((unused)))
 {
-    state.counters["interactions"] = this->simulation->GetNumBufferInteractions(0);
+    state.counters["num_buffer_interactions"] = this->simulation->GetNumBufferInteractions(0);
+    state.counters["num_mpi_shifts"] = this->simulation->GetAlgorithm()->GetNumShifts();
     state.counters["num_particles"] = this->simulation->GetAllParticles().size();
     state.counters["num_processors"] = this->simulation->GetTopology()->GetWorldSize();
 

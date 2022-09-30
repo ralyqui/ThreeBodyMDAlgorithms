@@ -45,6 +45,8 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
     this->times["shiftRight"].second.push_back(elapsed_time.count());
 #endif
 
+    this->numShifts++;
+
     return status.MPI_TAG;
 }
 
@@ -237,6 +239,8 @@ std::tuple<int, int> AUTA::SimulationStep()
     this->simulation->GetDecomposition()->ResetForces();
 
     this->b0 = this->simulation->GetDecomposition()->GetMyParticles();
+
+    this->numShifts = 0;
 
     // use assignment operator to copy vector
     b1 = b0;

@@ -74,6 +74,8 @@ int NATA::shiftRight(std::vector<Utility::Particle> &buf)
     this->times["shiftRight"].second.push_back(elapsed_time.count());
 #endif
 
+    this->numShifts++;
+
     return 0;
 }
 
@@ -83,6 +85,8 @@ std::tuple<int, int> NATA::SimulationStep()
     this->simulation->GetDecomposition()->ResetForces();
 
     this->b0 = this->simulation->GetDecomposition()->GetMyParticles();
+
+    this->numShifts = 0;
 
     // use assignment operator to copy vector
     b1 = b0;
@@ -113,11 +117,10 @@ std::tuple<int, int> NATA::SimulationStep()
             calculate = false;
             calculateProcessed(step, calculate);
             if (calculate) {
-
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
                 std::cout << "I'm proc " << simulation->GetTopology()->GetWorldRank()
-                          << " and going to calculate interactions between (" << worldRank << ", " << this->b1Owner << ", "
-                          << this->b2Owner << ")" << std::endl;
+                          << " and going to calculate interactions between (" << worldRank << ", " << this->b1Owner
+                          << ", " << this->b2Owner << ")" << std::endl;
 #endif
 
                 std::tuple<int, int> numParticleInteractions = this->CalculateInteractions(

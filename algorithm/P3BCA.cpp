@@ -430,6 +430,8 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
     this->times["mpiShift"].second.push_back(elapsed_time.count());
 #endif
 
+    this->numShifts++;
+
     return status.MPI_TAG;
 }
 
@@ -524,6 +526,8 @@ std::tuple<int, int> P3BCA::SimulationStep()
     this->simulation->GetDecomposition()->ResetForces();
 
     this->b0 = this->simulation->GetDecomposition()->GetMyParticles();
+
+    this->numShifts = 0;
 
 #ifdef TESTS_3BMDA
     processed.clear();

@@ -241,3 +241,5 @@ std::map<std::string, std::pair<char, std::vector<int64_t>>> Algorithm::GetTimes
 
 std::vector<double> Algorithm::GetHitrates() { return this->hitrates; }
 #endif
+
+int Algorithm::GetNumShifts() { return this->numShifts; }
