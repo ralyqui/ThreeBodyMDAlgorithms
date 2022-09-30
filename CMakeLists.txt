@@ -111,6 +111,8 @@ if(BENCHMARK_3BMDA)
 
   add_subdirectory(external/benchmark)
 
+  add_executable(benchrunner benchmarks/benchrunner.cpp)
+
   set(BENCHMARK_SOURCES
       benchmarks/benchmain.cpp
       benchmarks/MPIBenchmark.cpp
@@ -141,7 +143,6 @@ if(BENCHMARK_3BMDA)
       tools/ParticleGenerator.cpp
       tools/UniformGenerator.cpp)
 
-  add_executable(benchrunner benchmarks/benchrunner.cpp)
   add_executable(benchmain ${BENCHMARK_SOURCES})
 
   target_include_directories(benchmain PRIVATE thirdparty/rapidyaml/src)
@@ -157,8 +158,54 @@ if(BENCHMARK_3BMDA)
     target_compile_definitions(benchmain PUBLIC USE_OMP)
   endif()
 
+  set(BENCHMARK_CLUSTER_SOURCES
+      benchmarks/benchmain_cluster.cpp
+      benchmarks/MPIBenchmark.cpp
+      benchmarks/AUTAContext.cpp
+      benchmarks/NATAContext.cpp
+      benchmarks/P3BCAContext.cpp
+      benchmarks/Context.cpp
+      benchmarks/SingleIteration.cpp
+      benchmarks/SingleIterationOnlySimStep.cpp
+      topology/Topology.cpp
+      topology/RingTopology.cpp
+      topology/CartTopology.cpp
+      decomposition/AtomDecomposition.cpp
+      decomposition/RegularGridDecomposition.cpp
+      decomposition/DomainDecomposition.cpp
+      algorithm/Algorithm.cpp
+      algorithm/NATA.cpp
+      algorithm/AUTA.cpp
+      algorithm/P3BCA.cpp
+      utility/utility.cpp
+      potential/AxilrodTeller.cpp
+      potential/Potential.cpp
+      simulation/Simulation.cpp
+      tools/ClosestPackedGenerator.cpp
+      tools/ClusteredGaussGenerator.cpp
+      tools/GaussGenerator.cpp
+      tools/GridGenerator.cpp
+      tools/ParticleGenerator.cpp
+      tools/UniformGenerator.cpp)
+
+  add_executable(benchmain_cluster ${BENCHMARK_CLUSTER_SOURCES})
+
+  target_include_directories(benchmain_cluster PRIVATE thirdparty/rapidyaml/src)
+
+  target_link_libraries(benchmain_cluster benchmark)
+  target_link_libraries(benchmain_cluster ${MPI_C_LIBRARIES})
+  target_link_libraries(benchmain_cluster Eigen3::Eigen)
+  target_link_libraries(benchmain_cluster ryml)
+
+  target_compile_definitions(benchmain_cluster PUBLIC BENCHMARK_3BMDA)
+  if(USE_OMP)
+    message(STATUS "add USE_OMP compile definition")
+    target_compile_definitions(benchmain_cluster PUBLIC USE_OMP)
+  endif()
+
   set_target_properties(
-    benchrunner benchmain PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                     ${CMAKE_BINARY_DIR}/executables/benchmark)
+    benchrunner benchmain benchmain_cluster
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+               ${CMAKE_BINARY_DIR}/executables/benchmark)
 
 endif(BENCHMARK_3BMDA)

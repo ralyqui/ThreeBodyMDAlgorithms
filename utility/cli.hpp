@@ -19,6 +19,7 @@ namespace Utility
         Eigen::Vector3d gForce;
         bool optimalDecomposition;
         std::string outputProfile;
+        std::string benchYaml;
 
         void printHelp();
     };
@@ -37,8 +38,9 @@ namespace Utility
                   << "\t-csv,--csv\t\tcsv file with particles\n"
                   << "\t-o,--out\t\tcsv base file name that will be used to create all csv outputs from each "
                      "simulation step\n"
-                  << "\t-op,--outProfile\t\tjson file to save profile output\n"
-                  << "\t-decomp,--decomp\t\t(optimal | naive) decomposition strategy for cart topology\n"
+                  << "-op,--outProfile\t\tjson file to save profile output\n"
+                  << "-decomp,--decomp\t\t(optimal | naive) decomposition strategy for cart topology\n"
+                  << "-benchyaml,--benchyaml\t\tYAML file that contains config for benchmarks\n"
                   << "\t-c,--cutoff\t\tcutoff distance" << std::endl;
     }
 
@@ -131,6 +133,14 @@ namespace Utility
                         value = args[i + 1];
                         a.outputProfile = value;
                         i++;
+                    } else if (flag.compare("benchyaml") == 0 || flag.compare("-benchyaml") == 0) {
+                        if (args.size() <= (size_t)(i + 1)) {
+                            a.printHelp();
+                            exit(1);
+                        }
+                        value = args[i + 1];
+                        a.benchYaml = value;
+                        i++;
                     } else if (flag.compare("gx") == 0 || flag.compare("-gravityX") == 0) {
                         if (args.size() <= (size_t)(i + 1)) {
                             a.printHelp();
@@ -159,12 +169,14 @@ namespace Utility
 
                         i += 1;
                     } else {
-                        a.printHelp();
-                        exit(1);
+                        std::cout << "CLI parser: unrecognized option: " << flag << std::endl;
+                        // a.printHelp();
+                        // exit(1);
                     }
                 } else {
-                    a.printHelp();
-                    exit(1);
+                    std::cout << "CLI parser: unrecognized option: " << args[i] << std::endl;
+                    // a.printHelp();
+                    // exit(1);
                 }
             } catch (std::exception& e) {
                 a.printHelp();
