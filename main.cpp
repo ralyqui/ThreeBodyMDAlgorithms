@@ -150,13 +150,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
     // profile times calculation
     {
         for (const auto& [k, v] : times) {
-            // int numTimes = v.second.size();
-            std::vector<int64_t> accTimes;
-            // accTimes.resize(numTimes);
-
-            // MPI_Reduce(v.second.data(), accTimes.data(), numTimes, MPI_INT64_T, MPI_SUM, 0,
-            //           simulation->GetTopology()->GetComm());
-
+            
             std::vector<int64_t> allElements;
             int numMyElements = v.second.size();
             std::vector<int> numAllElements;
@@ -166,7 +160,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                        simulation->GetTopology()->GetComm());
 
             int maxNumElements = *(std::max_element(numAllElements.begin(), numAllElements.end()));
-            accTimes.resize(maxNumElements);
+            
 
             std::vector<int> displacements;
             int sumDispl = 0;
@@ -181,55 +175,82 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
             MPI_Gatherv(v.second.data(), v.second.size(), MPI_INT64_T, allElements.data(), numAllElements.data(),
                         displacements.data(), MPI_INT64_T, 0, simulation->GetTopology()->GetComm());
 
-            std::vector<int64_t> sumPerProc;
-            sumPerProc.resize(simulation->GetTopology()->GetWorldSize());
-
-            for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
-                int acc = 0;
-                for (int j = 0; j < maxNumElements; j++) {
-                    acc += allElements[displacements[i] + j];
-#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-                    std::cout << "proc " << i << " added " << allElements[displacements[i] + j]
-                              << " measured timesteps for " << k << std::endl;
-#endif
-                }
-                sumPerProc[i] = acc;
-            }
-
-            for (int i = 0; i < maxNumElements; i++) {
-                int acc = 0;
-                for (int j = 0; j < simulation->GetTopology()->GetWorldSize(); j++) {
-                    acc += allElements[displacements[j] + i];
-                }
-                accTimes[i] = acc;
-            }
-
             if (simulation->GetTopology()->GetWorldRank() == 0) {
-                int sumOfAllProc = 0;
-                for (int64_t& t : accTimes) {
+
+                std::vector<int64_t> sumPerProc;
+                sumPerProc.resize(simulation->GetTopology()->GetWorldSize());
+
+                //rapidjson::Value timesPerProc(rapidjson::kArrayType);
+                rapidjson::Value timesPerProc(rapidjson::kObjectType);
+
+                for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
+                    rapidjson::Value timesOfThisProc(rapidjson::kArrayType);
+                    int64_t acc = 0;
+                    for (int j = 0; j < maxNumElements; j++) {
+                        int64_t t = allElements[displacements[i] + j];
+                        timesOfThisProc.PushBack(rapidjson::Value(t), d.GetAllocator());
+                        // check for over & underflow. https://stackoverflow.com/a/1514309
+                        if (t > 0 && acc > std::numeric_limits<int64_t>::max() - t) {
+                            std::cout << "Overflow Warning for profiling" << std::endl;
+                        }
+                        if (t < 0 && acc < std::numeric_limits<int64_t>::max() - t) {
+                            std::cout << "Underflow Warning for profiling" << std::endl;
+                        }
+                        acc += t;
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+                        std::cout << "proc " << i << " added " << t
+                                << " measured timesteps for " << k << std::endl;
+#endif
+                    }
+                    sumPerProc[i] = acc;
+                    //timesPerProc.PushBack(timesOfThisProc, d.GetAllocator());
+                    std::string indexStr = std::to_string(i);
+                    rapidjson::Value indexStrRJ(indexStr.c_str(), indexStr.size(), d.GetAllocator());
+                    timesPerProc.AddMember(indexStrRJ, timesOfThisProc, d.GetAllocator());
+                }
+            
+                int64_t sumOfAllProc = 0;
+                for (int64_t& t : sumPerProc) {
+                    // check for over & underflow. https://stackoverflow.com/a/1514309
+                    if (t > 0 && sumOfAllProc > std::numeric_limits<int64_t>::max() - t) {
+                        std::cout << "Overflow Warning for profiling" << std::endl;
+                    }
+                    if (t < 0 && sumOfAllProc < std::numeric_limits<int64_t>::max() - t) {
+                        std::cout << "Underflow Warning for profiling" << std::endl;
+                    }
                     sumOfAllProc += t;
                 }
 
-                double sumOfAvgTimesPerStep =
-                    0;  //(double)sumOfAllProc / (double)simulation->GetTopology()->GetWorldSize();
-                for (size_t i = 0; i < sumPerProc.size(); i++) {
-                    double val = (double)sumPerProc[i] / (double)numAllElements[i];
-                    sumOfAvgTimesPerStep += val;
-                    // add average step computation time for each processor
-                    if (k.compare("CalculateForces") == 0) {
-                        /*std::cout << i << ": ";
-                        for (int j = 0; j < maxNumElements; j++) {
-                            std::cout << allElements[displacements[i] + j] << ", ";
-                        }
-                        std::cout << std::endl;
-                        std::cout << "sumPerProc[" << i << "] = " << (double)sumPerProc[i] << ", numAllElements[" << i
-                                  << "] = " << (double)numAllElements[i] << std::endl;
-                        */
+                double sumOfAvgUnionProcTimes = 0;
+                int64_t sumOfMaxUnionProcTimes = 0;
+                for (int i = 0; i < maxNumElements; i++) {
+                    int64_t sumSubStep = 0;
+                    int64_t maxVal = 0;
+                    int divider = 0;
+                    for (int j = 0; j < simulation->GetTopology()->GetWorldSize(); j++) {
+                        if(i < numAllElements[j]) {
+                            int64_t t = allElements[displacements[j] + i];
+                            sumSubStep += t;
+                            divider++;
 
+                            if(t > maxVal) {
+                                maxVal = t;
+                            }
+                        }
+                    }
+                    sumOfAvgUnionProcTimes += (double)sumSubStep / (double)divider;
+                    sumOfMaxUnionProcTimes += maxVal;
+                }
+
+                // calculate values for stvr
+                if (k.compare("CalculateForces") == 0) {
+                    for (size_t i = 0; i < sumPerProc.size(); i++) {
+                        double val = (double)sumPerProc[i] / (double)numAllElements[i];
                         valuesForSTVR.push_back(val);
                     }
                 }
 
+                // TODO: this is maybe incorrect for the NATA algorithm
                 double avgTimeAllProc =
                     (double)sumOfAllProc / ((double)simulation->GetTopology()->GetWorldSize() * (double)maxNumElements);
                 double totalTimeAllProc = (double)sumOfAllProc;
@@ -239,22 +260,22 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                 rapidjson::Value timeUnitRJ(rapidjson::kStringType);
                 rapidjson::Value avgTimeAllProcRJ(rapidjson::kNumberType);
                 rapidjson::Value totalTimeAllProcRJ(rapidjson::kNumberType);
-                rapidjson::Value totalTimeUnionProc(rapidjson::kNumberType);
-                // rapidjson::Value avgTimePerProcRJ(rapidjson::kArrayType);
-                // rapidjson::Value totalTimePerProcRJ(rapidjson::kArrayType);
+                rapidjson::Value totalAvgTimeUnionProcRJ(rapidjson::kNumberType);
+                rapidjson::Value totalMaxTimeUnionProcRJ(rapidjson::kNumberType);
 
                 std::string tu = charToTimeUnit(v.first);
                 timeUnitRJ.SetString(tu.c_str(), tu.size(), d.GetAllocator());
                 avgTimeAllProcRJ.SetDouble(avgTimeAllProc);
                 totalTimeAllProcRJ.SetDouble(totalTimeAllProc);
-                totalTimeUnionProc.SetDouble(sumOfAvgTimesPerStep);
+                totalAvgTimeUnionProcRJ.SetDouble(sumOfAvgUnionProcTimes);
+                totalMaxTimeUnionProcRJ.SetInt64(sumOfMaxUnionProcTimes);
 
                 oInner.AddMember("time unit", timeUnitRJ, d.GetAllocator());
                 oInner.AddMember("avg time all proc", avgTimeAllProcRJ, d.GetAllocator());
                 oInner.AddMember("total time all proc", totalTimeAllProcRJ, d.GetAllocator());
-                oInner.AddMember("total time union proc", totalTimeUnionProc, d.GetAllocator());
-                // oInner.AddMember("avg time per proc", avgTimePerProcRJ, d.GetAllocator());
-                // oInner.AddMember("total time per proc", totalTimePerProcRJ, d.GetAllocator());
+                oInner.AddMember("total avg time union proc", totalAvgTimeUnionProcRJ, d.GetAllocator());
+                oInner.AddMember("total max time union proc", totalMaxTimeUnionProcRJ, d.GetAllocator());
+                oInner.AddMember("times per proc", timesPerProc, d.GetAllocator());
 
                 rapidjson::Value key(k.c_str(), k.size(), d.GetAllocator());
                 o.AddMember(key, oInner, d.GetAllocator());
@@ -274,11 +295,6 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 
         int maxNumElements = *(std::max_element(numAllHitrates.begin(), numAllHitrates.end()));
 
-        int sumNumAllHitrates = 0;
-        for (int& nHr : numAllHitrates) {
-            sumNumAllHitrates += nHr;
-        }
-
         std::vector<int> displacements;
         int sumDispl = 0;
         for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
@@ -292,15 +308,17 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
         MPI_Gatherv(hitrates.data(), hitrates.size(), MPI_DOUBLE, allHitrates.data(), numAllHitrates.data(),
                     displacements.data(), MPI_DOUBLE, 0, simulation->GetTopology()->GetComm());
 
-        std::vector<double> accHitrates;
-        accHitrates.resize(maxNumElements);
-
-        // std::cout << "hitrate: " << hitrates[0] << std::endl;
-
-        // MPI_Reduce(hitrates.data(), accHitrates.data(), hitrates.size(), MPI_DOUBLE, MPI_SUM, 0,
-        //           simulation->GetTopology()->GetComm());
 
         if (simulation->GetTopology()->GetWorldRank() == 0) {
+
+            int sumNumAllHitrates = 0;
+            for (int& nHr : numAllHitrates) {
+                sumNumAllHitrates += nHr;
+            }
+
+            std::vector<double> accHitrates;
+            accHitrates.resize(maxNumElements);
+
             rapidjson::Value hitratesPerSimStepRJ(rapidjson::kArrayType);
 
             for (int j = 0; j < maxNumElements; j++) {
@@ -311,6 +329,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                     accHrPerSimStep += allHitrates[displacements[i] + j];
                 }
                 // Note: this works only if we have just one sim step
+                // TODO: make this work with multiple time steps
                 accHitrates[j] = accHrPerSimStep / (double)sumNumAllHitrates;
                 // std::cout << "divided hr by " << sumNumAllHitrates << std::endl;
             }
@@ -343,28 +362,6 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
         }
     }
 
-    /*for (const auto& [k, v] : calcTimes) {
-        std::vector<double> avgCalcTimesPerProc;
-        avgCalcTimesPerProc.resize(simulation->GetTopology()->GetWorldSize());
-
-        MPI_Gather(&v.second, 1, MPI_DOUBLE, avgCalcTimesPerProc.data(), 1, MPI_DOUBLE, 0,
-                   simulation->GetTopology()->GetComm());
-
-        if (simulation->GetTopology()->GetWorldRank() == 0) {
-            double sumAvgCalcTimesAllProc = 0;
-            for (double& cT : avgCalcTimesPerProc) {
-                // std::cout << cT << std::endl;
-                sumAvgCalcTimesAllProc += cT;
-            }
-            sumAvgCalcTimesAllProc /= (double)simulation->GetTopology()->GetWorldSize();
-
-            for (double& cT : avgCalcTimesPerProc) {
-                stvrRJ.PushBack(rapidjson::Value((cT - sumAvgCalcTimesAllProc) / sumAvgCalcTimesAllProc),
-                                d.GetAllocator());
-            }
-        }
-    }*/
-
     if (simulation->GetTopology()->GetWorldRank() == 0) {
         d.AddMember("times", o, d.GetAllocator());
         d.AddMember("hitrate", hr, d.GetAllocator());
@@ -373,8 +370,6 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         d.Accept(writer);
-
-        // std::cout << buffer.GetString() << std::endl;
 
         std::ofstream csvFile;
         csvFile.open(outFile);

@@ -9,7 +9,8 @@ void Algorithm::Init(std::shared_ptr<Simulation> simulation)
     this->simulation = simulation;
     this->mpiParticleType = simulation->GetMPIParticleType();
     this->potential = this->simulation->GetPotential();
-    this->wolrdSize = this->simulation->GetTopology()->GetWorldSize();
+    this->worldSize = this->simulation->GetTopology()->GetWorldSize();
+    this->worldRank = this->simulation->GetTopology()->GetWorldRank();
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
     std::cout << "I'm proc " << this->simulation->GetTopology()->GetWorldRank() << ", and own "
@@ -48,9 +49,10 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
                                                       Eigen::Array3d physicalDomainSize)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::time_point<std::chrono::system_clock> end;
-    start = std::chrono::system_clock::now();
+    bool append = false;
+    std::chrono::time_point<std::chrono::steady_clock> start;
+    std::chrono::time_point<std::chrono::steady_clock> end;
+    start = std::chrono::steady_clock::now();
 #endif
     std::vector<std::tuple<int, int, int>> particleTripletsToCalculate;
     int numActParticleInteractions = 0;
@@ -90,11 +92,12 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
                 particleTripletsToCalculate.push_back(std::tuple(i, j, k));
 
                 // we don't want to exceed the memory
-                if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / this->wolrdSize)) {
+                if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
-                    std::cout << "dispatch particle calculations before exceeding memory" << std::endl;
+                    std::cout << "I'm proc " << this->worldRank << " and dispatch particle calculations before exceeding memory" << std::endl;
 #endif
-                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+                    append = true;
                     particleTripletsToCalculate.clear();
                 }
 
@@ -104,7 +107,7 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
         }
     }
 #ifdef PROFILE_3BMDA
-    end = std::chrono::system_clock::now();
+    end = std::chrono::steady_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     bool hasKey = this->times.count("calculateInteractions");
     if (!hasKey) {
@@ -113,14 +116,14 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
     this->times["calculateInteractions"].second.push_back(elapsed_time.count());
 #endif
 
-    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
 
     return std::tuple(numActParticleInteractions, numPossibleParticleInteractions);
 }
 
 void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> &particleTripletsToCalculate,
                                          std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
-                                         std::vector<Utility::Particle> &b2)
+                                         std::vector<Utility::Particle> &b2, bool append)
 {
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
     // std::cout << "defined(USE_OMP) && defined(OPENMPAVAIL)" << std::endl;
@@ -133,13 +136,13 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
 #endif
 
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::system_clock> start1;
-    std::chrono::time_point<std::chrono::system_clock> end1;
-    start1 = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> start1;
+    std::chrono::time_point<std::chrono::steady_clock> end1;
+    start1 = std::chrono::steady_clock::now();
 #endif
 
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
-#pragma omp parallel for num_threads(2)
+#pragma omp parallel for
     for (auto it = particleTripletsToCalculate.begin(); it < particleTripletsToCalculate.end(); it++) {
         /*int tid = omp_get_thread_num();
         std::vector<Utility::Particle> *b0ToUse;
@@ -167,13 +170,17 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
 #endif
 
 #ifdef PROFILE_3BMDA
-    end1 = std::chrono::system_clock::now();
-    auto elapsed_time1 = std::chrono::duration_cast<std::chrono::microseconds>(end1 - start1);
+    end1 = std::chrono::steady_clock::now();
+    auto elapsed_time1 = std::chrono::duration_cast<std::chrono::nanoseconds>(end1 - start1);
     bool hasKey = this->times.count("CalculateForces");
     if (!hasKey) {
-        this->times["CalculateForces"] = std::make_pair(1, std::vector<int64_t>());
+        this->times["CalculateForces"] = std::make_pair(0, std::vector<int64_t>());
     }
-    this->times["CalculateForces"].second.push_back(elapsed_time1.count());
+    if(append && this->times["CalculateForces"].second.size() > 0) {
+        this->times["CalculateForces"].second.back() += elapsed_time1.count();
+    } else {
+        this->times["CalculateForces"].second.push_back(elapsed_time1.count());
+    }
 #endif
 
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
@@ -200,9 +207,9 @@ void Algorithm::SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<U
                                std::vector<Utility::Particle> &b2)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::time_point<std::chrono::system_clock> end;
-    start = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> start;
+    std::chrono::time_point<std::chrono::steady_clock> end;
+    start = std::chrono::steady_clock::now();
 #endif
     for (size_t i = 0; i < b0.size(); i++) {
         b0[i].fX += b1[i].fX + b2[i].fX;
@@ -222,7 +229,7 @@ void Algorithm::SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<U
         */
     }
 #ifdef PROFILE_3BMDA
-    end = std::chrono::system_clock::now();
+    end = std::chrono::steady_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("SumUpParticles");
     if (!hasKey) {

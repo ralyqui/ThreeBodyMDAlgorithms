@@ -8,9 +8,9 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
 {
     /*
     #ifdef PROFILE_3BMDA
-        std::chrono::time_point<std::chrono::system_clock> start;
-        std::chrono::time_point<std::chrono::system_clock> end;
-        start = std::chrono::system_clock::now();
+        std::chrono::time_point<std::chrono::steady_clock> start;
+        std::chrono::time_point<std::chrono::steady_clock> end;
+        start = std::chrono::steady_clock::now();
     #endif
     */
 
@@ -130,7 +130,7 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
 #endif
     /*
     #ifdef PROFILE_3BMDA
-        end = std::chrono::system_clock::now();
+        end = std::chrono::steady_clock::now();
         auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
         // check for over & underflow. https://stackoverflow.com/a/1514309

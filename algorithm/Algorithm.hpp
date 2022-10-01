@@ -26,7 +26,8 @@ protected:
     std::shared_ptr<Simulation> simulation;
     MPI_Datatype *mpiParticleType;
     std::shared_ptr<Potential> potential;
-    int wolrdSize;
+    int worldSize;
+    int worldRank;
     int numShifts;
 
 #ifdef TESTS_3BMDA
@@ -46,7 +47,7 @@ protected:
                                                Eigen::Array3d physicalDomainSize);
     void calcParticleInteractions(std::vector<std::tuple<int, int, int>> &particleTripletsToCalculate,
                                   std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
-                                  std::vector<Utility::Particle> &b2);
+                                  std::vector<Utility::Particle> &b2, bool append);
 
 public:
     Algorithm();

@@ -387,9 +387,9 @@ int P3BCA::shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<
 int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int dst)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::time_point<std::chrono::system_clock> end;
-    start = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> start;
+    std::chrono::time_point<std::chrono::steady_clock> end;
+    start = std::chrono::steady_clock::now();
 #endif
 
     // if (this->worldRank == 0) {
@@ -421,7 +421,7 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
     buf = this->tmpRecv;
 
 #ifdef PROFILE_3BMDA
-    end = std::chrono::system_clock::now();
+    end = std::chrono::steady_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     bool hasKey = this->times.count("mpiShift");
     if (!hasKey) {
@@ -438,9 +438,9 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
 void P3BCA::sendBackParticles()
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::time_point<std::chrono::system_clock> end;
-    start = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> start;
+    std::chrono::time_point<std::chrono::steady_clock> end;
+    start = std::chrono::steady_clock::now();
 #endif
     MPI_Request requestSend1, requestSend2;
     MPI_Request requestRecv1, requestRecv2;
@@ -501,7 +501,7 @@ void P3BCA::sendBackParticles()
         this->b2Tmp.clear();
     }
 #ifdef PROFILE_3BMDA
-    end = std::chrono::system_clock::now();
+    end = std::chrono::steady_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     bool hasKey = this->times.count("sendBackParticles");
     if (!hasKey) {

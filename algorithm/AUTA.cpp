@@ -24,9 +24,9 @@ void AUTA::Init(std::shared_ptr<Simulation> simulation)
 int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::time_point<std::chrono::system_clock> end;
-    start = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> start;
+    std::chrono::time_point<std::chrono::steady_clock> end;
+    start = std::chrono::steady_clock::now();
 #endif
 
     MPI_Status status;
@@ -36,7 +36,7 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
                          MPI_ANY_TAG, this->ringTopology->GetComm(), &status);
 
 #ifdef PROFILE_3BMDA
-    end = std::chrono::system_clock::now();
+    end = std::chrono::steady_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     bool hasKey = this->times.count("shiftRight");
     if (!hasKey) {
@@ -144,9 +144,9 @@ int& AUTA::getBufOwner(int i)
 void AUTA::sendBackParticles()
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::system_clock> start;
-    std::chrono::time_point<std::chrono::system_clock> end;
-    start = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> start;
+    std::chrono::time_point<std::chrono::steady_clock> end;
+    start = std::chrono::steady_clock::now();
 #endif
     MPI_Request requestSend0, requestSend1, requestSend2;
     MPI_Request requestRecv0, requestRecv1, requestRecv2;
@@ -223,7 +223,7 @@ void AUTA::sendBackParticles()
     this->b1Owner = this->worldRank;
     this->b2Owner = this->worldRank;
 #ifdef PROFILE_3BMDA
-    end = std::chrono::system_clock::now();
+    end = std::chrono::steady_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     bool hasKey = this->times.count("sendBackParticles");
     if (!hasKey) {
