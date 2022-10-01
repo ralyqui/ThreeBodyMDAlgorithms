@@ -120,7 +120,11 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
     this->times["calculateInteractions"].second.push_back(elapsed_time.count());
 #endif
 
-    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+#ifdef PROFILE_3BMDA
+                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+#else
+                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+#endif
 
     return std::tuple(numActParticleInteractions, numPossibleParticleInteractions);
 }
