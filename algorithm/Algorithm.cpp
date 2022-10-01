@@ -98,10 +98,10 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
 #endif
 #ifdef PROFILE_3BMDA
                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+                    append = true;
 #else
                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
 #endif
-                    append = true;
                     particleTripletsToCalculate.clear();
                 }
 
