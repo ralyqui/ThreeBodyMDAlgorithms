@@ -96,7 +96,11 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
                     std::cout << "I'm proc " << this->worldRank << " and dispatch particle calculations before exceeding memory" << std::endl;
 #endif
+#ifdef PROFILE_3BMDA
                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+#else
+                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+#endif
                     append = true;
                     particleTripletsToCalculate.clear();
                 }
@@ -121,9 +125,15 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
     return std::tuple(numActParticleInteractions, numPossibleParticleInteractions);
 }
 
+#ifdef PROFILE_3BMDA
 void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> &particleTripletsToCalculate,
                                          std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                                          std::vector<Utility::Particle> &b2, bool append)
+#else
+void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> &particleTripletsToCalculate,
+                                         std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                                         std::vector<Utility::Particle> &b2)
+#endif
 {
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
     // std::cout << "defined(USE_OMP) && defined(OPENMPAVAIL)" << std::endl;

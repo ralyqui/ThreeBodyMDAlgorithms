@@ -45,9 +45,15 @@ protected:
                                                std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner,
                                                int b2Owner, int b0Start, int b0NumSteps, double cutoff,
                                                Eigen::Array3d physicalDomainSize);
+#ifdef PROFILE_3BMDA
     void calcParticleInteractions(std::vector<std::tuple<int, int, int>> &particleTripletsToCalculate,
                                   std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
                                   std::vector<Utility::Particle> &b2, bool append);
+#else
+    void calcParticleInteractions(std::vector<std::tuple<int, int, int>> &particleTripletsToCalculate,
+                                  std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,
+                                  std::vector<Utility::Particle> &b2);
+#endif
 
 public:
     Algorithm();
