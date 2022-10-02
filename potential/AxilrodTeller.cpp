@@ -137,7 +137,7 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
         if (elapsed_time.count() > 0 && this->timeAcc > std::numeric_limits<int64_t>::max() - elapsed_time.count()) {
             std::cout << "Overflow Warning for profiling in CalculateForces" << std::endl;
         }
-        if (elapsed_time.count() < 0 && this->timeAcc < std::numeric_limits<int64_t>::max() - elapsed_time.count()) {
+        if (elapsed_time.count() < 0 && this->timeAcc < std::numeric_limits<int64_t>::min() - elapsed_time.count()) {
             std::cout << "Underflow Warning for profiling in CalculateForces" << std::endl;
         }
 

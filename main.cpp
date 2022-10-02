@@ -187,20 +187,24 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                     rapidjson::Value timesOfThisProc(rapidjson::kArrayType);
                     int64_t acc = 0;
                     for (int j = 0; j < maxNumElements; j++) {
-                        int64_t t = allElements[displacements[i] + j];
-                        timesOfThisProc.PushBack(rapidjson::Value(t), d.GetAllocator());
-                        // check for over & underflow. https://stackoverflow.com/a/1514309
-                        if (t > 0 && acc > std::numeric_limits<int64_t>::max() - t) {
-                            std::cout << "Overflow Warning for profiling" << std::endl;
-                        }
-                        if (t < 0 && acc < std::numeric_limits<int64_t>::max() - t) {
-                            std::cout << "Underflow Warning for profiling" << std::endl;
-                        }
-                        acc += t;
+                        if(j < numAllElements[i]) {
+                            int64_t t = allElements[displacements[i] + j];
+                            
+                            timesOfThisProc.PushBack(rapidjson::Value(t), d.GetAllocator());
+                            
+                            // check for over & underflow. https://stackoverflow.com/a/1514309
+                            if (t > 0 && acc > std::numeric_limits<int64_t>::max() - t) {
+                                std::cout << "Overflow Warning for profiling" << std::endl;
+                            }
+                            if (t < 0 && acc < std::numeric_limits<int64_t>::min() - t) {
+                                std::cout << "Underflow Warning for profiling" << std::endl;
+                            }
+                            acc += t;
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-                        std::cout << "proc " << i << " added " << t
-                                << " measured timesteps for " << k << std::endl;
+                            std::cout << "proc " << i << " added " << t
+                                    << " measured timesteps for " << k << std::endl;
 #endif
+                        }
                     }
                     sumPerProc[i] = acc;
                     //timesPerProc.PushBack(timesOfThisProc, d.GetAllocator());
@@ -215,7 +219,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                     if (t > 0 && sumOfAllProc > std::numeric_limits<int64_t>::max() - t) {
                         std::cout << "Overflow Warning for profiling" << std::endl;
                     }
-                    if (t < 0 && sumOfAllProc < std::numeric_limits<int64_t>::max() - t) {
+                    if (t < 0 && sumOfAllProc < std::numeric_limits<int64_t>::min() - t) {
                         std::cout << "Underflow Warning for profiling" << std::endl;
                     }
                     sumOfAllProc += t;
@@ -225,7 +229,8 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                 int64_t sumOfMaxUnionProcTimes = 0;
                 for (int i = 0; i < maxNumElements; i++) {
                     int64_t sumSubStep = 0;
-                    int64_t maxVal = 0;
+                    int64_t maxVal = std::numeric_limits<int64_t>::min();
+                    int64_t minVal = std::numeric_limits<int64_t>::max();
                     int divider = 0;
                     for (int j = 0; j < simulation->GetTopology()->GetWorldSize(); j++) {
                         if(i < numAllElements[j]) {
@@ -235,6 +240,10 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 
                             if(t > maxVal) {
                                 maxVal = t;
+                            }
+
+                            if(t < minVal) {
+                                minVal = t;
                             }
                         }
                     }
