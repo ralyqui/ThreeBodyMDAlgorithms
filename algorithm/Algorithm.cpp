@@ -94,7 +94,8 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
                 // we don't want to exceed the memory
                 if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
-                    std::cout << "I'm proc " << this->worldRank << " and dispatch particle calculations before exceeding memory" << std::endl;
+                    std::cout << "I'm proc " << this->worldRank
+                              << " and dispatch particle calculations before exceeding memory" << std::endl;
 #endif
 #ifdef PROFILE_3BMDA
                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
@@ -112,18 +113,18 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
     }
 #ifdef PROFILE_3BMDA
     end = std::chrono::steady_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("calculateInteractions");
     if (!hasKey) {
-        this->times["calculateInteractions"] = std::make_pair(1, std::vector<int64_t>());
+        this->times["calculateInteractions"] = std::make_pair(0, std::vector<int64_t>());
     }
     this->times["calculateInteractions"].second.push_back(elapsed_time.count());
 #endif
 
 #ifdef PROFILE_3BMDA
-                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
 #else
-                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
 #endif
 
     return std::tuple(numActParticleInteractions, numPossibleParticleInteractions);
@@ -190,7 +191,7 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
     if (!hasKey) {
         this->times["CalculateForces"] = std::make_pair(0, std::vector<int64_t>());
     }
-    if(append && this->times["CalculateForces"].second.size() > 0) {
+    if (append && this->times["CalculateForces"].second.size() > 0) {
         this->times["CalculateForces"].second.back() += elapsed_time1.count();
     } else {
         this->times["CalculateForces"].second.push_back(elapsed_time1.count());

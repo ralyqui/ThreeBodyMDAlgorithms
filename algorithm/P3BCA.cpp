@@ -422,10 +422,10 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
 
 #ifdef PROFILE_3BMDA
     end = std::chrono::steady_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("mpiShift");
     if (!hasKey) {
-        this->times["mpiShift"] = std::make_pair(1, std::vector<int64_t>());
+        this->times["mpiShift"] = std::make_pair(0, std::vector<int64_t>());
     }
     this->times["mpiShift"].second.push_back(elapsed_time.count());
 #endif
@@ -502,10 +502,10 @@ void P3BCA::sendBackParticles()
     }
 #ifdef PROFILE_3BMDA
     end = std::chrono::steady_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("sendBackParticles");
     if (!hasKey) {
-        this->times["sendBackParticles"] = std::make_pair(1, std::vector<int64_t>());
+        this->times["sendBackParticles"] = std::make_pair(0, std::vector<int64_t>());
     }
     this->times["sendBackParticles"].second.push_back(elapsed_time.count());
 #endif

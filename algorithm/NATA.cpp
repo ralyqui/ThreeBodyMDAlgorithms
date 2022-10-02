@@ -66,10 +66,10 @@ int NATA::shiftRight(std::vector<Utility::Particle> &buf)
                          this->ringTopology->GetComm(), MPI_STATUS_IGNORE);
 #ifdef PROFILE_3BMDA
     end = std::chrono::steady_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("shiftRight");
     if (!hasKey) {
-        this->times["shiftRight"] = std::make_pair(1, std::vector<int64_t>());
+        this->times["shiftRight"] = std::make_pair(0, std::vector<int64_t>());
     }
     this->times["shiftRight"].second.push_back(elapsed_time.count());
 #endif

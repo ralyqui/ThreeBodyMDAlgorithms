@@ -150,7 +150,6 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
     // profile times calculation
     {
         for (const auto& [k, v] : times) {
-            
             std::vector<int64_t> allElements;
             int numMyElements = v.second.size();
             std::vector<int> numAllElements;
@@ -160,7 +159,6 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                        simulation->GetTopology()->GetComm());
 
             int maxNumElements = *(std::max_element(numAllElements.begin(), numAllElements.end()));
-            
 
             std::vector<int> displacements;
             int sumDispl = 0;
@@ -176,22 +174,21 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                         displacements.data(), MPI_INT64_T, 0, simulation->GetTopology()->GetComm());
 
             if (simulation->GetTopology()->GetWorldRank() == 0) {
-
                 std::vector<int64_t> sumPerProc;
                 sumPerProc.resize(simulation->GetTopology()->GetWorldSize());
 
-                //rapidjson::Value timesPerProc(rapidjson::kArrayType);
+                // rapidjson::Value timesPerProc(rapidjson::kArrayType);
                 rapidjson::Value timesPerProc(rapidjson::kObjectType);
 
                 for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
                     rapidjson::Value timesOfThisProc(rapidjson::kArrayType);
                     int64_t acc = 0;
                     for (int j = 0; j < maxNumElements; j++) {
-                        if(j < numAllElements[i]) {
+                        if (j < numAllElements[i]) {
                             int64_t t = allElements[displacements[i] + j];
-                            
+
                             timesOfThisProc.PushBack(rapidjson::Value(t), d.GetAllocator());
-                            
+
                             // check for over & underflow. https://stackoverflow.com/a/1514309
                             if (t > 0 && acc > std::numeric_limits<int64_t>::max() - t) {
                                 std::cout << "Overflow Warning for profiling" << std::endl;
@@ -201,18 +198,17 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                             }
                             acc += t;
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-                            std::cout << "proc " << i << " added " << t
-                                    << " measured timesteps for " << k << std::endl;
+                            std::cout << "proc " << i << " added " << t << " measured timesteps for " << k << std::endl;
 #endif
                         }
                     }
                     sumPerProc[i] = acc;
-                    //timesPerProc.PushBack(timesOfThisProc, d.GetAllocator());
+                    // timesPerProc.PushBack(timesOfThisProc, d.GetAllocator());
                     std::string indexStr = std::to_string(i);
                     rapidjson::Value indexStrRJ(indexStr.c_str(), indexStr.size(), d.GetAllocator());
                     timesPerProc.AddMember(indexStrRJ, timesOfThisProc, d.GetAllocator());
                 }
-            
+
                 int64_t sumOfAllProc = 0;
                 for (int64_t& t : sumPerProc) {
                     // check for over & underflow. https://stackoverflow.com/a/1514309
@@ -233,16 +229,16 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                     int64_t minVal = std::numeric_limits<int64_t>::max();
                     int divider = 0;
                     for (int j = 0; j < simulation->GetTopology()->GetWorldSize(); j++) {
-                        if(i < numAllElements[j]) {
+                        if (i < numAllElements[j]) {
                             int64_t t = allElements[displacements[j] + i];
                             sumSubStep += t;
                             divider++;
 
-                            if(t > maxVal) {
+                            if (t > maxVal) {
                                 maxVal = t;
                             }
 
-                            if(t < minVal) {
+                            if (t < minVal) {
                                 minVal = t;
                             }
                         }
@@ -317,9 +313,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
         MPI_Gatherv(hitrates.data(), hitrates.size(), MPI_DOUBLE, allHitrates.data(), numAllHitrates.data(),
                     displacements.data(), MPI_DOUBLE, 0, simulation->GetTopology()->GetComm());
 
-
         if (simulation->GetTopology()->GetWorldRank() == 0) {
-
             int sumNumAllHitrates = 0;
             for (int& nHr : numAllHitrates) {
                 sumNumAllHitrates += nHr;
