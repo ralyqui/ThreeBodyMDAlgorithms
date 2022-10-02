@@ -142,6 +142,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
     rapidjson::Document d;
     rapidjson::Value o(rapidjson::kObjectType);
     rapidjson::Value hr(rapidjson::kObjectType);
+    rapidjson::Value hrPerProcRJ(rapidjson::kObjectType);
     rapidjson::Value stvrRJ(rapidjson::kArrayType);
     if (simulation->GetTopology()->GetWorldRank() == 0) {
         d.SetObject();
@@ -329,7 +330,16 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                 for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
                     // std::cout << "hr of proc " << i << " in step " << j << ": " << allHitrates[displacements[i] + j]
                     //          << std::endl;
-                    accHrPerSimStep += allHitrates[displacements[i] + j];
+                    double val = allHitrates[displacements[i] + j];
+                    accHrPerSimStep += val;
+
+                    if (j < numAllHitrates[i]) {
+                        rapidjson::Value hrOfThisProcRJ(val);
+
+                        std::string indexStr = std::to_string(i);
+                        rapidjson::Value indexStrRJ(indexStr.c_str(), indexStr.size(), d.GetAllocator());
+                        hrPerProcRJ.AddMember(indexStrRJ, hrOfThisProcRJ, d.GetAllocator());
+                    }
                 }
                 // Note: this works only if we have just one sim step
                 // TODO: make this work with multiple time steps
@@ -368,6 +378,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
     if (simulation->GetTopology()->GetWorldRank() == 0) {
         d.AddMember("times", o, d.GetAllocator());
         d.AddMember("hitrate", hr, d.GetAllocator());
+        d.AddMember("hitrate per proc", hrPerProcRJ, d.GetAllocator());
         d.AddMember("stvr", stvrRJ, d.GetAllocator());
 
         rapidjson::StringBuffer buffer;
