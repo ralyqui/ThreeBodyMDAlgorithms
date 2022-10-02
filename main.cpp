@@ -15,6 +15,7 @@
 #include "topology/RingTopology.hpp"
 #include "utility/cli.hpp"
 #include "utility/decompositions.hpp"
+#include "MPIReporter.hpp"
 
 #ifdef PROFILE_3BMDA
 #include <numeric>
@@ -126,9 +127,12 @@ std::string charToTimeUnit(const char& c)
 void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 {
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-    std::cout << "I'm proc " << simulation->GetTopology()->GetWorldRank() << " and have done "
-              << simulation->GetNumParticleInteractions(0) << " particle interactions actually, and "
-              << simulation->GetNumBufferInteractions(0) << " buffer interactions" << std::endl;
+
+    std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) + " and have done "
+    + std::to_string(simulation->GetNumParticleInteractions(0)) + " particle interactions actually, and "
+    + std::to_string(simulation->GetNumBufferInteractions(0)) + " buffer interactions";
+
+    MPIReporter::instance()->StoreMessage(simulation->GetTopology()->GetWorldRank(), message);
 #endif
 
     // fetch profiling data
@@ -199,7 +203,8 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                             }
                             acc += t;
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-                            std::cout << "proc " << i << " added " << t << " measured timesteps for " << k << std::endl;
+                            std::string message = "proc " + std::to_string(i) + " added " + std::to_string(t) + " measured timesteps for " + k;
+                            MPIReporter::instance()->StoreMessage(simulation->GetTopology()->GetWorldRank(), message);
 #endif
                         }
                     }
@@ -394,6 +399,70 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 
 #endif
 
+void gatherAndPrintMessages() {
+    
+    int worldSize, worldRank;
+    MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
+    MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
+    
+    std::vector<std::string> allMyMessages = MPIReporter::instance()->GetAllMessages();
+    int numMyMessages = allMyMessages.size();
+
+    std::vector<int> numAllMessages;
+    numAllMessages.resize(worldSize);
+
+    MPI_Gather(&numMyMessages, 1, MPI_INT, numAllMessages.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    if(worldRank == 0) {
+
+        std::vector<std::string> allMessages;
+
+        for (std::string & str : allMyMessages) {
+            allMessages.push_back(str);
+        }
+
+        for (int i = 1; i < worldSize; i++) {
+            for (int j = 0; j < numAllMessages[i]; j++) {
+
+                MPI_Status status;
+                int numRecv;
+
+                MPI_Probe(i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+                MPI_Get_count(&status, MPI_CHAR, &numRecv);
+
+                char *buf = new char[numRecv];
+
+                MPI_Recv(buf, numRecv, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+                std::string str(buf, numRecv);
+
+                allMessages.push_back(str);
+                
+                delete [] buf;
+            }
+        }
+
+        for (std::string& m : allMessages) {
+            std::cout << m << std::endl;
+        }
+
+    } else {
+        std::vector<MPI_Request> requests;
+        requests.resize(numMyMessages);
+        for (int j = 0; j < numMyMessages; j++) {
+            
+            //MPI_Request req;
+            //requests[j] = req;
+
+            MPI_Isend(allMyMessages[j].c_str(), allMyMessages[j].length(), MPI_CHAR, 0, 0,
+                    MPI_COMM_WORLD, &(requests[j]));
+
+        }
+        MPI_Waitall(numMyMessages, requests.data(), MPI_STATUSES_IGNORE);
+    }
+
+}
+
 int main(int argc, char* argv[])
 {
     // init MPI
@@ -441,6 +510,7 @@ int main(int argc, char* argv[])
 
 #ifdef PROFILE_3BMDA
     doTimingStuff(simulation, a.outputProfile);
+    gatherAndPrintMessages();
 #endif
 
     // finalize

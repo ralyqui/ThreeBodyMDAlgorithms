@@ -20,3 +20,5 @@ class CartTopology;
 
 // potentials
 class AxilrodTeller;
+
+class MPIReporter;

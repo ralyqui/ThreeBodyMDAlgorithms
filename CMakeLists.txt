@@ -19,7 +19,8 @@ set(MAIN_SOURCES
     utility/utility.cpp
     potential/AxilrodTeller.cpp
     potential/Potential.cpp
-    simulation/Simulation.cpp)
+    simulation/Simulation.cpp
+    MPIReporter.cpp)
 
 add_executable(main ${MAIN_SOURCES})
 target_include_directories(main PRIVATE utility algorithm decomposition
