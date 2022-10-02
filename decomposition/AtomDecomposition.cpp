@@ -46,3 +46,5 @@ void AtomDecomposition::Update(double dt, Eigen::Vector3d gForce)
     // update all my particles
     this->updateMyParticles(dt, gForce);
 }
+
+void AtomDecomposition::UpdatePredictorStage(double dt) { this->updateMyParticlesPredictorStage(dt); }

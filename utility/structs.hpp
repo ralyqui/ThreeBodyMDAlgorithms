@@ -37,30 +37,46 @@ namespace Utility
             return result;
         }
 
+        void UpdatePredictorStage(double dt)
+        {
+            Eigen::Vector3d pos(pX, pY, pZ);
+            Eigen::Vector3d vel(vX, vY, vZ);
+            Eigen::Vector3d acc(aX, aX, aX);
+            Eigen::Vector3d newPos = pos + vel * dt + acc * (dt * dt * 0.5);
+            // Eigen::Vector3d newVel = vel + acc * dt;
+
+            pX = newPos.x();
+            pY = newPos.y();
+            pZ = newPos.z();
+
+            // vX = newVel.x();
+            // vY = newVel.y();
+            // vZ = newVel.z();
+        }
+
         void Update(double dt, Eigen::Vector3d gForce)
         {
             // we use velocity Verlet integration
             // https://en.wikipedia.org/wiki/Verlet_integration#Algorithmic_representation
+            // https://en.wikipedia.org/wiki/Molecular_dynamics#/media/File:Molecular_dynamics_algorithm.png
+            // https://de.wikipedia.org/wiki/Molekulardynamik-Simulation#/media/Datei:Holec2016AtomisticMaterialsModellingP19_de.svg
             Eigen::Vector3d pos(pX, pY, pZ);
             Eigen::Vector3d vel(vX, vY, vZ);
             Eigen::Vector3d acc(aX, aX, aX);
             Eigen::Vector3d f(fX, fY, fZ);
 
-            Eigen::Vector3d newPos = pos + vel * dt + acc * (dt * dt * 0.5);
-            // std::cout << "(" << vel[0] << ", " << vel[1] << ", " << vel[2] << "), ";
-            // std::cout << "(" << acc[0] << ", " << acc[1] << ", " << acc[2] << "), ";
-            // std::cout << "(" << pos[0] << ", " << pos[1] << ", " << pos[2] << "), ";
-            // std::cout << "(" << newPos[0] << ", " << newPos[1] << ", " << newPos[2] << ")\n----------" << std::endl;
-
-            Eigen::Vector3d dragForce = 0.5 * f.cwiseProduct(vel.cwiseProduct(vel.cwiseAbs()));
-            Eigen::Vector3d dragAcc = dragForce / mass;
+            // Eigen::Vector3d dragForce = 0.5 * f.cwiseProduct(vel.cwiseProduct(vel));
+            Eigen::Vector3d dragAcc = f / mass;
+            // Eigen::Vector3d dragAcc = dragForce / mass;
             Eigen::Vector3d newAcc = gForce - dragAcc;
 
-            Eigen::Vector3d newVel = vel + (acc + newAcc) * (dt * 0.5);
+            // Eigen::Vector3d newPos = pos + vel * dt + newAcc * (dt * dt * 0.5);
 
-            pX = newPos.x();
-            pY = newPos.y();
-            pZ = newPos.z();
+            Eigen::Vector3d newVel = vel + newAcc * (dt * 0.5);
+
+            // pX = newPos.x();
+            // pY = newPos.y();
+            // pZ = newPos.z();
 
             // std::cout << "(" << pX << ", " << pY << ", " << pZ << ")\n----------" << std::endl;
 

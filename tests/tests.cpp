@@ -359,6 +359,7 @@ TEST(nata, test_decomposition)
 
     int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
+    simulation->GetDecomposition()->UpdatePredictorStage(simulation->GetDeltaT());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
 
     int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
@@ -378,6 +379,7 @@ TEST(auta, test_decomposition)
 
     int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
+    simulation->GetDecomposition()->UpdatePredictorStage(simulation->GetDeltaT());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
 
     int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
@@ -401,6 +403,7 @@ TEST(p3bca, test_decomposition)
 
     int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
+    simulation->GetDecomposition()->UpdatePredictorStage(simulation->GetDeltaT());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
 
     int myParticlesNewSize = simulation->GetDecomposition()->GetMyParticles().size();
@@ -419,6 +422,8 @@ TEST(nata, test_decomposition_with_step)
 
     int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
+    simulation->GetDecomposition()->UpdatePredictorStage(simulation->GetDeltaT());
+    MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetAlgorithm()->SimulationStep();
     MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
@@ -440,6 +445,8 @@ TEST(auta, test_decomposition_with_step)
 
     int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
+    simulation->GetDecomposition()->UpdatePredictorStage(simulation->GetDeltaT());
+    MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetAlgorithm()->SimulationStep();
     MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());
@@ -465,6 +472,8 @@ TEST(p3bca, test_decomposition_with_step)
 
     int myParticlesOldSize = simulation->GetDecomposition()->GetMyParticles().size();
 
+    simulation->GetDecomposition()->UpdatePredictorStage(simulation->GetDeltaT());
+    MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetAlgorithm()->SimulationStep();
     MPI_Barrier(simulation->GetTopology()->GetComm());
     simulation->GetDecomposition()->Update(simulation->GetDeltaT(), simulation->GetGForce());

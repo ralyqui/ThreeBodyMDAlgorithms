@@ -24,6 +24,15 @@ void DomainDecomposition::updateMyParticles(double dt, Eigen::Vector3d gForce)
     }*/
 }
 
+void DomainDecomposition::updateMyParticlesPredictorStage(double dt)
+{
+    for (size_t i = 0; i < myParticles.size(); i++) {
+        if (!myParticles[i].isDummy) {
+            myParticles[i].UpdatePredictorStage(dt);
+        }
+    }
+}
+
 void DomainDecomposition::ResetForces()
 {
     for (size_t i = 0; i < myParticles.size(); i++) {

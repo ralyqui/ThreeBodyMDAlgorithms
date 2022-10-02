@@ -39,9 +39,15 @@ void Simulation::Start()
         // this->potential->ResetTime();
 #endif
 
-        // do step and record the number of interactions
+        // update particle positions at predictor stage
+        this->decomposition->UpdatePredictorStage(this->dt);
+        MPI_Barrier(this->topology->GetComm());
+
+        // execute algorithm... force calculation
         numInteractions.push_back(this->algorithm->SimulationStep());
         MPI_Barrier(this->topology->GetComm());
+
+        // update the particle positions
         this->decomposition->Update(this->dt, this->gForce);
         MPI_Barrier(this->topology->GetComm());
 

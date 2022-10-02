@@ -206,6 +206,8 @@ void RegularGridDecomposition::Update(double dt, Eigen::Vector3d gForce)
     }
 }
 
+void RegularGridDecomposition::UpdatePredictorStage(double dt) { this->updateMyParticlesPredictorStage(dt); }
+
 Eigen::Array3d RegularGridDecomposition::GetCellSize() { return this->localCellWidth; }
 Eigen::Array3d RegularGridDecomposition::GetPhysicalDomainSize() { return this->physicalDomainSize; }
 int RegularGridDecomposition::GetDimX() { return this->dimX; }
