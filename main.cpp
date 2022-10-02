@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "MPIReporter.hpp"
 #include "algorithm/AUTA.hpp"
 #include "algorithm/NATA.hpp"
 #include "algorithm/P3BCA.hpp"
@@ -15,7 +16,6 @@
 #include "topology/RingTopology.hpp"
 #include "utility/cli.hpp"
 #include "utility/decompositions.hpp"
-#include "MPIReporter.hpp"
 
 #ifdef PROFILE_3BMDA
 #include <numeric>
@@ -128,9 +128,10 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 {
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
 
-    std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) + " and have done "
-    + std::to_string(simulation->GetNumParticleInteractions(0)) + " particle interactions actually, and "
-    + std::to_string(simulation->GetNumBufferInteractions(0)) + " buffer interactions";
+    std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) + " and have done " +
+                          std::to_string(simulation->GetNumParticleInteractions(0)) +
+                          " particle interactions actually, and " +
+                          std::to_string(simulation->GetNumBufferInteractions(0)) + " buffer interactions";
 
     MPIReporter::instance()->StoreMessage(simulation->GetTopology()->GetWorldRank(), message);
 #endif
@@ -203,7 +204,8 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                             }
                             acc += t;
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-                            std::string message = "proc " + std::to_string(i) + " added " + std::to_string(t) + " measured timesteps for " + k;
+                            std::string message = "proc " + std::to_string(i) + " added " + std::to_string(t) +
+                                                  " measured timesteps for " + k;
                             MPIReporter::instance()->StoreMessage(simulation->GetTopology()->GetWorldRank(), message);
 #endif
                         }
@@ -399,12 +401,12 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 
 #endif
 
-void gatherAndPrintMessages() {
-    
+void gatherAndPrintMessages()
+{
     int worldSize, worldRank;
     MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
     MPI_Comm_rank(MPI_COMM_WORLD, &worldRank);
-    
+
     std::vector<std::string> allMyMessages = MPIReporter::instance()->GetAllMessages();
     int numMyMessages = allMyMessages.size();
 
@@ -413,32 +415,30 @@ void gatherAndPrintMessages() {
 
     MPI_Gather(&numMyMessages, 1, MPI_INT, numAllMessages.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    if(worldRank == 0) {
-
+    if (worldRank == 0) {
         std::vector<std::string> allMessages;
 
-        for (std::string & str : allMyMessages) {
+        for (std::string& str : allMyMessages) {
             allMessages.push_back(str);
         }
 
         for (int i = 1; i < worldSize; i++) {
             for (int j = 0; j < numAllMessages[i]; j++) {
-
                 MPI_Status status;
                 int numRecv;
 
                 MPI_Probe(i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
                 MPI_Get_count(&status, MPI_CHAR, &numRecv);
 
-                char *buf = new char[numRecv];
+                char* buf = new char[numRecv];
 
                 MPI_Recv(buf, numRecv, MPI_CHAR, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
                 std::string str(buf, numRecv);
 
                 allMessages.push_back(str);
-                
-                delete [] buf;
+
+                delete[] buf;
             }
         }
 
@@ -450,17 +450,14 @@ void gatherAndPrintMessages() {
         std::vector<MPI_Request> requests;
         requests.resize(numMyMessages);
         for (int j = 0; j < numMyMessages; j++) {
-            
-            //MPI_Request req;
-            //requests[j] = req;
+            // MPI_Request req;
+            // requests[j] = req;
 
-            MPI_Isend(allMyMessages[j].c_str(), allMyMessages[j].length(), MPI_CHAR, 0, 0,
-                    MPI_COMM_WORLD, &(requests[j]));
-
+            MPI_Isend(allMyMessages[j].c_str(), allMyMessages[j].length(), MPI_CHAR, 0, 0, MPI_COMM_WORLD,
+                      &(requests[j]));
         }
         MPI_Waitall(numMyMessages, requests.data(), MPI_STATUSES_IGNORE);
     }
-
 }
 
 int main(int argc, char* argv[])

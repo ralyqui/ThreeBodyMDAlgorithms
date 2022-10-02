@@ -13,10 +13,10 @@ void Algorithm::Init(std::shared_ptr<Simulation> simulation)
     this->worldRank = this->simulation->GetTopology()->GetWorldRank();
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-    std::string message = "I'm proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " and own "
-              + std::to_string(this->simulation->GetDecomposition()->GetMyParticles().size()) + " particles";
+    std::string message = "I'm proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " and own " +
+                          std::to_string(this->simulation->GetDecomposition()->GetMyParticles().size()) + " particles";
     MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
-    
+
 #endif
 }
 
@@ -96,7 +96,8 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
                 // we don't want to exceed the memory
                 if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
-                    std::string message = "I'm proc " + std::to_string(this->worldRank) + " and dispatch particle calculations before exceeding memory";
+                    std::string message = "I'm proc " + std::to_string(this->worldRank) +
+                                          " and dispatch particle calculations before exceeding memory";
                     MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
 #endif
 #ifdef PROFILE_3BMDA

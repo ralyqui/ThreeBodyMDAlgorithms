@@ -64,10 +64,11 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
         std::string message1 = "numDims: " + std::to_string(numDims);
-        
-        std::string message2 = "specified cutoff: " + std::to_string(this->cutoff) + ", calculated cutoff boxes: [" + std::to_string(this->nCbX) + ", "
-                  + std::to_string(this->nCbY) + ", " + std::to_string(this->nCbZ) + "], cell size: [" + std::to_string(cellSizeX) + ", " + std::to_string(cellSizeY) + ", "
-                  + std::to_string(cellSizeZ) + "]";
+
+        std::string message2 = "specified cutoff: " + std::to_string(this->cutoff) + ", calculated cutoff boxes: [" +
+                               std::to_string(this->nCbX) + ", " + std::to_string(this->nCbY) + ", " +
+                               std::to_string(this->nCbZ) + "], cell size: [" + std::to_string(cellSizeX) + ", " +
+                               std::to_string(cellSizeY) + ", " + std::to_string(cellSizeZ) + "]";
 
         MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message1);
         MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message2);
@@ -636,9 +637,9 @@ std::tuple<int, int> P3BCA::SimulationStep()
             // if (cartTopology->GetWorldSize() == 2 && i2 < 1)
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-            std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank())
-            + " and going to calculate interactions between (" + std::to_string(worldRank) + ", " + std::to_string(this->b1Owner)
-            + ", " + std::to_string(this->b2Owner) + ")";
+            std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
+                                  " and going to calculate interactions between (" + std::to_string(worldRank) + ", " +
+                                  std::to_string(this->b1Owner) + ", " + std::to_string(this->b2Owner) + ")";
             MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
 #endif
 

@@ -272,9 +272,9 @@ std::tuple<int, int> AUTA::SimulationStep()
             }
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-            std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank())
-            + " and going to calculate interactions between (" + std::to_string(this->b0Owner) + ", " + std::to_string(this->b1Owner)
-            + ", " + std::to_string(this->b2Owner) + ")";
+            std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
+                                  " and going to calculate interactions between (" + std::to_string(this->b0Owner) +
+                                  ", " + std::to_string(this->b1Owner) + ", " + std::to_string(this->b2Owner) + ")";
             MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
 #endif
 
@@ -307,10 +307,10 @@ std::tuple<int, int> AUTA::SimulationStep()
         // Calculate one third of the interactions
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-            std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank())
-            + " and going to calculate interactions between (" + std::to_string(this->b0Owner) + ", " + std::to_string(this->b1Owner)
-            + ", " + std::to_string(this->b2Owner) + ")";
-            MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
+        std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
+                              " and going to calculate interactions between (" + std::to_string(this->b0Owner) + ", " +
+                              std::to_string(this->b1Owner) + ", " + std::to_string(this->b2Owner) + ")";
+        MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
 #endif
 
         numBufferInteractions++;
