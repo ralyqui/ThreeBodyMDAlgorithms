@@ -130,7 +130,7 @@ Bench getBenchFromString(std::string &type, std::string &subtype)
 
 std::vector<Utility::Particle> generateParticles(BenchVariant &v)
 {
-    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+    std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
         particlesTuple;
     std::vector<Utility::Particle> particles;
 

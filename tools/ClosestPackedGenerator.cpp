@@ -24,13 +24,14 @@ void ClosestPackedGenerator::Generate()
     bool evenLayer = true;
     bool evenRow = true;
 
+    int id = 0;
     for (double z = bottomLeftCorner[2]; z < topRightCorner[2]; z += spacingLayer) {
         double starty = evenLayer ? bottomLeftCorner[1] : bottomLeftCorner[1] + yOffset;
         for (double y = starty; y < topRightCorner[1]; y += spacingRow) {
             double startx = evenRow ? bottomLeftCorner[0] : bottomLeftCorner[0] + xOffset;
             for (double x = startx; x < topRightCorner[0]; x += particleSpacing) {
-                std::tuple<double, double, double, double, double, double, double, double, double, double> positions =
-                    std::make_tuple(x, y, z, velocity[0], velocity[1], velocity[2], 0, 0, 0, mass);
+                std::tuple<int, double, double, double, double, double, double, double, double, double, double>
+                    positions = std::make_tuple(id++, x, y, z, velocity[0], velocity[1], velocity[2], 0, 0, 0, mass);
 
                 this->particles.push_back(positions);
             }

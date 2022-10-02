@@ -20,8 +20,8 @@ void GaussGenerator::Generate()
         std::normal_distribution<double>{distributionMean[2], distributionStdDev[2]}};
 
     for (int i = 0; i < numParticles; ++i) {
-        std::tuple<double, double, double, double, double, double, double, double, double, double> positions =
-            std::make_tuple(bottomLeftCorner[0] + distributions[0](generator),
+        std::tuple<int, double, double, double, double, double, double, double, double, double, double> positions =
+            std::make_tuple(i, bottomLeftCorner[0] + distributions[0](generator),
                             bottomLeftCorner[1] + distributions[1](generator),
                             bottomLeftCorner[2] + distributions[2](generator), velocity[0], velocity[1], velocity[2], 0,
                             0, 0, mass);

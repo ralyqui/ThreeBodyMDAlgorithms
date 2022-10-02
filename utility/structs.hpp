@@ -9,6 +9,7 @@
 namespace Utility
 {
     struct Particle {
+        int ID;
         double pX, pY, pZ;
         double vX, vY, vZ;
         double aX, aY, aZ;
@@ -17,20 +18,20 @@ namespace Utility
         bool isDummy;
 
         Particle()
-            : pX(0.0), pY(0.0), pZ(0.0), vX(0.0), vY(0.0), vZ(0.0), aX(0.0), aY(0.0), aZ(0.0), fX(0.0), fY(0.0),
+            : ID(-1), pX(0.0), pY(0.0), pZ(0.0), vX(0.0), vY(0.0), vZ(0.0), aX(0.0), aY(0.0), aZ(0.0), fX(0.0), fY(0.0),
               fZ(0.0), mass(0), isDummy(false)
         {}
         Particle(bool isDummy) : isDummy(isDummy) {}
-        Particle(double pX, double pY, double pZ, double vX, double vY, double vZ, double aX, double aY, double aZ,
-                 double mass)
-            : pX(pX), pY(pY), pZ(pZ), vX(vX), vY(vY), vZ(vZ), aX(aX), aY(aY), aZ(aZ), fX(0.0), fY(0.0), fZ(0.0),
+        Particle(int ID, double pX, double pY, double pZ, double vX, double vY, double vZ, double aX, double aY,
+                 double aZ, double mass)
+            : ID(ID), pX(pX), pY(pY), pZ(pZ), vX(vX), vY(vY), vZ(vZ), aX(aX), aY(aY), aZ(aZ), fX(0.0), fY(0.0), fZ(0.0),
               mass(mass), isDummy(false)
         {}
         void ResetForce() { fX = fY = fZ = 0.0; }
 
         std::string toString()
         {
-            std::string result = "";
+            std::string result = std::to_string(ID) + ": ";
             result.append("(" + std::to_string(pX) + ", " + std::to_string(pY) + ", " + std::to_string(pZ) +
                           ", isDummy: " + (isDummy ? "true" : "false") + ")");
             return result;
@@ -99,28 +100,29 @@ namespace Utility
         {
             // create MPI struct
             MPI_Datatype mpiParticleType;
-            const int nitemsParticle = 14;
-            int blocklengthsParticle[14] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-            MPI_Datatype types[14] = {MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE,
+            const int nitemsParticle = 15;
+            int blocklengthsParticle[15] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+            MPI_Datatype types[15] = {MPI_INT,    MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE,
                                       MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE,
-                                      MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_C_BOOL};
+                                      MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_C_BOOL};
 
-            MPI_Aint offsetsParticle[14];
+            MPI_Aint offsetsParticle[15];
 
-            offsetsParticle[0] = offsetof(Utility::Particle, pX);
-            offsetsParticle[1] = offsetof(Utility::Particle, pY);
-            offsetsParticle[2] = offsetof(Utility::Particle, pZ);
-            offsetsParticle[3] = offsetof(Utility::Particle, vX);
-            offsetsParticle[4] = offsetof(Utility::Particle, vY);
-            offsetsParticle[5] = offsetof(Utility::Particle, vZ);
-            offsetsParticle[6] = offsetof(Utility::Particle, aX);
-            offsetsParticle[7] = offsetof(Utility::Particle, aY);
-            offsetsParticle[8] = offsetof(Utility::Particle, aZ);
-            offsetsParticle[9] = offsetof(Utility::Particle, fX);
-            offsetsParticle[10] = offsetof(Utility::Particle, fY);
-            offsetsParticle[11] = offsetof(Utility::Particle, fZ);
-            offsetsParticle[12] = offsetof(Utility::Particle, mass);
-            offsetsParticle[13] = offsetof(Utility::Particle, isDummy);
+            offsetsParticle[0] = offsetof(Utility::Particle, ID);
+            offsetsParticle[1] = offsetof(Utility::Particle, pX);
+            offsetsParticle[2] = offsetof(Utility::Particle, pY);
+            offsetsParticle[3] = offsetof(Utility::Particle, pZ);
+            offsetsParticle[4] = offsetof(Utility::Particle, vX);
+            offsetsParticle[5] = offsetof(Utility::Particle, vY);
+            offsetsParticle[6] = offsetof(Utility::Particle, vZ);
+            offsetsParticle[7] = offsetof(Utility::Particle, aX);
+            offsetsParticle[8] = offsetof(Utility::Particle, aY);
+            offsetsParticle[9] = offsetof(Utility::Particle, aZ);
+            offsetsParticle[10] = offsetof(Utility::Particle, fX);
+            offsetsParticle[11] = offsetof(Utility::Particle, fY);
+            offsetsParticle[12] = offsetof(Utility::Particle, fZ);
+            offsetsParticle[13] = offsetof(Utility::Particle, mass);
+            offsetsParticle[14] = offsetof(Utility::Particle, isDummy);
 
             MPI_Type_create_struct(nitemsParticle, blocklengthsParticle, offsetsParticle, types, &mpiParticleType);
 

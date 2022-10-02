@@ -10,7 +10,7 @@ ParticleGenerator::ParticleGenerator(int numParticles, const std::array<double, 
 
 ParticleGenerator::~ParticleGenerator() {}
 
-std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
 ParticleGenerator::GetParticles()
 {
     return this->particles;

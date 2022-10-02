@@ -35,11 +35,12 @@ void ClusteredGaussGenerator::Generate()
         std::normal_distribution<double>{distributionMean[1], distributionStdDev[1]},
         std::normal_distribution<double>{distributionMean[2], distributionStdDev[2]}};
 
+    int id = 0;
     for (std::tuple<double, double, double> &p : points) {
         for (int i = 0; i < numParticles / numClusters; ++i) {
-            std::tuple<double, double, double, double, double, double, double, double, double, double> positions =
+            std::tuple<int, double, double, double, double, double, double, double, double, double, double> positions =
                 std::make_tuple(
-                    std::get<0>(p) + distributions[0](generator), std::get<1>(p) + distributions[1](generator),
+                    id++, std::get<0>(p) + distributions[0](generator), std::get<1>(p) + distributions[1](generator),
                     std::get<2>(p) + distributions[2](generator), velocity[0], velocity[1], velocity[2], 0, 0, 0, mass);
             this->particles.push_back(positions);
         }

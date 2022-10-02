@@ -33,15 +33,15 @@ void generateParticles()
     const std::array<double, 3> distributionStdDev = {0.5, 0.5, 0.5};
     int numClusters = 25;
 
-    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+    std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
         uniformParticlesTuple;
-    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+    std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
         gridParticlesTuple;
-    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+    std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
         gaussParticlesTuple;
-    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+    std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
         closestpackedParticlesTuple;
-    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>>
+    std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
         clusteredgaussParticlesTuple;
 
     UniformGenerator uniformGenerator(numParticles, velocity, boxLength, bottomLeftCorner, mass, seed0, seed1);
@@ -858,7 +858,7 @@ TEST(utility, test_particle_constructor)
 {
     Utility::Particle p0;
     Utility::Particle p1(true);
-    Utility::Particle p2(1., 1., 1., 2., 2., 2., 3., 3., 3., 4.);
+    Utility::Particle p2(0, 1., 1., 1., 2., 2., 2., 3., 3., 3., 4.);
 
     EXPECT_DOUBLE_EQ(p0.pX, 0.);
     EXPECT_DOUBLE_EQ(p0.pY, 0.);
@@ -899,7 +899,7 @@ TEST(utility, test_particle_reset)
 
 TEST(utility, test_particle_GetR)
 {
-    Utility::Particle p(1., 2., 3., 0., 0., 0., 0., 0., 0., 0.);
+    Utility::Particle p(0, 1., 2., 3., 0., 0., 0., 0., 0., 0., 0.);
     Eigen::Vector3d r = p.GetR();
     EXPECT_DOUBLE_EQ(r.x(), 1.);
     EXPECT_DOUBLE_EQ(r.y(), 2.);

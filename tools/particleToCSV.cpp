@@ -18,7 +18,8 @@
 
 int main(int argc, char *argv[])
 {
-    std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>> particles;
+    std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
+        particles;
     int numParticles = 0;
     std::array<double, 3> distributionMean;
     std::array<double, 3> distributionStdDev;
@@ -125,12 +126,13 @@ int main(int argc, char *argv[])
 
     std::ofstream csvFile;
     csvFile.open(output);
-    csvFile << "pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m\n";
+    csvFile << "ID, pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m\n";
     for (size_t i = 0; i < particles.size(); i++) {
         csvFile << std::get<0>(particles[i]) << ", " << std::get<1>(particles[i]) << ", " << std::get<2>(particles[i])
                 << ", " << std::get<3>(particles[i]) << ", " << std::get<4>(particles[i]) << ", "
                 << std::get<5>(particles[i]) << ", " << std::get<6>(particles[i]) << ", " << std::get<7>(particles[i])
-                << ", " << std::get<8>(particles[i]) << ", " << std::get<9>(particles[i]) << "\n";
+                << ", " << std::get<8>(particles[i]) << ", " << std::get<9>(particles[i]) << ", "
+                << std::get<10>(particles[i]) << "\n";
     }
     csvFile.close();
 

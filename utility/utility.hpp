@@ -19,7 +19,7 @@ namespace Utility
 
     void getParticlesFromCSV(std::string file, std::vector<Particle> &particles);
     void getParticlesFromTuple(
-        std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>> &tuples,
+        std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>> &tuples,
         std::vector<Particle> &particles);
 
     /*void calculateInteractions(std::vector<Utility::Particle> &b0, std::vector<Utility::Particle> &b1,

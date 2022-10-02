@@ -17,19 +17,22 @@ namespace Utility
         std::vector<double> row;
         for (size_t i = 0; i < doc.GetRowCount(); i++) {
             row = doc.GetRow<double>(i);
+            int ID = doc.GetCell<int>(0, i);
             particles.push_back(
-                Particle(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]));
+                Particle(ID, row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10]));
         }
     }
 
     void getParticlesFromTuple(
-        std::vector<std::tuple<double, double, double, double, double, double, double, double, double, double>> &tuples,
+        std::vector<std::tuple<int, double, double, double, double, double, double, double, double, double, double>>
+            &tuples,
         std::vector<Particle> &particles)
     {
-        for (std::tuple<double, double, double, double, double, double, double, double, double, double> &t : tuples) {
+        for (std::tuple<int, double, double, double, double, double, double, double, double, double, double> &t :
+             tuples) {
             particles.push_back(Particle(std::get<0>(t), std::get<1>(t), std::get<2>(t), std::get<3>(t), std::get<4>(t),
-                                         std::get<5>(t), std::get<6>(t), std::get<7>(t), std::get<8>(t),
-                                         std::get<9>(t)));
+                                         std::get<5>(t), std::get<6>(t), std::get<7>(t), std::get<8>(t), std::get<9>(t),
+                                         std::get<10>(t)));
         }
     }
 
@@ -37,13 +40,14 @@ namespace Utility
     {
         std::ofstream csvFile;
         csvFile.open(file);
-        csvFile << "pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m\n";
+        csvFile << "ID, pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m\n";
         // std::cout << particles.size();
         for (size_t i = 0; i < particles.size(); i++) {
             if (particles[i].isDummy) continue;
-            csvFile << particles[i].pX << ", " << particles[i].pY << ", " << particles[i].pZ << ", " << particles[i].vX
-                    << ", " << particles[i].vY << ", " << particles[i].vZ << ", " << particles[i].aX << ", "
-                    << particles[i].aY << ", " << particles[i].aZ << ", " << particles[i].mass << "\n";
+            csvFile << particles[i].ID << ", " << particles[i].pX << ", " << particles[i].pY << ", " << particles[i].pZ
+                    << ", " << particles[i].vX << ", " << particles[i].vY << ", " << particles[i].vZ << ", "
+                    << particles[i].aX << ", " << particles[i].aY << ", " << particles[i].aZ << ", "
+                    << particles[i].mass << "\n";
         }
         csvFile.close();
     }
@@ -74,7 +78,8 @@ namespace Utility
         return contents.str();
     }
 
-    std::vector<int> getDecomposition(int worldSize, const std::vector<std::pair<int, std::vector<int>>> &decompositions)
+    std::vector<int> getDecomposition(int worldSize,
+                                      const std::vector<std::pair<int, std::vector<int>>> &decompositions)
     {
         std::vector<int> result;
         for (std::pair<int, std::vector<int>> e : decompositions) {

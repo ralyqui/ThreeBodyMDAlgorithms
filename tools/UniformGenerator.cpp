@@ -17,9 +17,9 @@ void UniformGenerator::Generate()
     std::uniform_real_distribution<double> distribution(0.0, 1.0);
 
     for (int i = 0; i < numParticles; ++i) {
-        std::tuple<double, double, double, double, double, double, double, double, double, double> positions =
+        std::tuple<int, double, double, double, double, double, double, double, double, double, double> positions =
 
-            std::make_tuple(bottomLeftCorner[0] + distribution(randomNumberEngine) * boxLength[0],
+            std::make_tuple(i, bottomLeftCorner[0] + distribution(randomNumberEngine) * boxLength[0],
                             bottomLeftCorner[1] + distribution(randomNumberEngine) * boxLength[1],
                             bottomLeftCorner[2] + distribution(randomNumberEngine) * boxLength[2], velocity[0],
                             velocity[1], velocity[2], 0, 0, 0, mass);
