@@ -141,6 +141,9 @@ void Simulation::writeSimulationStepToCSV(std::string file)
         }
     }*/
 
+    std::sort(receivedParticlesForCSVOutput.begin(), receivedParticlesForCSVOutput.end(),
+              [](Utility::Particle a, Utility::Particle b) { return a.ID < b.ID; });
+
     if (topology->GetWorldRank() == 0) {
         Utility::writeStepToCSV(file, receivedParticlesForCSVOutput);
     }

@@ -81,7 +81,7 @@ namespace Utility
             // this part is just added here so we move our particles after the first iteration... just for testing
             // purpose. remove this for production
             {
-                Eigen::Vector3d newPos = pos + vel * dt + acc * (dt * dt * 0.5);
+                Eigen::Vector3d newPos = pos + newVel * dt + newAcc * (dt * dt * 0.5);
                 // Eigen::Vector3d newVel = vel + acc * dt;
 
                 pX = newPos.x();

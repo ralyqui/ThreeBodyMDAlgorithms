@@ -401,6 +401,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 
 #endif
 
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
 void gatherAndPrintMessages()
 {
     int worldSize, worldRank;
@@ -459,6 +460,7 @@ void gatherAndPrintMessages()
         MPI_Waitall(numMyMessages, requests.data(), MPI_STATUSES_IGNORE);
     }
 }
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -507,6 +509,9 @@ int main(int argc, char* argv[])
 
 #ifdef PROFILE_3BMDA
     doTimingStuff(simulation, a.outputProfile);
+#endif
+
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
     gatherAndPrintMessages();
 #endif
 
