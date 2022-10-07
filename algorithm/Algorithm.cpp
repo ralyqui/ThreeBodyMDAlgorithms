@@ -61,7 +61,10 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
     uint64_t numActParticleInteractions = 0;
     uint64_t numPossibleParticleInteractions = 0;
     double sqrCutoff = cutoff * cutoff;
-
+    //#pragma omp parallel
+    //{
+    //    #pragma omp single
+    //    {
     for (size_t i = b0Start; i < (b0NumSteps != -1 ? (size_t)b0NumSteps : b0.size()); ++i) {
         if (b0[i].isDummy) {
             continue;
@@ -91,7 +94,10 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
                     }
                 }
 
+                //#pragma omp task
+                //{
                 this->potential->CalculateForces(b0[i], b1[j], b2[k]);
+                //}
 
                 //                 particleTripletsToCalculate.push_back(std::tuple(i, j, k));
 
@@ -118,6 +124,9 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
             }
         }
     }
+//    }
+//    #pragma omp taskwait
+//}
 #ifdef PROFILE_3BMDA
     end = std::chrono::steady_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
