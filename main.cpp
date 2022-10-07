@@ -322,6 +322,10 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                     displacements.data(), MPI_DOUBLE, 0, simulation->GetTopology()->GetComm());
 
         if (simulation->GetTopology()->GetWorldRank() == 0) {
+            /*for (size_t i = 0; i < numAllHitrates.size(); i++) {
+                std::cout << "proc " << i << " has a numHitrates of " << numAllHitrates[i] << std::endl;
+            }*/
+
             int sumNumAllHitrates = 0;
             for (int& nHr : numAllHitrates) {
                 sumNumAllHitrates += nHr;

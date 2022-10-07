@@ -83,11 +83,11 @@ std::vector<Utility::Particle>& Simulation::GetAllParticles() { return this->par
 
 double Simulation::GetDeltaT() { return this->dt; }
 int Simulation::GetNumIterations() { return this->iterations; }
-int Simulation::GetNumBufferInteractions(int step)
+uint64_t Simulation::GetNumBufferInteractions(int step)
 {
     return (size_t)step < this->numInteractions.size() ? std::get<0>(this->numInteractions[step]) : 0;
 }
-int Simulation::GetNumParticleInteractions(int step)
+uint64_t Simulation::GetNumParticleInteractions(int step)
 {
     return (size_t)step < this->numInteractions.size() ? std::get<1>(this->numInteractions[step]) : 0;
 }

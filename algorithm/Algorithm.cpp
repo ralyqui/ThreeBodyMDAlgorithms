@@ -20,45 +20,46 @@ void Algorithm::Init(std::shared_ptr<Simulation> simulation)
 #endif
 }
 
-std::tuple<int, int> Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0,
-                                                      std::vector<Utility::Particle> &b1,
-                                                      std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner,
-                                                      int b2Owner)
+std::tuple<uint64_t, uint64_t> Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0,
+                                                                std::vector<Utility::Particle> &b1,
+                                                                std::vector<Utility::Particle> &b2, int b0Owner,
+                                                                int b1Owner, int b2Owner)
 {
     return calculateInteractions(b0, b1, b2, b0Owner, b1Owner, b2Owner, 0, -1, -1, Eigen::Array3d(-1));
 }
 
-std::tuple<int, int> Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0,
-                                                      std::vector<Utility::Particle> &b1,
-                                                      std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner,
-                                                      int b2Owner, int b0Start, int b0NumSteps)
+std::tuple<uint64_t, uint64_t> Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0,
+                                                                std::vector<Utility::Particle> &b1,
+                                                                std::vector<Utility::Particle> &b2, int b0Owner,
+                                                                int b1Owner, int b2Owner, int b0Start, int b0NumSteps)
 {
     return calculateInteractions(b0, b1, b2, b0Owner, b1Owner, b2Owner, b0Start, b0NumSteps, -1, Eigen::Array3d(-1));
 }
 
-std::tuple<int, int> Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0,
-                                                      std::vector<Utility::Particle> &b1,
-                                                      std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner,
-                                                      int b2Owner, double cutoff, Eigen::Array3d physicalDomainSize)
+std::tuple<uint64_t, uint64_t> Algorithm::CalculateInteractions(std::vector<Utility::Particle> &b0,
+                                                                std::vector<Utility::Particle> &b1,
+                                                                std::vector<Utility::Particle> &b2, int b0Owner,
+                                                                int b1Owner, int b2Owner, double cutoff,
+                                                                Eigen::Array3d physicalDomainSize)
 {
     return calculateInteractions(b0, b1, b2, b0Owner, b1Owner, b2Owner, 0, -1, cutoff, physicalDomainSize);
 }
 
-std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Particle> &b0,
-                                                      std::vector<Utility::Particle> &b1,
-                                                      std::vector<Utility::Particle> &b2, int b0Owner, int b1Owner,
-                                                      int b2Owner, int b0Start, int b0NumSteps, double cutoff,
-                                                      Eigen::Array3d physicalDomainSize)
+std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Utility::Particle> &b0,
+                                                                std::vector<Utility::Particle> &b1,
+                                                                std::vector<Utility::Particle> &b2, int b0Owner,
+                                                                int b1Owner, int b2Owner, int b0Start, int b0NumSteps,
+                                                                double cutoff, Eigen::Array3d physicalDomainSize)
 {
 #ifdef PROFILE_3BMDA
-    bool append = false;
+    // bool append = false;
     std::chrono::time_point<std::chrono::steady_clock> start;
     std::chrono::time_point<std::chrono::steady_clock> end;
     start = std::chrono::steady_clock::now();
 #endif
-    std::vector<std::tuple<int, int, int>> particleTripletsToCalculate;
-    int numActParticleInteractions = 0;
-    int numPossibleParticleInteractions = 0;
+    // std::vector<std::tuple<int, int, int>> particleTripletsToCalculate;
+    uint64_t numActParticleInteractions = 0;
+    uint64_t numPossibleParticleInteractions = 0;
     double sqrCutoff = cutoff * cutoff;
 
     for (size_t i = b0Start; i < (b0NumSteps != -1 ? (size_t)b0NumSteps : b0.size()); ++i) {
@@ -90,24 +91,27 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
                     }
                 }
 
-                // this->potential->CalculateForces(b0[i], b1[j], b2[k]);
-                particleTripletsToCalculate.push_back(std::tuple(i, j, k));
+                this->potential->CalculateForces(b0[i], b1[j], b2[k]);
 
-                // we don't want to exceed the memory
-                if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
-#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
-                    std::string message = "I'm proc " + std::to_string(this->worldRank) +
-                                          " and dispatch particle calculations before exceeding memory";
-                    MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
-#endif
-#ifdef PROFILE_3BMDA
-                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
-                    append = true;
-#else
-                    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
-#endif
-                    particleTripletsToCalculate.clear();
-                }
+                //                 particleTripletsToCalculate.push_back(std::tuple(i, j, k));
+
+                //                 // we don't want to exceed the memory
+                //                 if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
+                // #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
+                //                     std::string message = "I'm proc " + std::to_string(this->worldRank) +
+                //                                           " and dispatch particle calculations before exceeding
+                //                                           memory";
+                //                     MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(),
+                //                     message);
+                // #endif
+                // #ifdef PROFILE_3BMDA
+                //                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+                //                     append = true;
+                // #else
+                //                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+                // #endif
+                //                     particleTripletsToCalculate.clear();
+                //                 }
 
                 // std::cout << "calculate particle triplet (" << i << ", " << j << ", " << k << ")" << std::endl;
                 numActParticleInteractions++;
@@ -124,14 +128,15 @@ std::tuple<int, int> Algorithm::calculateInteractions(std::vector<Utility::Parti
     this->times["calculateInteractions"].second.push_back(elapsed_time.count());
 #endif
 
-#ifdef PROFILE_3BMDA
-    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
-#else
-    calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
-#endif
+    // #ifdef PROFILE_3BMDA
+    //     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+    // #else
+    //     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+    // #endif
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-    std::string message = "proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " calculates particle triplets : ";
+    std::string message =
+        "proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " calculates particle triplets : ";
     if (particleTripletsToCalculate.size() > 0) {
         for (size_t i = 0; i < particleTripletsToCalculate.size(); i++) {
             message.append("(" + std::to_string(b0[std::get<0>(particleTripletsToCalculate[i])].ID) + ", " +
@@ -159,16 +164,6 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
                                          std::vector<Utility::Particle> &b2)
 #endif
 {
-#if defined(USE_OMP) && defined(OPENMPAVAIL)
-    // std::cout << "defined(USE_OMP) && defined(OPENMPAVAIL)" << std::endl;
-    // TODO: write custom omp reduction
-    /*
-    std::vector<Utility::Particle> b0Copy = b0;
-    std::vector<Utility::Particle> b1Copy = b1;
-    std::vector<Utility::Particle> b2Copy = b2;
-    */
-#endif
-
 #ifdef PROFILE_3BMDA
     std::chrono::time_point<std::chrono::steady_clock> start1;
     std::chrono::time_point<std::chrono::steady_clock> end1;
@@ -178,26 +173,9 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
 #pragma omp parallel for
     for (auto it = particleTripletsToCalculate.begin(); it < particleTripletsToCalculate.end(); it++) {
-        /*int tid = omp_get_thread_num();
-        std::vector<Utility::Particle> *b0ToUse;
-        std::vector<Utility::Particle> *b1ToUse;
-        std::vector<Utility::Particle> *b2ToUse;
-        if (tid == 0) {
-            b0ToUse = &b0;
-            b1ToUse = &b1;
-            b2ToUse = &b2;
-        } else {
-            b0ToUse = &b0Copy;
-            b1ToUse = &b1Copy;
-            b2ToUse = &b2Copy;
-        }*/
-
-        // this->potential->CalculateForces((*b0ToUse)[std::get<0>((*it))], (*b1ToUse)[std::get<1>((*it))],
-        //                                 (*b2ToUse)[std::get<2>((*it))]);
         this->potential->CalculateForces(b0[std::get<0>((*it))], b1[std::get<1>((*it))], b2[std::get<2>((*it))]);
     }
 #else
-
     for (auto it = particleTripletsToCalculate.begin(); it < particleTripletsToCalculate.end(); it++) {
         this->potential->CalculateForces(b0[std::get<0>((*it))], b1[std::get<1>((*it))], b2[std::get<2>((*it))]);
     }
@@ -215,24 +193,6 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
     } else {
         this->times["CalculateForces"].second.push_back(elapsed_time1.count());
     }
-#endif
-
-#if defined(USE_OMP) && defined(OPENMPAVAIL)
-    /*for (size_t i = 0; i < b0.size(); i++) {
-        b0[i].fX += b0Copy[i].fX;
-        b0[i].fY += b0Copy[i].fY;
-        b0[i].fZ += b0Copy[i].fZ;
-    }
-    for (size_t i = 0; i < b1.size(); i++) {
-        b1[i].fX += b1Copy[i].fX;
-        b1[i].fY += b1Copy[i].fY;
-        b1[i].fZ += b1Copy[i].fZ;
-    }
-    for (size_t i = 0; i < b2.size(); i++) {
-        b2[i].fX += b2Copy[i].fX;
-        b2[i].fY += b2Copy[i].fY;
-        b2[i].fZ += b2Copy[i].fZ;
-    }*/
 #endif
 }
 

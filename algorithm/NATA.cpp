@@ -79,7 +79,7 @@ int NATA::shiftRight(std::vector<Utility::Particle> &buf)
     return 0;
 }
 
-std::tuple<int, int> NATA::SimulationStep()
+std::tuple<uint64_t, uint64_t> NATA::SimulationStep()
 {
     // reset all forces in b0 to 0
     this->simulation->GetDecomposition()->ResetForces();
@@ -100,11 +100,11 @@ std::tuple<int, int> NATA::SimulationStep()
 #endif
 #ifdef PROFILE_3BMDA
     this->hitrate = 0;
-    int hitRateDivider = 0;
+    uint64_t hitRateDivider = 0;
 #endif
 
-    int numBufferInteractions = 0;
-    int numParticleInteractionsAcc = 0;
+    uint64_t numBufferInteractions = 0;
+    uint64_t numParticleInteractionsAcc = 0;
 
     bool calculate = false;
     alreadyProcessed.clear();
@@ -119,12 +119,13 @@ std::tuple<int, int> NATA::SimulationStep()
             if (calculate) {
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
                 std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
-                                      " and going to calculate interactions between buffers from proc (" + std::to_string(worldRank) +
-                                      ", " + std::to_string(this->b1Owner) + ", " + std::to_string(this->b2Owner) + ")";
+                                      " and going to calculate interactions between buffers from proc (" +
+                                      std::to_string(worldRank) + ", " + std::to_string(this->b1Owner) + ", " +
+                                      std::to_string(this->b2Owner) + ")";
                 MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
 #endif
 
-                std::tuple<int, int> numParticleInteractions = this->CalculateInteractions(
+                std::tuple<uint64_t, uint64_t> numParticleInteractions = this->CalculateInteractions(
                     this->b0, this->b1, this->b2, this->worldRank, this->b1Owner, this->b2Owner);
 
                 numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
@@ -139,9 +140,11 @@ std::tuple<int, int> NATA::SimulationStep()
 #ifdef PROFILE_3BMDA
                 // only accumulate if there are possible particle interactions to avoid div by 0
                 if (std::get<1>(numParticleInteractions) > 0) {
-                    this->hitrate +=
-                        (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-                    hitRateDivider++;
+                    // this->hitrate +=
+                    //    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+                    // hitRateDivider++;
+
+                    hitRateDivider += std::get<1>(numParticleInteractions);
                 }
 #endif
             }
@@ -157,8 +160,10 @@ std::tuple<int, int> NATA::SimulationStep()
     }
 
 #ifdef PROFILE_3BMDA
-    this->hitrate /= hitRateDivider;
-    this->hitrates.push_back(this->hitrate);
+    if (hitRateDivider > 0) {
+        // this->hitrate /= (double)hitRateDivider;
+        this->hitrates.push_back((double)numParticleInteractionsAcc / (double)hitRateDivider);
+    }
 #endif
 
     this->SumUpParticles(this->b0, this->b1, this->b2);

@@ -526,7 +526,7 @@ int& P3BCA::getBufOwner(int i)
     }
 }
 
-std::tuple<int, int> P3BCA::SimulationStep()
+std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
 {
     this->simulation->GetDecomposition()->ResetForces();
 
@@ -540,11 +540,11 @@ std::tuple<int, int> P3BCA::SimulationStep()
 
 #ifdef PROFILE_3BMDA
     this->hitrate = 0;
-    int hitRateDivider = 0;
+    uint64_t hitRateDivider = 0;
 #endif
 
-    int numBufferInteractions = 0;
-    int numParticleInteractionsAcc = 0;
+    uint64_t numBufferInteractions = 0;
+    uint64_t numParticleInteractionsAcc = 0;
 
     // copy b0 to b1 and b2
     b1 = b0;
@@ -638,12 +638,13 @@ std::tuple<int, int> P3BCA::SimulationStep()
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
             std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
-                                  " and going to calculate interactions between buffers from proc (" + std::to_string(worldRank) + ", " +
-                                  std::to_string(this->b1Owner) + ", " + std::to_string(this->b2Owner) + ")";
+                                  " and going to calculate interactions between buffers from proc (" +
+                                  std::to_string(worldRank) + ", " + std::to_string(this->b1Owner) + ", " +
+                                  std::to_string(this->b2Owner) + ")";
             MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
 #endif
 
-            std::tuple<int, int> numParticleInteractions =
+            std::tuple<uint64_t, uint64_t> numParticleInteractions =
                 this->CalculateInteractions(this->b0, this->b1, this->b2, this->worldRank, this->b1Owner, this->b2Owner,
                                             this->cutoff, physicalDomainSize);
             numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
@@ -658,9 +659,11 @@ std::tuple<int, int> P3BCA::SimulationStep()
 #ifdef PROFILE_3BMDA
             // only accumulate if there are possible particle interactions to avoid div by 0
             if (std::get<1>(numParticleInteractions) > 0) {
-                this->hitrate +=
-                    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-                hitRateDivider++;
+                // this->hitrate +=
+                //    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+                // hitRateDivider++;
+
+                hitRateDivider += std::get<1>(numParticleInteractions);
             }
 #endif
 
@@ -748,8 +751,8 @@ std::tuple<int, int> P3BCA::SimulationStep()
 
 #ifdef PROFILE_3BMDA
     if (hitRateDivider > 0) {
-        this->hitrate /= hitRateDivider;
-        this->hitrates.push_back(this->hitrate);
+        // this->hitrate /= (double)hitRateDivider;
+        this->hitrates.push_back((double)numParticleInteractionsAcc / (double)hitRateDivider);
     }
 
 #endif

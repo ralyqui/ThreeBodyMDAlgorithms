@@ -50,7 +50,7 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
     return status.MPI_TAG;
 }
 
-std::tuple<int, int> AUTA::calculateOneThirdOfInteractions(int thirdID)
+std::tuple<uint64_t, uint64_t> AUTA::calculateOneThirdOfInteractions(int thirdID)
 {
     std::vector<Utility::Particle>* b0Sorted = nullptr;
     std::vector<Utility::Particle>* b1Sorted = nullptr;
@@ -233,7 +233,7 @@ void AUTA::sendBackParticles()
 #endif
 }
 
-std::tuple<int, int> AUTA::SimulationStep()
+std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
 {
     // reset all forces in b0 to 0
     this->simulation->GetDecomposition()->ResetForces();
@@ -253,8 +253,8 @@ std::tuple<int, int> AUTA::SimulationStep()
     int i = 2;
     std::vector<Utility::Particle>* bi = pickBuffer(i);
 
-    int numBufferInteractions = 0;
-    int numParticleInteractionsAcc = 0;
+    uint64_t numBufferInteractions = 0;
+    uint64_t numParticleInteractionsAcc = 0;
 
 #ifdef TESTS_3BMDA
     processed.clear();
@@ -262,7 +262,7 @@ std::tuple<int, int> AUTA::SimulationStep()
 
 #ifdef PROFILE_3BMDA
     this->hitrate = 0;
-    int hitRateDivider = 0;
+    uint64_t hitRateDivider = 0;
 #endif
 
     for (int s = this->worldSize; s > 0; s -= 3) {
@@ -273,12 +273,13 @@ std::tuple<int, int> AUTA::SimulationStep()
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
             std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
-                                  " and going to calculate interactions between buffers from proc (" + std::to_string(this->b0Owner) +
-                                  ", " + std::to_string(this->b1Owner) + ", " + std::to_string(this->b2Owner) + ")";
+                                  " and going to calculate interactions between buffers from proc (" +
+                                  std::to_string(this->b0Owner) + ", " + std::to_string(this->b1Owner) + ", " +
+                                  std::to_string(this->b2Owner) + ")";
             MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
 #endif
 
-            std::tuple<int, int> numParticleInteractions =
+            std::tuple<uint64_t, uint64_t> numParticleInteractions =
                 this->CalculateInteractions(this->b0, this->b1, this->b2, this->b0Owner, this->b1Owner, this->b2Owner);
             numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
 
@@ -290,9 +291,11 @@ std::tuple<int, int> AUTA::SimulationStep()
 #ifdef PROFILE_3BMDA
             // only accumulate if there are possible particle interactions to avoid div by 0
             if (std::get<1>(numParticleInteractions) > 0) {
-                this->hitrate +=
-                    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-                hitRateDivider++;
+                // this->hitrate +=
+                //    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+                // hitRateDivider++;
+
+                hitRateDivider += std::get<1>(numParticleInteractions);
             }
 #endif
         }
@@ -308,13 +311,14 @@ std::tuple<int, int> AUTA::SimulationStep()
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
         std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
-                              " and going to calculate interactions between buffers from proc (" + std::to_string(this->b0Owner) + ", " +
-                              std::to_string(this->b1Owner) + ", " + std::to_string(this->b2Owner) + ")";
+                              " and going to calculate interactions between buffers from proc (" +
+                              std::to_string(this->b0Owner) + ", " + std::to_string(this->b1Owner) + ", " +
+                              std::to_string(this->b2Owner) + ")";
         MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
 #endif
 
         numBufferInteractions++;
-        std::tuple<int, int> numParticleInteractions = calculateOneThirdOfInteractions(thirdID);
+        std::tuple<uint64_t, uint64_t> numParticleInteractions = calculateOneThirdOfInteractions(thirdID);
         numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
 
 #ifdef TESTS_3BMDA
@@ -325,9 +329,11 @@ std::tuple<int, int> AUTA::SimulationStep()
 #ifdef PROFILE_3BMDA
         // only accumulate if there are possible particle interactions to avoid div by 0
         if (std::get<1>(numParticleInteractions) > 0) {
-            this->hitrate +=
-                (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-            hitRateDivider++;
+            // this->hitrate +=
+            //    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+            // hitRateDivider++;
+
+            hitRateDivider += std::get<1>(numParticleInteractions);
         }
 #endif
     }
@@ -338,8 +344,10 @@ std::tuple<int, int> AUTA::SimulationStep()
     }
 
 #ifdef PROFILE_3BMDA
-    this->hitrate /= hitRateDivider;
-    this->hitrates.push_back(this->hitrate);
+    if (hitRateDivider > 0) {
+        // this->hitrate /= (double)hitRateDivider;
+        this->hitrates.push_back((double)numParticleInteractionsAcc / (double)hitRateDivider);
+    }
 #endif
 
     // sum up particles

@@ -466,7 +466,7 @@ TEST(p3bca, test_decomposition_with_step)
     int worldSize;
     MPI_Comm_size(MPI_COMM_WORLD, &worldSize);
 
-    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 1., Eigen::Vector3d(0, -9.81, 0), 0.5,
+    std::shared_ptr<Simulation> simulation = createP3BCAContext(0, 1., Eigen::Vector3d(0, 0, 0), 0.5,
                                                                 Utility::getDecomposition(worldSize, decompositions));
     simulation->Init();
 
@@ -491,7 +491,7 @@ TEST(nata, test_num_interactions)
 
     int numProcessors = simulation->GetTopology()->GetWorldSize();
 
-    int numInteractionsExp = Utility::BinomialCoefficient(numProcessors + 2, 3) / numProcessors;
+    uint64_t numInteractionsExp = Utility::BinomialCoefficient(numProcessors + 2, 3) / numProcessors;
 
     if (numProcessors % 3 == 0) {
         // each processor calculates Utility::BinomialCoefficient(numProcessors + 2, 3) / numProcessors + 0.33 (=1)
@@ -502,7 +502,7 @@ TEST(nata, test_num_interactions)
         }
     }
 
-    int numInteractionsAct = std::get<0>(simulation->GetAlgorithm()->SimulationStep());
+    uint64_t numInteractionsAct = std::get<0>(simulation->GetAlgorithm()->SimulationStep());
 
     GTEST_ASSERT_EQ(numInteractionsExp, numInteractionsAct);
 }
@@ -514,7 +514,7 @@ TEST(auta, test_num_interactions)
 
     int numProcessors = simulation->GetTopology()->GetWorldSize();
 
-    int numInteractionsExp = Utility::BinomialCoefficient(numProcessors + 2, 3) / numProcessors;
+    uint64_t numInteractionsExp = Utility::BinomialCoefficient(numProcessors + 2, 3) / numProcessors;
 
     if (numProcessors % 3 == 0) {
         // each processor calculates Utility::BinomialCoefficient(numProcessors + 2, 3) / numProcessors + 0.33 (=1)
@@ -522,7 +522,7 @@ TEST(auta, test_num_interactions)
         numInteractionsExp += 1;
     }
 
-    int numInteractionsAct = std::get<0>(simulation->GetAlgorithm()->SimulationStep());
+    uint64_t numInteractionsAct = std::get<0>(simulation->GetAlgorithm()->SimulationStep());
 
     GTEST_ASSERT_EQ(numInteractionsExp, numInteractionsAct);
 }
@@ -534,14 +534,14 @@ TEST(nata, test_num_particle_interactions)
 
     int numParticles = simulation->GetAllParticles().size();
 
-    int numInteractionsTotalExp = Utility::BinomialCoefficient(numParticles, 3);
+    uint64_t numInteractionsTotalExp = Utility::BinomialCoefficient(numParticles, 3);
 
-    int numMyInteractionsAct = std::get<1>(simulation->GetAlgorithm()->SimulationStep());
+    uint64_t numMyInteractionsAct = std::get<1>(simulation->GetAlgorithm()->SimulationStep());
 
-    int numInteractionsTotalAct;
+    uint64_t numInteractionsTotalAct;
 
     // elements from each process are gathered in order of their rank
-    MPI_Allreduce(&numMyInteractionsAct, &numInteractionsTotalAct, 1, MPI_INT, MPI_SUM,
+    MPI_Allreduce(&numMyInteractionsAct, &numInteractionsTotalAct, 1, MPI_UINT64_T, MPI_SUM,
                   simulation->GetTopology()->GetComm());
 
     GTEST_ASSERT_EQ(numInteractionsTotalExp, numInteractionsTotalAct);
@@ -554,14 +554,14 @@ TEST(auta, test_num_particle_interactions)
 
     int numParticles = simulation->GetAllParticles().size();
 
-    int numInteractionsTotalExp = Utility::BinomialCoefficient(numParticles, 3);
+    uint64_t numInteractionsTotalExp = Utility::BinomialCoefficient(numParticles, 3);
 
-    int numMyInteractionsAct = std::get<1>(simulation->GetAlgorithm()->SimulationStep());
+    uint64_t numMyInteractionsAct = std::get<1>(simulation->GetAlgorithm()->SimulationStep());
 
-    int numInteractionsTotalAct;
+    uint64_t numInteractionsTotalAct;
 
     // elements from each process are gathered in order of their rank
-    MPI_Allreduce(&numMyInteractionsAct, &numInteractionsTotalAct, 1, MPI_INT, MPI_SUM,
+    MPI_Allreduce(&numMyInteractionsAct, &numInteractionsTotalAct, 1, MPI_UINT64_T, MPI_SUM,
                   simulation->GetTopology()->GetComm());
 
     GTEST_ASSERT_EQ(numInteractionsTotalExp, numInteractionsTotalAct);

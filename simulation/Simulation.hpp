@@ -15,13 +15,13 @@ private:
     std::vector<Utility::Particle>& particles;
     double dt;
     Eigen::Vector3d gForce;
-    std::vector<std::tuple<int, int>> numInteractions;
+    std::vector<std::tuple<uint64_t, uint64_t>> numInteractions;
     std::string csvOutput;
 
     void writeSimulationStepToCSV(std::string file);
 
 #ifdef PROFILE_3BMDA
-    //void calcOverallHitrate(int step, double hitrate);
+    // void calcOverallHitrate(int step, double hitrate);
 #endif
 
 public:
@@ -42,8 +42,8 @@ public:
     std::vector<Utility::Particle>& GetAllParticles();
     double GetDeltaT();
     int GetNumIterations();
-    int GetNumBufferInteractions(int step);
-    int GetNumParticleInteractions(int step);
+    uint64_t GetNumBufferInteractions(int step);
+    uint64_t GetNumParticleInteractions(int step);
 
     Eigen::Vector3d GetGForce();
 };
