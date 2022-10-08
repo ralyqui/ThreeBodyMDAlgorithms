@@ -63,7 +63,7 @@ namespace Utility
             csvFile << particles[i].ID << ", " << particles[i].pX << ", " << particles[i].pY << ", " << particles[i].pZ
                     << ", " << particles[i].vX << ", " << particles[i].vY << ", " << particles[i].vZ << ", "
                     << particles[i].aX << ", " << particles[i].aY << ", " << particles[i].aZ << ", "
-                    << particles[i].mass << particles[i].fX << ", " << particles[i].fY << ", " << particles[i].fZ
+                    << particles[i].mass << ", " << particles[i].fX << ", " << particles[i].fY << ", " << particles[i].fZ
                     << "\n";
         }
         csvFile.close();
