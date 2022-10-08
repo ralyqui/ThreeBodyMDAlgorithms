@@ -142,6 +142,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
     // std::map<std::string, std::pair<char, double>> calcTimes = simulation->GetPotential()->GetAvgCalcTime();
 
     std::vector<float> valuesForSTVR;
+    std::vector<CartRank> cartRanks;
 
     // init json object
     rapidjson::Document d;
@@ -151,6 +152,38 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
     rapidjson::Value stvrRJ(rapidjson::kArrayType);
     if (simulation->GetTopology()->GetWorldRank() == 0) {
         d.SetObject();
+    }
+
+    // gather all ranks
+    {
+        CartRank rank;
+        std::shared_ptr<CartTopology> cartTopology = std::dynamic_pointer_cast<CartTopology>(simulation->GetTopology());
+        if (cartTopology) {
+            rank = cartTopology->GetCartRank();
+        } else {
+            rank = CartRank(simulation->GetTopology()->GetWorldRank());
+        }
+        std::array<int, 3> rankArray = rank.GetRank();
+
+        std::vector<int> ranks;
+        if (simulation->GetTopology()->GetWorldRank() == 0) {
+            ranks.resize(simulation->GetTopology()->GetWorldSize() * rank.GetDimensions());
+        }
+
+        MPI_Gather(rankArray.data(), rank.GetDimensions(), MPI_INT, ranks.data(), rank.GetDimensions(), MPI_INT, 0,
+                   simulation->GetTopology()->GetComm());
+
+        if (simulation->GetTopology()->GetWorldRank() == 0) {
+            for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
+                if (rank.GetDimensions() == 1) {
+                    cartRanks.push_back(CartRank(ranks[i * 1]));
+                } else if (rank.GetDimensions() == 2) {
+                    cartRanks.push_back(CartRank(ranks[i * 2], ranks[i * 2 + 1]));
+                } else {
+                    cartRanks.push_back(CartRank(ranks[i * 3], ranks[i * 3 + 1], ranks[i * 3 + 2]));
+                }
+            }
+        }
     }
 
     // profile times calculation
@@ -378,10 +411,27 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
             }
             avgStepTimeAllProc /= (double)(simulation->GetTopology()->GetWorldSize());
 
+            int i = 0;
             for (const double& t_i : valuesForSTVR) {
                 double stvr = std::abs((t_i - avgStepTimeAllProc) / avgStepTimeAllProc);
 
-                stvrRJ.PushBack(rapidjson::Value(stvr), d.GetAllocator());
+                // stvrRJ.PushBack(rapidjson::Value(stvr), d.GetAllocator());
+
+                rapidjson::Value stvrPerProcRJ(rapidjson::kObjectType);
+                rapidjson::Value cartRankRJ(rapidjson::kArrayType);
+
+                CartRank rank = cartRanks[i];
+
+                for (int j = 0; j < rank.GetDimensions(); j++) {
+                    // std::cout << rank.GetRank()[j] << std::endl;
+                    cartRankRJ.PushBack(rapidjson::Value(rank.GetRank()[j]), d.GetAllocator());
+                }
+
+                stvrPerProcRJ.AddMember("rank", cartRankRJ, d.GetAllocator());
+                stvrPerProcRJ.AddMember("stvr", rapidjson::Value(stvr), d.GetAllocator());
+
+                stvrRJ.PushBack(stvrPerProcRJ, d.GetAllocator());
+                i++;
             }
         }
     }

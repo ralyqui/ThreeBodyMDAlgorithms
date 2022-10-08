@@ -99,25 +99,23 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
                 this->potential->CalculateForces(b0[i], b1[j], b2[k]);
                 //}
 
-                //                 particleTripletsToCalculate.push_back(std::tuple(i, j, k));
+//                 particleTripletsToCalculate.push_back(std::tuple(i, j, k));
 
-                //                 // we don't want to exceed the memory
-                //                 if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
-                // #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
-                //                     std::string message = "I'm proc " + std::to_string(this->worldRank) +
-                //                                           " and dispatch particle calculations before exceeding
-                //                                           memory";
-                //                     MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(),
-                //                     message);
-                // #endif
-                // #ifdef PROFILE_3BMDA
-                //                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
-                //                     append = true;
-                // #else
-                //                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
-                // #endif
-                //                     particleTripletsToCalculate.clear();
-                //                 }
+//                 // we don't want to exceed the memory
+//                 if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
+// #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
+//                     std::string message = "I'm proc " + std::to_string(this->worldRank) +
+//                                           " and dispatch particle calculations before exceeding memory ";
+//                     MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
+// #endif
+// #ifdef PROFILE_3BMDA
+//                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+//                     append = true;
+// #else
+//                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+// #endif
+//                     particleTripletsToCalculate.clear();
+//                 }
 
                 // std::cout << "calculate particle triplet (" << i << ", " << j << ", " << k << ")" << std::endl;
                 numActParticleInteractions++;
@@ -137,11 +135,11 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
     this->times["calculateInteractions"].second.push_back(elapsed_time.count());
 #endif
 
-    // #ifdef PROFILE_3BMDA
-    //     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
-    // #else
-    //     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
-    // #endif
+// #ifdef PROFILE_3BMDA
+//     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+// #else
+//     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+// #endif
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
     std::string message =

@@ -659,11 +659,11 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
 #ifdef PROFILE_3BMDA
             // only accumulate if there are possible particle interactions to avoid div by 0
             if (std::get<1>(numParticleInteractions) > 0) {
-                // this->hitrate +=
-                //    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-                // hitRateDivider++;
+                this->hitrate +=
+                    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
+                hitRateDivider++;
 
-                hitRateDivider += std::get<1>(numParticleInteractions);
+                // hitRateDivider += std::get<1>(numParticleInteractions);
             }
 #endif
 
@@ -751,8 +751,9 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
 
 #ifdef PROFILE_3BMDA
     if (hitRateDivider > 0) {
-        // this->hitrate /= (double)hitRateDivider;
-        this->hitrates.push_back((double)numParticleInteractionsAcc / (double)hitRateDivider);
+        this->hitrate /= (double)hitRateDivider;
+        this->hitrates.push_back(this->hitrate);
+        // this->hitrates.push_back((double)numParticleInteractionsAcc / (double)hitRateDivider);
     }
 
 #endif
