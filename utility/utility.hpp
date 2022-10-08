@@ -26,6 +26,7 @@ namespace Utility
                                std::vector<Utility::Particle> &b2, std::shared_ptr<Potential> potential);*/
 
     void writeStepToCSV(std::string file, std::vector<Particle> &particles);
+    void writeStepToCSVWithForces(std::string file, std::vector<Particle> &particles);
 
     int BinomialCoefficient(const int n, const int k);
 

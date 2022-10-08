@@ -52,6 +52,23 @@ namespace Utility
         csvFile.close();
     }
 
+    void writeStepToCSVWithForces(std::string file, std::vector<Particle> &particles)
+    {
+        std::ofstream csvFile;
+        csvFile.open(file);
+        csvFile << "ID, pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m, fX, fY, fZ\n";
+        // std::cout << particles.size();
+        for (size_t i = 0; i < particles.size(); i++) {
+            if (particles[i].isDummy) continue;
+            csvFile << particles[i].ID << ", " << particles[i].pX << ", " << particles[i].pY << ", " << particles[i].pZ
+                    << ", " << particles[i].vX << ", " << particles[i].vY << ", " << particles[i].vZ << ", "
+                    << particles[i].aX << ", " << particles[i].aY << ", " << particles[i].aZ << ", "
+                    << particles[i].mass << particles[i].fX << ", " << particles[i].fY << ", " << particles[i].fZ
+                    << "\n";
+        }
+        csvFile.close();
+    }
+
     // https://stackoverflow.com/a/55422097
     int BinomialCoefficient(const int n, const int k)
     {

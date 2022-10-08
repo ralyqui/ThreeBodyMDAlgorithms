@@ -141,22 +141,22 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
 //     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
 // #endif
 
-#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-    std::string message =
-        "proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " calculates particle triplets : ";
-    if (particleTripletsToCalculate.size() > 0) {
-        for (size_t i = 0; i < particleTripletsToCalculate.size(); i++) {
-            message.append("(" + std::to_string(b0[std::get<0>(particleTripletsToCalculate[i])].ID) + ", " +
-                           std::to_string(b1[std::get<1>(particleTripletsToCalculate[i])].ID) + ", " +
-                           std::to_string(b2[std::get<2>(particleTripletsToCalculate[i])].ID) + ")");
-            if (i < particleTripletsToCalculate.size() - 1) {
-                message.append(", ");
-            }
-        }
-        MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
-    }
+// #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+//     std::string message =
+//         "proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " calculates particle triplets : ";
+//     if (particleTripletsToCalculate.size() > 0) {
+//         for (size_t i = 0; i < particleTripletsToCalculate.size(); i++) {
+//             message.append("(" + std::to_string(b0[std::get<0>(particleTripletsToCalculate[i])].ID) + ", " +
+//                            std::to_string(b1[std::get<1>(particleTripletsToCalculate[i])].ID) + ", " +
+//                            std::to_string(b2[std::get<2>(particleTripletsToCalculate[i])].ID) + ")");
+//             if (i < particleTripletsToCalculate.size() - 1) {
+//                 message.append(", ");
+//             }
+//         }
+//         MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
+//     }
 
-#endif
+// #endif
 
     return std::tuple(numActParticleInteractions, numPossibleParticleInteractions);
 }

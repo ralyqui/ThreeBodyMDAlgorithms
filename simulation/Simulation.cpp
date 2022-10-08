@@ -145,6 +145,7 @@ void Simulation::writeSimulationStepToCSV(std::string file)
               [](Utility::Particle a, Utility::Particle b) { return a.ID < b.ID; });
 
     if (topology->GetWorldRank() == 0) {
-        Utility::writeStepToCSV(file, receivedParticlesForCSVOutput);
+        // Utility::writeStepToCSV(file, receivedParticlesForCSVOutput);
+        Utility::writeStepToCSVWithForces(file, receivedParticlesForCSVOutput);
     }
 }
