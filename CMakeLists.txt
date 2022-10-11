@@ -37,6 +37,9 @@ if(USE_OMP)
   message(STATUS "add USE_OMP compile definition")
   target_compile_definitions(main PUBLIC USE_OMP)
 endif()
+if(MEASURESIMSTEP_3BMDA)
+  target_compile_definitions(main PUBLIC MEASURESIMSTEP_3BMDA)
+endif()
 
 set_target_properties(main PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                                       ${CMAKE_BINARY_DIR}/executables)

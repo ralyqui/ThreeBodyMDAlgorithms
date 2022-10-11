@@ -35,8 +35,10 @@ void Simulation::Start()
             std::cout << "sum before: " << sumBefore << std::endl;
         }*/
 
-#ifdef PROFILE_3BMDA
-        // this->potential->ResetTime();
+#ifdef MEASURESIMSTEP_3BMDA
+        std::chrono::time_point<std::chrono::steady_clock> start;
+        std::chrono::time_point<std::chrono::steady_clock> end;
+        start = std::chrono::steady_clock::now();
 #endif
 
         // update particle positions at predictor stage
@@ -51,12 +53,29 @@ void Simulation::Start()
         this->decomposition->Update(this->dt, this->gForce);
         MPI_Barrier(this->topology->GetComm());
 
-        /*int after = decomposition->GetMyParticles().size();
-        int sumAfter;
-        MPI_Reduce(&after, &sumAfter, 1, MPI_INT, MPI_SUM, 0, topology->GetComm());
+#ifdef MEASURESIMSTEP_3BMDA
+        end = std::chrono::steady_clock::now();
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+        std::vector<uint64_t> allTimes;
         if (topology->GetWorldRank() == 0) {
-            std::cout << "sum after: " << sumAfter << std::endl;
-        }*/
+            allTimes.resize(topology->GetWorldSize());
+        }
+        MPI_Gather(&elapsed_time, 1, MPI_INT64_T, allTimes.data(), 1, MPI_INT64_T, 0, topology->GetComm());
+        if (topology->GetWorldRank() == 0) {
+            uint64_t max = *max_element(allTimes.begin(), allTimes.end());
+            std::string allTimesStr = "[";
+            for (size_t i = 0; i < allTimes.size(); i++) {
+                allTimesStr.append(std::to_string(allTimes[i]));
+                if (i < allTimes.size() - 1) {
+                    allTimesStr.append(", ");
+                }
+            }
+            allTimesStr.append("]");
+            std::string json = "{allTimes: " + allTimesStr + ", avg: " + std::to_string(max) + "}";
+            std::cout << json << std::endl;
+        }
+
+#endif
 
 #if !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && !defined(PROFILE_3BMDA)
         if (this->csvOutput.compare("") != 0) {

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef MEASURESIMSTEP_3BMDA
+#include <chrono>
+#endif
+
 #include "../algorithm/Algorithm.hpp"
 #include "../fwd.hpp"
 #include "../potential/Potential.hpp"
