@@ -91,17 +91,17 @@ void P3BCA::calcSteps(int dimension)
     }
 }
 
-// void P3BCA::schedule1D(int i, int& myCartRank, int& src) { src = Utility::mod(i + myCartRank, this->dimX); }
+void P3BCA::schedule1D(int i, int& myCartRank, int& src) { src = Utility::mod(i + myCartRank, this->dimX); }
 
-/*void P3BCA::calcDestFromSrc1D(int& myCartRank, int& src, int& dst)
+void P3BCA::calcDestFromSrc1D(int& myCartRank, int& src, int& dst)
 {
     int shiftedSrc;
     shiftedSrc = Utility::mod(src - myCartRank, this->dimX);
 
     dst = Utility::mod(myCartRank - shiftedSrc, this->dimX);
-}*/
+}
 
-/*void P3BCA::schedule1DHelper(int i2, int i3, int& cartRank, int& src, int& dst, int& diff)
+void P3BCA::schedule1DHelper(int i3, int& cartRank, int& src, int& dst, int& diff)
 {
     int initI3 = i3;
 
@@ -109,19 +109,19 @@ void P3BCA::calcSteps(int dimension)
 
     calcDestFromSrc1D(cartRank, src, dst);
     calcDiff1D(cartRank, src, diff, initI3 + 1);
-}*/
+}
 
-/*void P3BCA::calcDiff1D(int& cartRank, int& src, int& diff, int i)
+void P3BCA::calcDiff1D(int& cartRank, int& src, int& diff, int i)
 {
     int oldSrc;
     int iOld = i - 1;
 
-    int g_x_iOld = Utility::mod(iOld + cartRank, this->dimX);
+    // int g_x_iOld = Utility::mod(iOld + cartRank, this->dimX);
 
-    oldSrc = Utility::mod(g_x_iOld + cartRank, this->dimX);
+    oldSrc = Utility::mod(iOld + cartRank, this->dimX);
 
     diff = oldSrc - src;
-}*/
+}
 
 void P3BCA::schedule2D(int i, std::array<int, 2>& myCartRank, std::array<int, 2>& src)
 {
@@ -318,8 +318,8 @@ void P3BCA::handleOffsetVector2D(std::array<int, 2>& nextSrcRank, std::array<int
     offsetVector[1] += diff[1];
 }
 
-/*void P3BCA::handleOffsetVector1D(int& nextSrcRank, int& nextDstRank, int& offsetVector, int& diff,
-                                 int& coordsSrc, int& coordsDst)
+void P3BCA::handleOffsetVector1D(int& nextSrcRank, int& nextDstRank, int& offsetVector, int& diff, int& coordsSrc,
+                                 int& coordsDst)
 {
     // int myCoords;
     // int coordsOld;
@@ -334,9 +334,9 @@ void P3BCA::handleOffsetVector2D(std::array<int, 2>& nextSrcRank, std::array<int
 
     // adjust the offset vector for the next iteration
     offsetVector += diff;
-}*/
+}
 
-/*int P3BCA::shiftLeft(std::vector<Utility::Particle>& buf, int owner, int& nextSrcRank, int& nextDstRank,
+int P3BCA::shiftLeft(std::vector<Utility::Particle>& buf, int owner, int& nextSrcRank, int& nextDstRank,
                      int& offsetVector, int& diff)
 {
     int coordsSrc;
@@ -355,7 +355,7 @@ void P3BCA::handleOffsetVector2D(std::array<int, 2>& nextSrcRank, std::array<int
     //}
 
     return mpiShift(buf, owner, src, dest);
-}*/
+}
 
 int P3BCA::shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<int, 2>& nextSrcRank,
                      std::array<int, 2>& nextDstRank, std::array<int, 2>& offsetVector, std::array<int, 2>& diff)
@@ -397,10 +397,10 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
     start = std::chrono::steady_clock::now();
 #endif
 
-    // if (this->worldRank == 0) {
-    //    std::cout << "myRank: " << this->worldRank << ", shift buffer from " << owner << " to " << dst
-    //              << ", and import from " << src << std::endl;
-    //}
+    /*if (this->worldRank == 4) {
+        std::cout << "myRank: " << this->worldRank << ", shift buffer from " << owner << " to " << dst
+                  << ", and import from " << src << std::endl;
+    }*/
 
     this->tmpRecv.clear();
 
@@ -462,6 +462,21 @@ void P3BCA::sendBackParticles()
                   this->cartTopology->GetComm(), &requestSend2);
         b2Sent = true;
     }
+
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+    if (this->b1Owner != this->worldRank) {
+        std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
+                              " and going to send back particles in b1 to " + std::to_string(this->b1Owner);
+        MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
+    }
+
+    if (this->b2Owner != this->worldRank) {
+        std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
+                              " and going to send back particles in b2 to " + std::to_string(this->b2Owner);
+        MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
+    }
+
+#endif
 
     int numRecv1;
     int numRecv2;
@@ -555,7 +570,6 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
 
     // 1D
 
-    /*
     int nextSrcRankOuter1D;
     int nextDstRankOuter1D;
 
@@ -567,7 +581,6 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
 
     int offsetVectorOuter1D = 0;
     int offsetVectorInner1D = 0;
-    */
 
     int myCoords1D;
     if (this->numDims == 1) {
@@ -673,7 +686,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 } else if (this->numDims == 2) {
                     schedule2DHelper(i2, i3, myCoordsArray2D, nextSrcRankInner2D, nextDstRankInner2D, diffInner2D);
                 } else {
-                    // schedule1DHelper(i2, i3, myCoords1D, nextSrcRankInner1D, nextDstRankInner1D, diffInner1D);
+                    schedule1DHelper(i3, myCoords1D, nextSrcRankInner1D, nextDstRankInner1D, diffInner1D);
                 }
 
                 if (i3 < this->numSteps - 1) {
@@ -684,23 +697,27 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                         getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner2D, nextDstRankInner2D,
                                                    offsetVectorInner2D, diffInner2D);
                     } else {
-                        /* if (this->worldRank == 0) {
-                        std::cout << "my rank: " << this->worldRank
-                                  << "before shiftLeft b2 in 1D schedule: nextSrcRankInner1D = "
-                                  << Utility::mod(worldRank + 1, this->dimX)
-                                  << ", nextDstRankInner1D = " << Utility::mod(worldRank - 1, this->dimX) << std::endl;
+                        /*if (this->worldRank == 4) {
+                            std::cout << i3 << std::endl;
+                            std::cout << "my rank: " << this->worldRank
+                                      << " before shiftLeft b2 in 1D schedule: nextSrcRankInner1D = "
+                                      << nextSrcRankInner1D << ", nextDstRankInner1D = " << nextDstRankInner1D
+                                      << ", offsetVectorInner1D = " << offsetVectorInner1D << std::endl;
                         }*/
-                        // getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner1D, nextDstRankInner1D,
-                        //                           offsetVectorInner1D, diffInner1D);
-                        getBufOwner(2) = mpiShift(this->b2, getBufOwner(2), Utility::mod(worldRank + 1, this->dimX),
-                                                  Utility::mod(worldRank - 1, this->dimX));
-                        // if (this->worldRank == 0) {
-                        // std::cout << "after shiftLeft b2 in 1D schedule" << std::endl;
-                        //}
+                        getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner1D, nextDstRankInner1D,
+                                                   offsetVectorInner1D, diffInner1D);
+                        // getBufOwner(2) = mpiShift(this->b2, getBufOwner(2), Utility::mod(worldRank + 1, this->dimX),
+                        //                          Utility::mod(worldRank - 1, this->dimX));
+                        /*if (this->worldRank == 4) {
+                            std::cout << this->worldRank << " after shiftLeft b2 in 1D schedule"
+                                      << "offsetVectorInner1D = " << offsetVectorInner1D << std::endl;
+                        }*/
                     }
                 }
             }
         }
+
+        // std::cout << this->worldRank << " after inner loop" << std::endl;
 
         // only shift if not the last step
         if (i2 < ((cartTopology->GetWorldSize() == 2 ? 1 : this->numSteps) - 1)) {
@@ -709,32 +726,63 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 calcDestFromSrc3D(myCoordsArray3D, nextSrcRankOuter3D, nextDstRankOuter3D);
                 calcDiff3D(myCoordsArray3D, nextSrcRankOuter3D, diffOuter3D, i2 + 1);
 
+                // also shift inner buffer
+                schedule3D(i2 + 1, myCoordsArray3D, nextSrcRankInner3D);
+                calcDestFromSrc3D(myCoordsArray3D, nextSrcRankInner3D, nextDstRankInner3D);
+                calcDiff3D(myCoordsArray3D, nextSrcRankInner3D, diffInner3D, i2 + 1);
+
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter3D, nextDstRankOuter3D,
                                            offsetVectorOuter3D, diffOuter3D);
+
+                getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner3D, nextDstRankInner3D,
+                                           offsetVectorInner3D, diffInner3D);
+
                 offsetVectorInner3D = offsetVectorOuter3D;
             } else if (this->numDims == 2) {
                 schedule2D(i2 + 1, myCoordsArray2D, nextSrcRankOuter2D);
                 calcDestFromSrc2D(myCoordsArray2D, nextSrcRankOuter2D, nextDstRankOuter2D);
                 calcDiff2D(myCoordsArray2D, nextSrcRankOuter2D, diffOuter2D, i2 + 1);
 
+                // also shift inner buffer
+                schedule2D(i2 + 1, myCoordsArray2D, nextSrcRankInner2D);
+                calcDestFromSrc2D(myCoordsArray2D, nextSrcRankInner2D, nextDstRankInner2D);
+                calcDiff2D(myCoordsArray2D, nextSrcRankInner2D, diffInner2D, i2 + 1);
+
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter2D, nextDstRankOuter2D,
                                            offsetVectorOuter2D, diffOuter2D);
+
+                getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner2D, nextDstRankInner2D,
+                                           offsetVectorInner2D, diffInner2D);
+
                 offsetVectorInner2D = offsetVectorOuter2D;
             } else {
-                // schedule1D(i2 + 1, myCoords1D, nextSrcRankOuter1D);
-                // calcDestFromSrc1D(myCoords1D, nextSrcRankOuter1D, nextDstRankOuter1D);
-                // calcDiff1D(myCoords1D, nextSrcRankOuter1D, diffOuter1D, i2 + 1);
+                schedule1D(i2 + 1, myCoords1D, nextSrcRankOuter1D);
+                calcDestFromSrc1D(myCoords1D, nextSrcRankOuter1D, nextDstRankOuter1D);
+                calcDiff1D(myCoords1D, nextSrcRankOuter1D, diffOuter1D, i2 + 1);
+
+                // also shift inner buffer
+                schedule1D(i2 + 1, myCoords1D, nextSrcRankInner1D);
+                calcDestFromSrc1D(myCoords1D, nextSrcRankInner1D, nextDstRankInner1D);
+                calcDiff1D(myCoords1D, nextSrcRankInner1D, diffInner1D, i2 + 1);
 
                 /*if (this->worldRank == 0) {
                     std::cout << "before shiftLeft b1 in 1D schedule: nextSrcRankOuter1D = " << nextSrcRankOuter1D
                               << ", nextDstRankOuter1D = " << nextDstRankOuter1D << ", i2 = " << i2 << std::endl;
                 }*/
 
-                // getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter1D, nextDstRankOuter1D,
-                //                           offsetVectorOuter1D, diffOuter1D);
-                getBufOwner(1) = mpiShift(this->b1, getBufOwner(1), Utility::mod(worldRank + 1, this->dimX),
-                                          Utility::mod(worldRank - 1, this->dimX));
-                // offsetVectorInner1D = offsetVectorOuter1D;
+                if (this->worldRank == 4) {
+                    std::cout << this->worldRank << " shift in outer loop" << std::endl;
+                }
+
+                getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter1D, nextDstRankOuter1D,
+                                           offsetVectorOuter1D, diffOuter1D);
+
+                getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner1D, nextDstRankInner1D,
+                                           offsetVectorInner1D, diffInner1D);
+
+                // getBufOwner(1) = mpiShift(this->b1, getBufOwner(1), Utility::mod(worldRank + 1, this->dimX),
+                //                          Utility::mod(worldRank - 1, this->dimX));
+                offsetVectorInner1D = offsetVectorOuter1D;
 
                 /*if (this->worldRank == 0) {
                     std::cout << "after shiftLeft b1 in 1D schedule" << std::endl;
@@ -742,8 +790,8 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
             }
 
             // copy b1 to b2 -> optimized schedule
-            b2 = b1;
-            this->b2Owner = this->b1Owner;
+            // b2 = b1;
+            // this->b2Owner = this->b1Owner;
         }
     }
 

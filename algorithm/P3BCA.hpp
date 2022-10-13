@@ -33,8 +33,8 @@ private:
 
     void calcSteps(int dimension);
 
-    /*int shiftLeft(std::vector<Utility::Particle>& buf, int owner, int& nextSrcRank, int& nextDstRank, int&
-       offsetVector, int& diff);*/
+    int shiftLeft(std::vector<Utility::Particle>& buf, int owner, int& nextSrcRank, int& nextDstRank, int&
+       offsetVector, int& diff);
     int shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<int, 2>& nextSrcRank,
                   std::array<int, 2>& nextDstRank, std::array<int, 2>& offsetVector, std::array<int, 2>& diff);
     int shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<int, 3>& nextSrcRank,
@@ -46,14 +46,14 @@ private:
     int& getBufOwner(int i);
 
     // 1D
-    /*
+    
     void schedule1D(int i, int& myCartRank, int& src);
     void calcDestFromSrc1D(int& myCartRank, int& src, int& dst);
-    void schedule1DHelper(int i2, int i3, int& cartRank, int& src, int& dst, int& diff);
+    void schedule1DHelper(int i3, int& cartRank, int& src, int& dst, int& diff);
     void calcDiff1D(int& cartRank, int& src, int& diff, int i);
     void handleOffsetVector1D(int& nextSrcRank, int& nextDstRank, int& offsetVector, int& diff,
                               int& coordsSrc, int& coordsDst);
-    */
+    
 
     // 2D
     void schedule2D(int i, std::array<int, 2>& myCartRank, std::array<int, 2>& src);
