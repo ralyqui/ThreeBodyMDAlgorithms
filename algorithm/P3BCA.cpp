@@ -715,10 +715,10 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
 
                         // getBufOwner(2) = mpiShift(this->b2, getBufOwner(2), Utility::mod(worldRank + 1, this->dimX),
                         //                          Utility::mod(worldRank - 1, this->dimX));
-                        if (this->worldRank == 0) {
+                        /*if (this->worldRank == 0) {
                             std::cout << this->worldRank << " after shiftLeft b2 in 1D schedule"
                                       << "offsetVectorInner1D = " << offsetVectorInner1D << ", i3= " << i3 << std::endl;
-                        }
+                        }*/
                     }
                 }
             }
