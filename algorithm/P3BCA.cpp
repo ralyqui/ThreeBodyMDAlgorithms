@@ -28,7 +28,13 @@ void P3BCA::Init(std::shared_ptr<Simulation> simulation)
     this->numDims = this->cartTopology->GetCartRank().GetDimensions();
 
     // all boxed are included that are fully or partially covered by the cutoff distance
-    this->nCbX = cartTopology->GetWorldSize() == 1 ? 0 : (int)std::ceil((this->cutoff / cellSizeX));
+    if (cartTopology->GetWorldSize() == 1) {
+        this->nCbX = 0;
+    } else if (cartTopology->GetWorldSize() == 2) {
+        this->nCbX = 1;
+    } else {
+        this->nCbX = (int)std::ceil((this->cutoff / cellSizeX));
+    }
     if (numDims > 1) {
         this->nCbY = (int)std::ceil((this->cutoff / cellSizeY));
     } else {
@@ -706,12 +712,13 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                         }*/
                         getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner1D, nextDstRankInner1D,
                                                    offsetVectorInner1D, diffInner1D);
+
                         // getBufOwner(2) = mpiShift(this->b2, getBufOwner(2), Utility::mod(worldRank + 1, this->dimX),
                         //                          Utility::mod(worldRank - 1, this->dimX));
-                        /*if (this->worldRank == 4) {
+                        if (this->worldRank == 0) {
                             std::cout << this->worldRank << " after shiftLeft b2 in 1D schedule"
-                                      << "offsetVectorInner1D = " << offsetVectorInner1D << std::endl;
-                        }*/
+                                      << "offsetVectorInner1D = " << offsetVectorInner1D << ", i3= " << i3 << std::endl;
+                        }
                     }
                 }
             }
@@ -769,10 +776,6 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                     std::cout << "before shiftLeft b1 in 1D schedule: nextSrcRankOuter1D = " << nextSrcRankOuter1D
                               << ", nextDstRankOuter1D = " << nextDstRankOuter1D << ", i2 = " << i2 << std::endl;
                 }*/
-
-                if (this->worldRank == 4) {
-                    std::cout << this->worldRank << " shift in outer loop" << std::endl;
-                }
 
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter1D, nextDstRankOuter1D,
                                            offsetVectorOuter1D, diffOuter1D);
