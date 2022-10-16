@@ -203,6 +203,13 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
             int sumDispl = 0;
             for (int i = 0; i < simulation->GetTopology()->GetWorldSize(); i++) {
                 displacements.push_back(sumDispl);
+                // check for over & underflow. https://stackoverflow.com/a/1514309
+                if (maxNumElements > 0 && sumDispl > std::numeric_limits<int>::max() - maxNumElements) {
+                    std::cout << "Overflow Warning for profiling in sumDispl" << std::endl;
+                }
+                if (maxNumElements < 0 && sumDispl < std::numeric_limits<int>::min() - maxNumElements) {
+                    std::cout << "Underflow Warning for profiling in sumDispl" << std::endl;
+                }
                 sumDispl += maxNumElements;
             }
 

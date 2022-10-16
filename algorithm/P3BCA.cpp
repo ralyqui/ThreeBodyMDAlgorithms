@@ -398,9 +398,9 @@ int P3BCA::shiftLeft(std::vector<Utility::Particle>& buf, int owner, std::array<
 int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int dst)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::steady_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> end;
-    start = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
 #endif
 
     /*if (this->worldRank == 4) {
@@ -432,7 +432,7 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
     buf = this->tmpRecv;
 
 #ifdef PROFILE_3BMDA
-    end = std::chrono::steady_clock::now();
+    end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("mpiShift");
     if (!hasKey) {
@@ -449,9 +449,9 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
 void P3BCA::sendBackParticles()
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::steady_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> end;
-    start = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
 #endif
     MPI_Request requestSend1, requestSend2;
     MPI_Request requestRecv1, requestRecv2;
@@ -527,7 +527,7 @@ void P3BCA::sendBackParticles()
         this->b2Tmp.clear();
     }
 #ifdef PROFILE_3BMDA
-    end = std::chrono::steady_clock::now();
+    end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("sendBackParticles");
     if (!hasKey) {
@@ -696,6 +696,22 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 }
 
                 if (i3 < this->numSteps - 1) {
+                    #ifdef PROFILE_3BMDA
+                    // this prevents double time measurements
+                    std::chrono::time_point<std::chrono::system_clock> start;
+                    std::chrono::time_point<std::chrono::system_clock> end;
+                    start = std::chrono::system_clock::now();
+
+                    MPI_Barrier(this->simulation->GetTopology()->GetComm());
+
+                    end = std::chrono::system_clock::now();
+                    auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+                    bool hasKey = this->times.count("idle");
+                    if (!hasKey) {
+                        this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
+                    }
+                    this->times["idle"].second.push_back(elapsed_time.count());
+                    #endif
                     if (this->numDims == 3) {
                         getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner3D, nextDstRankInner3D,
                                                    offsetVectorInner3D, diffInner3D);
@@ -738,6 +754,23 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 calcDestFromSrc3D(myCoordsArray3D, nextSrcRankInner3D, nextDstRankInner3D);
                 calcDiff3D(myCoordsArray3D, nextSrcRankInner3D, diffInner3D, i2 + 1);
 
+                #ifdef PROFILE_3BMDA
+                // this prevents double time measurements
+                std::chrono::time_point<std::chrono::system_clock> start;
+                std::chrono::time_point<std::chrono::system_clock> end;
+                start = std::chrono::system_clock::now();
+
+                MPI_Barrier(this->simulation->GetTopology()->GetComm());
+
+                end = std::chrono::system_clock::now();
+                auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+                bool hasKey = this->times.count("idle");
+                if (!hasKey) {
+                    this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
+                }
+                this->times["idle"].second.push_back(elapsed_time.count());
+                #endif
+
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter3D, nextDstRankOuter3D,
                                            offsetVectorOuter3D, diffOuter3D);
 
@@ -754,6 +787,23 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 schedule2D(i2 + 1, myCoordsArray2D, nextSrcRankInner2D);
                 calcDestFromSrc2D(myCoordsArray2D, nextSrcRankInner2D, nextDstRankInner2D);
                 calcDiff2D(myCoordsArray2D, nextSrcRankInner2D, diffInner2D, i2 + 1);
+
+                #ifdef PROFILE_3BMDA
+                // this prevents double time measurements
+                std::chrono::time_point<std::chrono::system_clock> start;
+                std::chrono::time_point<std::chrono::system_clock> end;
+                start = std::chrono::system_clock::now();
+
+                MPI_Barrier(this->simulation->GetTopology()->GetComm());
+
+                end = std::chrono::system_clock::now();
+                auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+                bool hasKey = this->times.count("idle");
+                if (!hasKey) {
+                    this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
+                }
+                this->times["idle"].second.push_back(elapsed_time.count());
+                #endif
 
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter2D, nextDstRankOuter2D,
                                            offsetVectorOuter2D, diffOuter2D);
@@ -776,6 +826,23 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                     std::cout << "before shiftLeft b1 in 1D schedule: nextSrcRankOuter1D = " << nextSrcRankOuter1D
                               << ", nextDstRankOuter1D = " << nextDstRankOuter1D << ", i2 = " << i2 << std::endl;
                 }*/
+
+                #ifdef PROFILE_3BMDA
+                // this prevents double time measurements
+                std::chrono::time_point<std::chrono::system_clock> start;
+                std::chrono::time_point<std::chrono::system_clock> end;
+                start = std::chrono::system_clock::now();
+
+                MPI_Barrier(this->simulation->GetTopology()->GetComm());
+
+                end = std::chrono::system_clock::now();
+                auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+                bool hasKey = this->times.count("idle");
+                if (!hasKey) {
+                    this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
+                }
+                this->times["idle"].second.push_back(elapsed_time.count());
+                #endif
 
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter1D, nextDstRankOuter1D,
                                            offsetVectorOuter1D, diffOuter1D);

@@ -27,9 +27,9 @@ bool NATA::containsProcessed(Utility::Triplet t)
 void NATA::calculateProcessed(int step, bool &calculate)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::steady_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> end;
-    start = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
 #endif
     for (int i = 0; i < this->worldSize; i++) {
         int b1Rank = Utility::mod(i - (step / this->worldSize), this->worldSize);
@@ -44,7 +44,7 @@ void NATA::calculateProcessed(int step, bool &calculate)
         }
     }
 #ifdef PROFILE_3BMDA
-    end = std::chrono::steady_clock::now();
+    end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("calculateProcessed");
     if (!hasKey) {
@@ -57,15 +57,15 @@ void NATA::calculateProcessed(int step, bool &calculate)
 int NATA::shiftRight(std::vector<Utility::Particle> &buf)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::steady_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> end;
-    start = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
 #endif
     // https://moodle.rrze.uni-erlangen.de/pluginfile.php/13157/mod_resource/content/1/06_MPI_Advanced.pdf Page 12
     MPI_Sendrecv_replace(buf.data(), buf.size(), *this->mpiParticleType, this->rightNeighbor, 0, this->leftNeighbor, 0,
                          this->ringTopology->GetComm(), MPI_STATUS_IGNORE);
 #ifdef PROFILE_3BMDA
-    end = std::chrono::steady_clock::now();
+    end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("shiftRight");
     if (!hasKey) {
@@ -150,11 +150,43 @@ std::tuple<uint64_t, uint64_t> NATA::SimulationStep()
             }
 
             if (this->worldSize > 1) {
+                #ifdef PROFILE_3BMDA
+                // this prevents double time measurements
+                std::chrono::time_point<std::chrono::system_clock> start;
+                std::chrono::time_point<std::chrono::system_clock> end;
+                start = std::chrono::system_clock::now();
+
+                MPI_Barrier(this->simulation->GetTopology()->GetComm());
+
+                end = std::chrono::system_clock::now();
+                auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+                bool hasKey = this->times.count("idle");
+                if (!hasKey) {
+                    this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
+                }
+                this->times["idle"].second.push_back(elapsed_time.count());
+                #endif
                 shiftRight(b2);
                 ++step;
             }
         }
         if (this->worldSize > 1) {
+            #ifdef PROFILE_3BMDA
+            // this prevents double time measurements
+            std::chrono::time_point<std::chrono::system_clock> start;
+            std::chrono::time_point<std::chrono::system_clock> end;
+            start = std::chrono::system_clock::now();
+
+            MPI_Barrier(this->simulation->GetTopology()->GetComm());
+
+            end = std::chrono::system_clock::now();
+            auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+            bool hasKey = this->times.count("idle");
+            if (!hasKey) {
+                this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
+            }
+            this->times["idle"].second.push_back(elapsed_time.count());
+            #endif
             shiftRight(b1);
         }
     }

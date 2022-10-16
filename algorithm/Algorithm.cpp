@@ -53,9 +53,9 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
 {
 #ifdef PROFILE_3BMDA
     // bool append = false;
-    std::chrono::time_point<std::chrono::steady_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> end;
-    start = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
 #endif
     // std::vector<std::tuple<int, int, int>> particleTripletsToCalculate;
     uint64_t numActParticleInteractions = 0;
@@ -126,7 +126,7 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
 //    #pragma omp taskwait
 //}
 #ifdef PROFILE_3BMDA
-    end = std::chrono::steady_clock::now();
+    end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("calculateInteractions");
     if (!hasKey) {
@@ -172,9 +172,9 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
 #endif
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::steady_clock> start1;
-    std::chrono::time_point<std::chrono::steady_clock> end1;
-    start1 = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start1;
+    std::chrono::time_point<std::chrono::system_clock> end1;
+    start1 = std::chrono::system_clock::now();
 #endif
 
 #if defined(USE_OMP) && defined(OPENMPAVAIL)
@@ -189,7 +189,7 @@ void Algorithm::calcParticleInteractions(std::vector<std::tuple<int, int, int>> 
 #endif
 
 #ifdef PROFILE_3BMDA
-    end1 = std::chrono::steady_clock::now();
+    end1 = std::chrono::system_clock::now();
     auto elapsed_time1 = std::chrono::duration_cast<std::chrono::nanoseconds>(end1 - start1);
     bool hasKey = this->times.count("CalculateForces");
     if (!hasKey) {
@@ -208,9 +208,9 @@ void Algorithm::SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<U
                                std::vector<Utility::Particle> &b2)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::steady_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> end;
-    start = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
 #endif
     for (size_t i = 0; i < b0.size(); i++) {
         b0[i].fX += b1[i].fX + b2[i].fX;
@@ -230,7 +230,7 @@ void Algorithm::SumUpParticles(std::vector<Utility::Particle> &b0, std::vector<U
         */
     }
 #ifdef PROFILE_3BMDA
-    end = std::chrono::steady_clock::now();
+    end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("SumUpParticles");
     if (!hasKey) {

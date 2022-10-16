@@ -24,9 +24,9 @@ void AUTA::Init(std::shared_ptr<Simulation> simulation)
 int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::steady_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> end;
-    start = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
 #endif
 
     MPI_Status status;
@@ -36,7 +36,7 @@ int AUTA::shiftRight(std::vector<Utility::Particle>& buf, int owner)
                          MPI_ANY_TAG, this->ringTopology->GetComm(), &status);
 
 #ifdef PROFILE_3BMDA
-    end = std::chrono::steady_clock::now();
+    end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("shiftRight");
     if (!hasKey) {
@@ -144,9 +144,9 @@ int& AUTA::getBufOwner(int i)
 void AUTA::sendBackParticles()
 {
 #ifdef PROFILE_3BMDA
-    std::chrono::time_point<std::chrono::steady_clock> start;
-    std::chrono::time_point<std::chrono::steady_clock> end;
-    start = std::chrono::steady_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> start;
+    std::chrono::time_point<std::chrono::system_clock> end;
+    start = std::chrono::system_clock::now();
 #endif
     MPI_Request requestSend0, requestSend1, requestSend2;
     MPI_Request requestRecv0, requestRecv1, requestRecv2;
@@ -223,7 +223,7 @@ void AUTA::sendBackParticles()
     this->b1Owner = this->worldRank;
     this->b2Owner = this->worldRank;
 #ifdef PROFILE_3BMDA
-    end = std::chrono::steady_clock::now();
+    end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     bool hasKey = this->times.count("sendBackParticles");
     if (!hasKey) {
@@ -268,6 +268,22 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
     for (int s = this->worldSize; s > 0; s -= 3) {
         for (int j = 0; j < s; ++j) {
             if (j != 0 || s != this->worldSize) {
+                #ifdef PROFILE_3BMDA
+                // this prevents double time measurements
+                std::chrono::time_point<std::chrono::system_clock> start;
+                std::chrono::time_point<std::chrono::system_clock> end;
+                start = std::chrono::system_clock::now();
+
+                MPI_Barrier(this->simulation->GetTopology()->GetComm());
+
+                end = std::chrono::system_clock::now();
+                auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+                bool hasKey = this->times.count("idle");
+                if (!hasKey) {
+                    this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
+                }
+                this->times["idle"].second.push_back(elapsed_time.count());
+                #endif
                 getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
             }
 
@@ -303,6 +319,22 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
         bi = pickBuffer(i);
     }
     if (this->worldSize % 3 == 0) {
+        #ifdef PROFILE_3BMDA
+        // this prevents double time measurements
+        std::chrono::time_point<std::chrono::system_clock> start;
+        std::chrono::time_point<std::chrono::system_clock> end;
+        start = std::chrono::system_clock::now();
+
+        MPI_Barrier(this->simulation->GetTopology()->GetComm());
+
+        end = std::chrono::system_clock::now();
+        auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+        bool hasKey = this->times.count("idle");
+        if (!hasKey) {
+            this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
+        }
+        this->times["idle"].second.push_back(elapsed_time.count());
+        #endif
         getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
 
         int thirdID = this->worldRank / (this->worldSize / 3);

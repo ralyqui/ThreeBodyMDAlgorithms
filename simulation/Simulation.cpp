@@ -36,9 +36,9 @@ void Simulation::Start()
         }*/
 
 #ifdef MEASURESIMSTEP_3BMDA
-        std::chrono::time_point<std::chrono::steady_clock> start;
-        std::chrono::time_point<std::chrono::steady_clock> end;
-        start = std::chrono::steady_clock::now();
+        std::chrono::time_point<std::chrono::system_clock> start;
+        std::chrono::time_point<std::chrono::system_clock> end;
+        start = std::chrono::system_clock::now();
 #endif
 
         // update particle positions at predictor stage
@@ -54,7 +54,7 @@ void Simulation::Start()
         MPI_Barrier(this->topology->GetComm());
 
 #ifdef MEASURESIMSTEP_3BMDA
-        end = std::chrono::steady_clock::now();
+        end = std::chrono::system_clock::now();
         auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
         std::vector<uint64_t> allTimes;
         if (topology->GetWorldRank() == 0) {
@@ -71,7 +71,7 @@ void Simulation::Start()
                 }
             }
             allTimesStr.append("]");
-            std::string json = "{allTimes: " + allTimesStr + ", avg: " + std::to_string(max) + "}";
+            std::string json = "{\"allTimes\": " + allTimesStr + ", \"avg\": " + std::to_string(max) + "}";
             std::cout << json << std::endl;
         }
 
