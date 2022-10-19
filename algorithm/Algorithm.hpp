@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#ifdef PROFILE_3BMDA
+//#ifdef PROFILE_3BMDA
 #include <chrono>
-#endif
+//#endif
 
 #include "../MPIReporter.hpp"
 #include "../decomposition/DomainDecomposition.hpp"
@@ -40,6 +40,7 @@ protected:
     std::map<std::string, std::pair<char, std::vector<int64_t>>> times;
     std::vector<double> hitrates;
     double hitrate;
+    int64_t calcForcesAcc;
 #endif
 
     std::tuple<uint64_t, uint64_t> calculateInteractions(std::vector<Utility::Particle> &b0,

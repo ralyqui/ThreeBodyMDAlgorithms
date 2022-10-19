@@ -11,6 +11,9 @@ void Algorithm::Init(std::shared_ptr<Simulation> simulation)
     this->potential = this->simulation->GetPotential();
     this->worldSize = this->simulation->GetTopology()->GetWorldSize();
     this->worldRank = this->simulation->GetTopology()->GetWorldRank();
+#ifdef PROFILE_3BMDA
+    this->calcForcesAcc = 0;
+#endif
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
     std::string message = "I'm proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " and own " +
@@ -52,6 +55,7 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
                                                                 double cutoff, Eigen::Array3d physicalDomainSize)
 {
 #ifdef PROFILE_3BMDA
+    this->calcForcesAcc = 0;
     // bool append = false;
     std::chrono::time_point<std::chrono::system_clock> start;
     std::chrono::time_point<std::chrono::system_clock> end;
@@ -96,26 +100,38 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
 
                 //#pragma omp task
                 //{
+#ifdef PROFILE_3BMDA
+                std::chrono::time_point<std::chrono::system_clock> start1;
+                std::chrono::time_point<std::chrono::system_clock> end1;
+                start1 = std::chrono::system_clock::now();
+#endif
                 this->potential->CalculateForces(b0[i], b1[j], b2[k]);
+#ifdef PROFILE_3BMDA
+                end1 = std::chrono::system_clock::now();
+                auto elapsed_time1 = std::chrono::duration_cast<std::chrono::nanoseconds>(end1 - start1);
+                this->calcForcesAcc += elapsed_time1.count();
+#endif
                 //}
 
-//                 particleTripletsToCalculate.push_back(std::tuple(i, j, k));
+                //                 particleTripletsToCalculate.push_back(std::tuple(i, j, k));
 
-//                 // we don't want to exceed the memory
-//                 if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
-// #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
-//                     std::string message = "I'm proc " + std::to_string(this->worldRank) +
-//                                           " and dispatch particle calculations before exceeding memory ";
-//                     MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
-// #endif
-// #ifdef PROFILE_3BMDA
-//                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
-//                     append = true;
-// #else
-//                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
-// #endif
-//                     particleTripletsToCalculate.clear();
-//                 }
+                //                 // we don't want to exceed the memory
+                //                 if (particleTripletsToCalculate.size() > (size_t)(MAX_NUM_ELEMENTS / 28)) {
+                // #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
+                //                     std::string message = "I'm proc " + std::to_string(this->worldRank) +
+                //                                           " and dispatch particle calculations before exceeding
+                //                                           memory ";
+                //                     MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(),
+                //                     message);
+                // #endif
+                // #ifdef PROFILE_3BMDA
+                //                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+                //                     append = true;
+                // #else
+                //                     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+                // #endif
+                //                     particleTripletsToCalculate.clear();
+                //                 }
 
                 // std::cout << "calculate particle triplet (" << i << ", " << j << ", " << k << ")" << std::endl;
                 numActParticleInteractions++;
@@ -128,35 +144,48 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
 #ifdef PROFILE_3BMDA
     end = std::chrono::system_clock::now();
     auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+    // std::cout << "proc " << this->simulation->GetTopology()->GetWorldRank() << " calcstep took " <<
+    // elapsed_time.count()
+    //          << " ns" << std::endl;
     bool hasKey = this->times.count("calculateInteractions");
     if (!hasKey) {
         this->times["calculateInteractions"] = std::make_pair(0, std::vector<int64_t>());
     }
     this->times["calculateInteractions"].second.push_back(elapsed_time.count());
+
+    bool hasKey2 = this->times.count("calculateForces");
+    if (!hasKey2) {
+        this->times["calculateForces"] = std::make_pair(0, std::vector<int64_t>());
+    }
+    this->times["calculateForces"].second.push_back(this->calcForcesAcc);
 #endif
 
-// #ifdef PROFILE_3BMDA
-//     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
-// #else
-//     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
-// #endif
+    // #ifdef PROFILE_3BMDA
+    //     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2, append);
+    // #else
+    //     calcParticleInteractions(particleTripletsToCalculate, b0, b1, b2);
+    // #endif
 
-// #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-//     std::string message =
-//         "proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " calculates particle triplets : ";
-//     if (particleTripletsToCalculate.size() > 0) {
-//         for (size_t i = 0; i < particleTripletsToCalculate.size(); i++) {
-//             message.append("(" + std::to_string(b0[std::get<0>(particleTripletsToCalculate[i])].ID) + ", " +
-//                            std::to_string(b1[std::get<1>(particleTripletsToCalculate[i])].ID) + ", " +
-//                            std::to_string(b2[std::get<2>(particleTripletsToCalculate[i])].ID) + ")");
-//             if (i < particleTripletsToCalculate.size() - 1) {
-//                 message.append(", ");
-//             }
-//         }
-//         MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
-//     }
+    // #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+    //     std::string message =
+    //         "proc " + std::to_string(this->simulation->GetTopology()->GetWorldRank()) + " calculates particle
+    //         triplets : ";
+    //     if (particleTripletsToCalculate.size() > 0) {
+    //         for (size_t i = 0; i < particleTripletsToCalculate.size(); i++) {
+    //             message.append("(" + std::to_string(b0[std::get<0>(particleTripletsToCalculate[i])].ID) + ", " +
+    //                            std::to_string(b1[std::get<1>(particleTripletsToCalculate[i])].ID) + ", " +
+    //                            std::to_string(b2[std::get<2>(particleTripletsToCalculate[i])].ID) + ")");
+    //             if (i < particleTripletsToCalculate.size() - 1) {
+    //                 message.append(", ");
+    //             }
+    //         }
+    //         MPIReporter::instance()->StoreMessage(this->simulation->GetTopology()->GetWorldRank(), message);
+    //     }
 
-// #endif
+    // #endif
+
+    // std::cout << "proc " << this->simulation->GetTopology()->GetWorldRank() << " did " << numActParticleInteractions
+    //          << " particle interactions in this substep" << std::endl;
 
     return std::tuple(numActParticleInteractions, numPossibleParticleInteractions);
 }
