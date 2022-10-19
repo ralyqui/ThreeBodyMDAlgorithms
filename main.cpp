@@ -126,16 +126,6 @@ std::string charToTimeUnit(const char& c)
 
 void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
 {
-#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
-
-    std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) + " and have done " +
-                          std::to_string(simulation->GetNumParticleInteractions(0)) +
-                          " particle interactions actually, and " +
-                          std::to_string(simulation->GetNumBufferInteractions(0)) + " buffer interactions";
-
-    MPIReporter::instance()->StoreMessage(simulation->GetTopology()->GetWorldRank(), message);
-#endif
-
     // fetch profiling data
     std::map<std::string, std::pair<char, std::vector<int64_t>>> times = simulation->GetAlgorithm()->GetTimes();
     std::vector<double> hitrates = simulation->GetAlgorithm()->GetHitrates();
@@ -567,6 +557,16 @@ int main(int argc, char* argv[])
 
     // execute simulation
     simulation->Start();
+
+#if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
+
+    std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) + " and have done " +
+                          std::to_string(simulation->GetNumParticleInteractions(0)) +
+                          " particle interactions actually, and " +
+                          std::to_string(simulation->GetNumBufferInteractions(0)) + " buffer interactions";
+
+    MPIReporter::instance()->StoreMessage(simulation->GetTopology()->GetWorldRank(), message);
+#endif
 
 #ifdef PROFILE_3BMDA
     doTimingStuff(simulation, a.outputProfile);
