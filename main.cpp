@@ -286,7 +286,7 @@ void doTimingStuff(std::shared_ptr<Simulation> simulation, std::string outFile)
                 }
 
                 // calculate values for stvr
-                if (k.compare("CalculateForces") == 0) {
+                if (k.compare("CalculateForces") == 0 || k.compare("calculateForces") == 0) {
                     for (size_t i = 0; i < sumPerProc.size(); i++) {
                         double val = (double)sumPerProc[i] / (double)numAllElements[i];
                         valuesForSTVR.push_back(val);
