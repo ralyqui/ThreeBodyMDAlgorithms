@@ -55,6 +55,9 @@ std::tuple<uint64_t, uint64_t> AUTA::calculateOneThirdOfInteractions(int thirdID
     std::vector<Utility::Particle>* b0Sorted = nullptr;
     std::vector<Utility::Particle>* b1Sorted = nullptr;
     std::vector<Utility::Particle>* b2Sorted = nullptr;
+    int b0OwnerSorted = this->b0Owner;
+    int b1OwnerSorted = this->b1Owner;
+    int b2OwnerSorted = this->b2Owner;
 
     // sort buffers by owner
     if (this->b0Owner < this->b1Owner && this->b0Owner < this->b2Owner) {
@@ -66,26 +69,41 @@ std::tuple<uint64_t, uint64_t> AUTA::calculateOneThirdOfInteractions(int thirdID
             b0Sorted = &(this->b0);
             b1Sorted = &(this->b2);
             b2Sorted = &(this->b1);
+            b0OwnerSorted = this->b0Owner;
+            b1OwnerSorted = this->b2Owner;
+            b2OwnerSorted = this->b1Owner;
         }
     } else if (this->b1Owner < this->b0Owner && this->b1Owner < this->b2Owner) {
         if (this->b0Owner < this->b2Owner) {
             b0Sorted = &(this->b1);
             b1Sorted = &(this->b0);
             b2Sorted = &(this->b2);
+            b0OwnerSorted = this->b1Owner;
+            b1OwnerSorted = this->b0Owner;
+            b2OwnerSorted = this->b2Owner;
         } else {
             b0Sorted = &(this->b1);
             b1Sorted = &(this->b2);
             b2Sorted = &(this->b0);
+            b0OwnerSorted = this->b1Owner;
+            b1OwnerSorted = this->b2Owner;
+            b2OwnerSorted = this->b0Owner;
         }
     } else if (this->b2Owner < this->b1Owner && this->b2Owner < this->b0Owner) {
         if (this->b0Owner < this->b1Owner) {
             b0Sorted = &(this->b2);
             b1Sorted = &(this->b0);
             b2Sorted = &(this->b1);
+            b0OwnerSorted = this->b2Owner;
+            b1OwnerSorted = this->b0Owner;
+            b2OwnerSorted = this->b1Owner;
         } else {
             b0Sorted = &(this->b2);
             b1Sorted = &(this->b1);
             b2Sorted = &(this->b0);
+            b0OwnerSorted = this->b2Owner;
+            b1OwnerSorted = this->b1Owner;
+            b2OwnerSorted = this->b0Owner;
         }
     }
 
@@ -93,30 +111,12 @@ std::tuple<uint64_t, uint64_t> AUTA::calculateOneThirdOfInteractions(int thirdID
     int numSteps = b0Sorted->size() / 3;
 
     // the last processor calculates the rest if #particles in b0Sorted is not divisable by 3
-    if (this->worldRank >= (this->worldSize - 3)) {
-        numSteps += b0Sorted->size() % 3;
+    if(thirdID == 2) {
+        numSteps = b0Sorted->size() - 2 * numSteps;
     }
 
-    return this->CalculateInteractions(*b0Sorted, *b1Sorted, *b2Sorted, this->b0Owner, this->b1Owner, this->b2Owner,
+    return this->CalculateInteractions(*b0Sorted, *b1Sorted, *b2Sorted, b0OwnerSorted, b1OwnerSorted, b2OwnerSorted,
                                        start, numSteps);
-
-    /*for (int i = start; i < numSteps; ++i) {
-        if ((*b0Sorted)[i].isDummy) {
-            continue;
-        }
-        for (size_t j = 0; j < b1Sorted->size(); ++j) {
-            if ((*b1Sorted)[j].isDummy) {
-                continue;
-            }
-            for (size_t k = 0; k < b2Sorted->size(); ++k) {
-                if ((*b2Sorted)[k].isDummy) {
-                    continue;
-                }
-                // this->simulation->GetPotential()->CalculateForces((*b0Sorted)[i], (*b2Sorted)[j], (*b2Sorted)[k]);
-                this->potential->CalculateForces((*b0Sorted)[i], (*b2Sorted)[j], (*b2Sorted)[k]);
-            }
-        }
-    }*/
 }
 
 std::vector<Utility::Particle>* AUTA::pickBuffer(int i)
@@ -268,7 +268,7 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
     for (int s = this->worldSize; s > 0; s -= 3) {
         for (int j = 0; j < s; ++j) {
             if (j != 0 || s != this->worldSize) {
-                #ifdef PROFILE_3BMDA
+#ifdef PROFILE_3BMDA
                 // this prevents double time measurements
                 std::chrono::time_point<std::chrono::system_clock> start;
                 std::chrono::time_point<std::chrono::system_clock> end;
@@ -283,7 +283,7 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
                     this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
                 }
                 this->times["idle"].second.push_back(elapsed_time.count());
-                #endif
+#endif
                 getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
             }
 
@@ -319,7 +319,7 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
         bi = pickBuffer(i);
     }
     if (this->worldSize % 3 == 0) {
-        #ifdef PROFILE_3BMDA
+#ifdef PROFILE_3BMDA
         // this prevents double time measurements
         std::chrono::time_point<std::chrono::system_clock> start;
         std::chrono::time_point<std::chrono::system_clock> end;
@@ -334,7 +334,7 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
             this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
         }
         this->times["idle"].second.push_back(elapsed_time.count());
-        #endif
+#endif
         getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
 
         int thirdID = this->worldRank / (this->worldSize / 3);

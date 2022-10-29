@@ -69,7 +69,8 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
     //{
     //    #pragma omp single
     //    {
-    for (size_t i = b0Start; i < (b0NumSteps != -1 ? (size_t)b0NumSteps : b0.size()); ++i) {
+    for (size_t i = b0Start; i < (b0NumSteps != -1 ? (size_t)(b0Start + b0NumSteps) : b0.size()); ++i) {
+        if (b0NumSteps != -1) std::cout << worldRank << ": " << i << std::endl;
         if (b0[i].isDummy) {
             continue;
         }
