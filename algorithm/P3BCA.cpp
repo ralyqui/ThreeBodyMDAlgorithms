@@ -678,11 +678,10 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
 #ifdef PROFILE_3BMDA
             // only accumulate if there are possible particle interactions to avoid div by 0
             if (std::get<1>(numParticleInteractions) > 0) {
-                this->hitrate +=
-                    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-                hitRateDivider++;
+                this->hitrate += (double)std::get<0>(numParticleInteractions);
+                // hitRateDivider++;
 
-                // hitRateDivider += std::get<1>(numParticleInteractions);
+                hitRateDivider += std::get<1>(numParticleInteractions);
             }
 #endif
 
@@ -696,7 +695,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 }
 
                 if (i3 < this->numSteps - 1) {
-                    #ifdef PROFILE_3BMDA
+#ifdef PROFILE_3BMDA
                     // this prevents double time measurements
                     std::chrono::time_point<std::chrono::system_clock> start;
                     std::chrono::time_point<std::chrono::system_clock> end;
@@ -711,7 +710,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                         this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
                     }
                     this->times["idle"].second.push_back(elapsed_time.count());
-                    #endif
+#endif
                     if (this->numDims == 3) {
                         getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner3D, nextDstRankInner3D,
                                                    offsetVectorInner3D, diffInner3D);
@@ -754,7 +753,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 calcDestFromSrc3D(myCoordsArray3D, nextSrcRankInner3D, nextDstRankInner3D);
                 calcDiff3D(myCoordsArray3D, nextSrcRankInner3D, diffInner3D, i2 + 1);
 
-                #ifdef PROFILE_3BMDA
+#ifdef PROFILE_3BMDA
                 // this prevents double time measurements
                 std::chrono::time_point<std::chrono::system_clock> start;
                 std::chrono::time_point<std::chrono::system_clock> end;
@@ -769,7 +768,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                     this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
                 }
                 this->times["idle"].second.push_back(elapsed_time.count());
-                #endif
+#endif
 
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter3D, nextDstRankOuter3D,
                                            offsetVectorOuter3D, diffOuter3D);
@@ -788,7 +787,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 calcDestFromSrc2D(myCoordsArray2D, nextSrcRankInner2D, nextDstRankInner2D);
                 calcDiff2D(myCoordsArray2D, nextSrcRankInner2D, diffInner2D, i2 + 1);
 
-                #ifdef PROFILE_3BMDA
+#ifdef PROFILE_3BMDA
                 // this prevents double time measurements
                 std::chrono::time_point<std::chrono::system_clock> start;
                 std::chrono::time_point<std::chrono::system_clock> end;
@@ -803,7 +802,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                     this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
                 }
                 this->times["idle"].second.push_back(elapsed_time.count());
-                #endif
+#endif
 
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter2D, nextDstRankOuter2D,
                                            offsetVectorOuter2D, diffOuter2D);
@@ -827,7 +826,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                               << ", nextDstRankOuter1D = " << nextDstRankOuter1D << ", i2 = " << i2 << std::endl;
                 }*/
 
-                #ifdef PROFILE_3BMDA
+#ifdef PROFILE_3BMDA
                 // this prevents double time measurements
                 std::chrono::time_point<std::chrono::system_clock> start;
                 std::chrono::time_point<std::chrono::system_clock> end;
@@ -842,7 +841,7 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                     this->times["idle"] = std::make_pair(0, std::vector<int64_t>());
                 }
                 this->times["idle"].second.push_back(elapsed_time.count());
-                #endif
+#endif
 
                 getBufOwner(1) = shiftLeft(this->b1, getBufOwner(1), nextSrcRankOuter1D, nextDstRankOuter1D,
                                            offsetVectorOuter1D, diffOuter1D);
