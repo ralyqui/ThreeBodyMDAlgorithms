@@ -111,7 +111,7 @@ std::tuple<uint64_t, uint64_t> AUTA::calculateOneThirdOfInteractions(int thirdID
     int numSteps = b0Sorted->size() / 3;
 
     // the last processor calculates the rest if #particles in b0Sorted is not divisable by 3
-    if(thirdID == 2) {
+    if (thirdID == 2) {
         numSteps = b0Sorted->size() - 2 * numSteps;
     }
 
@@ -277,6 +277,10 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
                 MPI_Barrier(this->simulation->GetTopology()->GetComm());
 
                 end = std::chrono::system_clock::now();
+#endif
+                getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
+                
+#ifdef PROFILE_3BMDA
                 auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
                 bool hasKey = this->times.count("idle");
                 if (!hasKey) {
@@ -284,7 +288,6 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
                 }
                 this->times["idle"].second.push_back(elapsed_time.count());
 #endif
-                getBufOwner(i) = shiftRight(*bi, getBufOwner(i));
             }
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
