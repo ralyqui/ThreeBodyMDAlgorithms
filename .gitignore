@@ -1,0 +1,6 @@
+# no build stuff
+**/build/
+**/bin/
+
+# no VS Code stuff
+**/.vscode/

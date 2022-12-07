@@ -1,215 +1,73 @@
-include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+project(
+  3BMDA
+  VERSION 1.0
+  LANGUAGES C CXX
+  DESCRIPTION "Three Body MD Algorithms")
 
-add_subdirectory(utility)
-add_subdirectory(tools)
-add_subdirectory(external/rapidyaml)
+# so we can see which compile flags are used by gcc
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(MAIN_SOURCES
-    main.cpp
-    topology/Topology.cpp
-    topology/RingTopology.cpp
-    topology/CartTopology.cpp
-    decomposition/AtomDecomposition.cpp
-    decomposition/RegularGridDecomposition.cpp
-    decomposition/DomainDecomposition.cpp
-    algorithm/Algorithm.cpp
-    algorithm/NATA.cpp
-    algorithm/AUTA.cpp
-    algorithm/P3BCA.cpp
-    utility/utility.cpp
-    potential/AxilrodTeller.cpp
-    potential/Potential.cpp
-    simulation/Simulation.cpp
-    MPIReporter.cpp)
+# configure_file("resources/decompositions.json"
+# "executables/decompositions.json" COPYONLY)
+# configure_file("resources/decompositions.json"
+# "executables/tests/decompositions.json" COPYONLY)
+# configure_file("resources/decompositions.json"
+# "executables/benchmark/decompositions.json" COPYONLY)
 
-add_executable(main ${MAIN_SOURCES})
-target_include_directories(main PRIVATE utility algorithm decomposition
-                                        topology potential simulation)
+option(TESTS_3BMDA "Build test programs" OFF)
+option(BENCHMARK_3BMDA "Benchmark mode" OFF)
+option(PROFILE_3BMDA "Profile mode" OFF)
+option(USE_OMP "Use OPENMP" OFF)
+option(MEASURESIMSTEP_3BMDA "Measure one timestep" OFF)
+option(VLEVEL "Verbosity Level" -1)
 
-target_link_libraries(main ${MPI_C_LIBRARIES})
-target_link_libraries(main Eigen3::Eigen)
-target_link_libraries(main OpenMP::OpenMP_CXX)
+set(MPIEXEC_EXECUTABLE mpiexec)
+set(MPIEXEC_NUMPROC_FLAG -n)
 
-if(PROFILE_3BMDA)
-  target_compile_definitions(main PUBLIC PROFILE_3BMDA)
-endif()
-if(USE_OMP)
-  message(STATUS "add USE_OMP compile definition")
-  target_compile_definitions(main PUBLIC USE_OMP)
-endif()
-if(MEASURESIMSTEP_3BMDA)
-  target_compile_definitions(main PUBLIC MEASURESIMSTEP_3BMDA)
+find_package(Eigen3 REQUIRED)
+find_package(MPI REQUIRED)
+find_package(OpenMP REQUIRED)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RELEASE)
 endif()
 
-set_target_properties(main PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                      ${CMAKE_BINARY_DIR}/executables)
+if(VLEVEL GREATER_EQUAL 0)
+  add_compile_definitions(VLEVEL=${VLEVEL})
+endif()
 
-target_include_directories(
-  main PUBLIC ${CMAKE_SOURCE_DIR}/src/external/rapidjson/include)
-
-# TESTS
-
-if(TESTS_3BMDA)
-
-  include(GoogleTest)
-
-  set(INSTALL_GTEST OFF)
-  add_subdirectory(external/gtest)
-  include_directories(external/gtest/include)
-
-  set(TEST_SOURCES
-      tests/tests.cpp
-      topology/Topology.cpp
-      topology/RingTopology.cpp
-      topology/CartTopology.cpp
-      decomposition/AtomDecomposition.cpp
-      decomposition/RegularGridDecomposition.cpp
-      decomposition/DomainDecomposition.cpp
-      algorithm/Algorithm.cpp
-      algorithm/NATA.cpp
-      algorithm/AUTA.cpp
-      algorithm/P3BCA.cpp
-      utility/utility.cpp
-      potential/AxilrodTeller.cpp
-      potential/Potential.cpp
-      simulation/Simulation.cpp
-      tools/ClosestPackedGenerator.cpp
-      tools/ClusteredGaussGenerator.cpp
-      tools/GaussGenerator.cpp
-      tools/GridGenerator.cpp
-      tools/ParticleGenerator.cpp
-      tools/UniformGenerator.cpp
-      utility/utility.cpp)
-
-  add_executable(testrunner tests/testrunner.cpp)
-
-  add_executable(tests ${TEST_SOURCES})
-  target_link_libraries(tests gtest)
-  target_link_libraries(tests ${MPI_C_LIBRARIES})
-  target_link_libraries(tests Eigen3::Eigen)
-
-  target_compile_definitions(tests PUBLIC TESTS_3BMDA)
-  if(USE_OMP)
-    message(STATUS "add USE_OMP compile definition")
-    target_compile_definitions(tests PUBLIC USE_OMP)
-  endif()
-
-  # https://stackoverflow.com/questions/71971858/ctest-and-mpi-parallel-tests
-  # solving the problem when gtest executes tests without mpi set_property(
-  # TARGET tests PROPERTY CROSSCOMPILING_EMULATOR '${MPIEXEC_EXECUTABLE}
-  # ${MPIEXEC_NUMPROC_FLAG} 1') gtest_discover_tests(tests TEST_PREFIX "tests/"
-  # DISCOVERY_TIMEOUT 60)
-
-  set_target_properties(
-    tests testrunner PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-                                ${CMAKE_BINARY_DIR}/executables/tests)
-
-endif(TESTS_3BMDA)
-
-# BENCHMARK
+# we have to set this for google benchmark
 if(BENCHMARK_3BMDA)
-  set(BENCHMARK_ENABLE_INSTALL OFF)
-  set(BENCHMARK_ENABLE_TESTING OFF)
-  set(BENCHMARK_INSTALL_DOCS OFF)
-  set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON)
+  set(NDEBUG)
+  # https://github.com/google/benchmark/issues/773#issuecomment-616067912
+  set(RUN_HAVE_STD_REGEX 0)
+  set(RUN_HAVE_POSIX_REGEX 0)
+  set(COMPILE_HAVE_GNU_POSIX_REGEX 0)
+else()
+  unset(NDEBUG)
+endif()
 
-  add_subdirectory(external/benchmark)
+if(CMAKE_COMPILER_IS_GNUCXX)
+  message(STATUS "GCC detected, adding compile flags")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+  if(${OpenMP_FOUND})
+    message(STATUS "OpenMP detected, adding compiler definition")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+    add_compile_definitions(OPENMPAVAIL)
+  else()
+    unset(OPENMPAVAIL)
+  endif(${OpenMP_FOUND})
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg -Og")
+  # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native")
+  set(CMAKE_CXX_FLAGS_RELEASE
+      "${CMAKE_CXX_FLAGS_RELEASE} -march=native -fno-omit-frame-pointer")
+  # set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -O3
+  # -march=native")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO " -pg -Og -march=native")
+endif(CMAKE_COMPILER_IS_GNUCXX)
 
-  add_executable(benchrunner benchmarks/benchrunner.cpp)
-
-  set(BENCHMARK_SOURCES
-      benchmarks/benchmain.cpp
-      benchmarks/MPIBenchmark.cpp
-      benchmarks/AUTAContext.cpp
-      benchmarks/NATAContext.cpp
-      benchmarks/P3BCAContext.cpp
-      benchmarks/Context.cpp
-      benchmarks/SingleIteration.cpp
-      benchmarks/SingleIterationOnlySimStep.cpp
-      topology/Topology.cpp
-      topology/RingTopology.cpp
-      topology/CartTopology.cpp
-      decomposition/AtomDecomposition.cpp
-      decomposition/RegularGridDecomposition.cpp
-      decomposition/DomainDecomposition.cpp
-      algorithm/Algorithm.cpp
-      algorithm/NATA.cpp
-      algorithm/AUTA.cpp
-      algorithm/P3BCA.cpp
-      utility/utility.cpp
-      potential/AxilrodTeller.cpp
-      potential/Potential.cpp
-      simulation/Simulation.cpp
-      tools/ClosestPackedGenerator.cpp
-      tools/ClusteredGaussGenerator.cpp
-      tools/GaussGenerator.cpp
-      tools/GridGenerator.cpp
-      tools/ParticleGenerator.cpp
-      tools/UniformGenerator.cpp)
-
-  add_executable(benchmain ${BENCHMARK_SOURCES})
-
-  target_include_directories(benchmain PRIVATE thirdparty/rapidyaml/src)
-
-  target_link_libraries(benchmain benchmark)
-  target_link_libraries(benchmain ${MPI_C_LIBRARIES})
-  target_link_libraries(benchmain Eigen3::Eigen)
-  target_link_libraries(benchmain ryml)
-
-  target_compile_definitions(benchmain PUBLIC BENCHMARK_3BMDA)
-  if(USE_OMP)
-    message(STATUS "add USE_OMP compile definition")
-    target_compile_definitions(benchmain PUBLIC USE_OMP)
-  endif()
-
-  set(BENCHMARK_CLUSTER_SOURCES
-      benchmarks/benchmain_cluster.cpp
-      benchmarks/MPIBenchmark.cpp
-      benchmarks/AUTAContext.cpp
-      benchmarks/NATAContext.cpp
-      benchmarks/P3BCAContext.cpp
-      benchmarks/Context.cpp
-      benchmarks/SingleIteration.cpp
-      benchmarks/SingleIterationOnlySimStep.cpp
-      topology/Topology.cpp
-      topology/RingTopology.cpp
-      topology/CartTopology.cpp
-      decomposition/AtomDecomposition.cpp
-      decomposition/RegularGridDecomposition.cpp
-      decomposition/DomainDecomposition.cpp
-      algorithm/Algorithm.cpp
-      algorithm/NATA.cpp
-      algorithm/AUTA.cpp
-      algorithm/P3BCA.cpp
-      utility/utility.cpp
-      potential/AxilrodTeller.cpp
-      potential/Potential.cpp
-      simulation/Simulation.cpp
-      tools/ClosestPackedGenerator.cpp
-      tools/ClusteredGaussGenerator.cpp
-      tools/GaussGenerator.cpp
-      tools/GridGenerator.cpp
-      tools/ParticleGenerator.cpp
-      tools/UniformGenerator.cpp)
-
-  add_executable(benchmain_cluster ${BENCHMARK_CLUSTER_SOURCES})
-
-  target_include_directories(benchmain_cluster PRIVATE thirdparty/rapidyaml/src)
-
-  target_link_libraries(benchmain_cluster benchmark)
-  target_link_libraries(benchmain_cluster ${MPI_C_LIBRARIES})
-  target_link_libraries(benchmain_cluster Eigen3::Eigen)
-  target_link_libraries(benchmain_cluster ryml)
-
-  target_compile_definitions(benchmain_cluster PUBLIC BENCHMARK_3BMDA)
-  if(USE_OMP)
-    message(STATUS "add USE_OMP compile definition")
-    target_compile_definitions(benchmain_cluster PUBLIC USE_OMP)
-  endif()
-
-  set_target_properties(
-    benchrunner benchmain benchmain_cluster
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY
-               ${CMAKE_BINARY_DIR}/executables/benchmark)
-
-endif(BENCHMARK_3BMDA)
+add_subdirectory(src)
