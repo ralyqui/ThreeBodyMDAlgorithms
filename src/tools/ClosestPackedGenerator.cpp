@@ -25,38 +25,18 @@ void ClosestPackedGenerator::Generate()
     bool evenRow = true;
 
     int id = 0;
-    // for (double z = bottomLeftCorner[2]; z < topRightCorner[2]; z += spacingLayer) {
-    //     double starty = evenLayer ? bottomLeftCorner[1] : bottomLeftCorner[1] + yOffset;
-    //     for (double y = starty; y < topRightCorner[1]; y += spacingRow) {
-    //         double startx = evenRow ? bottomLeftCorner[0] : bottomLeftCorner[0] + xOffset;
-    //         for (double x = startx; x < topRightCorner[0]; x += particleSpacing) {
-    //             std::tuple<int, double, double, double, double, double, double, double, double, double, double>
-    //                 positions = std::make_tuple(id++, x, y, z, velocity[0], velocity[1], velocity[2], 0, 0, 0, mass);
-
-    //             this->particles.push_back(positions);
-    //         }
-    //         evenRow = !evenRow;
-    //     }
-    //     evenLayer = !evenLayer;
-    // }
-    double z = bottomLeftCorner[2];
-    for (int i = 0; i < 20; i++) {
+    for (double z = bottomLeftCorner[2]; z < topRightCorner[2]; z += spacingLayer) {
         double starty = evenLayer ? bottomLeftCorner[1] : bottomLeftCorner[1] + yOffset;
-        double y = starty;
-        for (int j = 0; j < 20; j++) {
+        for (double y = starty; y < topRightCorner[1]; y += spacingRow) {
             double startx = evenRow ? bottomLeftCorner[0] : bottomLeftCorner[0] + xOffset;
-            double x = startx;
-            for (int k = 0; k < 20; k++) {
+            for (double x = startx; x < topRightCorner[0]; x += particleSpacing) {
                 std::tuple<int, double, double, double, double, double, double, double, double, double, double>
                     positions = std::make_tuple(id++, x, y, z, velocity[0], velocity[1], velocity[2], 0, 0, 0, mass);
 
                 this->particles.push_back(positions);
-                x += particleSpacing;
             }
             evenRow = !evenRow;
-            y += spacingRow;
         }
         evenLayer = !evenLayer;
-        z += spacingLayer;
     }
 }
