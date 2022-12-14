@@ -17,11 +17,6 @@
 
 #define MAX_NUM_ELEMENTS 2666666667  // num of elements (int i, int j, int k) that use up 32 GB of memory
 
-// https://stackoverflow.com/a/43169193
-#pragma omp declare reduction(vec_particle_plus : std::vector<Utility::Particle> : \
-                              std::transform(omp_out.begin(), omp_out.end(), omp_in.begin(), omp_out.begin(), [](Utility::Particle a, Utility::Particle b) {a.fX += b.fX; a.fY += b.fY; a.fZ += b.fZ; return a;})) \
-                    initializer(omp_priv = decltype(omp_orig)(omp_orig.size()))
-
 class Algorithm {
 protected:
     std::shared_ptr<Simulation> simulation;
@@ -32,7 +27,6 @@ protected:
     int numShifts;
 
 #ifdef TESTS_3BMDA
-    // TESTS_3BMDA is defined
     std::vector<Utility::Triplet> processed;
 #endif
 

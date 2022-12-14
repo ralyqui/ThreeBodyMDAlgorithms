@@ -22,8 +22,6 @@ std::map<std::string, std::pair<char, double>> Potential::GetAvgCalcTime()
     }
     time["CalculateForces"].second = (double)this->timeAcc / (double)this->counter;
 
-    //std::cout << time["CalculateForces"].second << std::endl;
-
     return time;
 }
 void Potential::ResetTime()

@@ -304,16 +304,11 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
 
             numBufferInteractions++;
 #ifdef TESTS_3BMDA
-            // TESTS_3BMDA is defined
             processed.push_back(Utility::Triplet(this->b0Owner, this->b1Owner, this->b2Owner));
 #endif
 #ifdef PROFILE_3BMDA
             // only accumulate if there are possible particle interactions to avoid div by 0
             if (std::get<1>(numParticleInteractions) > 0) {
-                // this->hitrate +=
-                //    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-                // hitRateDivider++;
-
                 hitRateDivider += std::get<1>(numParticleInteractions);
             }
 #endif
@@ -364,10 +359,6 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
 #ifdef PROFILE_3BMDA
         // only accumulate if there are possible particle interactions to avoid div by 0
         if (std::get<1>(numParticleInteractions) > 0) {
-            // this->hitrate +=
-            //    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-            // hitRateDivider++;
-
             hitRateDivider += std::get<1>(numParticleInteractions);
         }
 #endif
@@ -380,7 +371,6 @@ std::tuple<uint64_t, uint64_t> AUTA::SimulationStep()
 
 #ifdef PROFILE_3BMDA
     if (hitRateDivider > 0) {
-        // this->hitrate /= (double)hitRateDivider;
         this->hitrates.push_back((double)numParticleInteractionsAcc / (double)hitRateDivider);
     }
 #endif

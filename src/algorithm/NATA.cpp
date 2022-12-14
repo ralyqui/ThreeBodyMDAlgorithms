@@ -131,7 +131,6 @@ std::tuple<uint64_t, uint64_t> NATA::SimulationStep()
                 numParticleInteractionsAcc += std::get<0>(numParticleInteractions);
                 numBufferInteractions++;
 #ifdef TESTS_3BMDA
-                // TESTS_3BMDA is defined
                 processed.push_back(Utility::Triplet(this->worldRank,
                                                      Utility::mod(i + this->worldRank, this->worldSize),
                                                      Utility::mod(j + this->worldRank, this->worldSize)));
@@ -140,10 +139,6 @@ std::tuple<uint64_t, uint64_t> NATA::SimulationStep()
 #ifdef PROFILE_3BMDA
                 // only accumulate if there are possible particle interactions to avoid div by 0
                 if (std::get<1>(numParticleInteractions) > 0) {
-                    // this->hitrate +=
-                    //    (double)std::get<0>(numParticleInteractions) / (double)std::get<1>(numParticleInteractions);
-                    // hitRateDivider++;
-
                     hitRateDivider += std::get<1>(numParticleInteractions);
                 }
 #endif
@@ -193,7 +188,6 @@ std::tuple<uint64_t, uint64_t> NATA::SimulationStep()
 
 #ifdef PROFILE_3BMDA
     if (hitRateDivider > 0) {
-        // this->hitrate /= (double)hitRateDivider;
         this->hitrates.push_back((double)numParticleInteractionsAcc / (double)hitRateDivider);
     }
 #endif

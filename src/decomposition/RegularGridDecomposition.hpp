@@ -20,7 +20,6 @@ protected:
     std::vector<Utility::Particle> recvFromLeftNeighbor, recvFromRightNeighbor;
     Eigen::Array3d localCellWidth;
     Eigen::Array3d physicalDomainSize;
-    // double physicalDomainSize;
     int dimX;
     int dimY;
     int dimZ;

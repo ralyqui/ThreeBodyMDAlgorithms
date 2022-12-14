@@ -28,12 +28,6 @@ std::shared_ptr<DomainDecomposition> Simulation::GetDecomposition() { return thi
 void Simulation::Start()
 {
     for (int i = 0; i < iterations; ++i) {
-        /*int before = decomposition->GetMyParticles().size();
-        int sumBefore;
-        MPI_Reduce(&before, &sumBefore, 1, MPI_INT, MPI_SUM, 0, topology->GetComm());
-        if (topology->GetWorldRank() == 0) {
-            std::cout << "sum before: " << sumBefore << std::endl;
-        }*/
 
 #ifdef MEASURESIMSTEP_3BMDA
         std::chrono::time_point<std::chrono::system_clock> start;
@@ -71,7 +65,7 @@ void Simulation::Start()
                 }
             }
             allTimesStr.append("]");
-            std::string json = "{\"allTimes\": " + allTimesStr + ", \"avg\": " + std::to_string(max) + "}";
+            std::string json = "{\"allTimes\": " + allTimesStr + ", \"max\": " + std::to_string(max) + "}";
             std::cout << json << std::endl;
         }
 
@@ -83,16 +77,6 @@ void Simulation::Start()
                                      std::to_string(i) + ".csv");
         }
 #endif
-
-        /*if (topology->GetWorldRank() == 0) {
-            std::cout << "sim step end" << std::endl;
-        }*/
-
-        /*if (topology->GetWorldRank() == 0) {
-            for (Utility::Particle& p : decomposition->GetMyParticles()) {
-                std::cout << p.toString() << std::endl;
-            }
-        }*/
     }
 }
 
@@ -123,12 +107,6 @@ void Simulation::writeSimulationStepToCSV(std::string file)
     int numOfMyParticles = decomposition->GetNumOfMyParticles();
     MPI_Gather(&numOfMyParticles, 1, MPI_INT, numParticlesPerProcessor.data(), 1, MPI_INT, 0, topology->GetComm());
 
-    /*if (topology->GetWorldRank() == 0) {
-        std::cout << "numParticlesPerProcessor" << std::endl;
-        for (int& np : numParticlesPerProcessor) {
-            std::cout << np << std::endl;
-        }
-    }*/
 
     std::vector<int> displacements;
     int sumDispl = 0;
@@ -136,13 +114,6 @@ void Simulation::writeSimulationStepToCSV(std::string file)
         displacements.push_back(sumDispl);
         sumDispl += numParticlesPerProcessor[i];
     }
-
-    /*if (topology->GetWorldRank() == 0) {
-        std::cout << "displacements" << std::endl;
-        for (int& displ : displacements) {
-            std::cout << displ << std::endl;
-        }
-    }*/
 
     if (topology->GetWorldRank() == 0) {
         receivedParticlesForCSVOutput.resize(sumDispl);
@@ -153,18 +124,10 @@ void Simulation::writeSimulationStepToCSV(std::string file)
     MPI_Gatherv(particlesToSend.data(), particlesToSend.size(), *mpiParticleType, receivedParticlesForCSVOutput.data(),
                 numParticlesPerProcessor.data(), displacements.data(), *mpiParticleType, 0, topology->GetComm());
 
-    /*if (topology->GetWorldRank() == 0) {
-        std::cout << "particles" << std::endl;
-        for (Utility::Particle& p : receivedParticlesForCSVOutput) {
-            std::cout << p.toString() << std::endl;
-        }
-    }*/
-
     std::sort(receivedParticlesForCSVOutput.begin(), receivedParticlesForCSVOutput.end(),
               [](Utility::Particle a, Utility::Particle b) { return a.ID < b.ID; });
 
     if (topology->GetWorldRank() == 0) {
-        // Utility::writeStepToCSV(file, receivedParticlesForCSVOutput);
         Utility::writeStepToCSVWithForces(file, receivedParticlesForCSVOutput);
     }
 }

@@ -20,24 +20,9 @@ public:
 
 class CartTopology final : public Topology {
 protected:
-    // int dims[3];
-    // int periods[3] = {1, 1, 1};
     int dimX, dimY, dimZ;
     CartRank cartRank;
     std::vector<int> decomposition;
-
-    // TODO: finish this functions
-    std::vector<int> primeFactors(int n);
-    std::vector<std::vector<int>> partitions(std::vector<int> lst);
-    double blfSlope(std::vector<int> values);
-    void createPossibleDecompositions(int n);
-    std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>, std::vector<std::vector<int>>>
-    avoidTwoInDims(
-        std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>, std::vector<std::vector<int>>>
-            decompositions);
-    std::vector<int> pickBestDecomposition(
-        std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>, std::vector<std::vector<int>>>
-            decompositions);
 
 public:
     CartTopology(std::vector<int> decomposition);

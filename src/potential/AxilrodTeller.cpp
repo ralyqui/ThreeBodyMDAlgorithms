@@ -64,7 +64,7 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
 
     double dVdRa, dVdRb, dVdRc;
 
-    // this is the gradient of the axilrodteller potential... unmagic this lord vector :D
+    // this is the gradient of the axilrodteller potential
     dVdRa = (3. * this->v / (8. * d1a)) *
             (-8. / (d4a * d3b * d3c) - 1. / (d5b * d5c) + 5. * d1b / (d6a * d5c) + 5. * d1c / (d6a * d5b) -
              1. / (d2a * d3b * d5c) - 1. / (d2a * d5b * d3c) - 3. / (d4a * d1b * d5c) - 3. / (d4a * d5b * d1c) -

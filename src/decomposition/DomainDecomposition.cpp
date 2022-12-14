@@ -16,12 +16,6 @@ void DomainDecomposition::updateMyParticles(double dt, Eigen::Vector3d gForce)
             myParticles[i].Update(dt, gForce);
         }
     }
-
-    /*if (simulation->GetTopology()->GetWorldRank() == 0) {
-        for (size_t i = 0; i < myParticles.size(); i++) {
-            std::cout << myParticles[i].toString() << std::endl;
-        }
-    }*/
 }
 
 void DomainDecomposition::updateMyParticlesPredictorStage(double dt)

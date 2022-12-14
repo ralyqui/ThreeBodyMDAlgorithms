@@ -1,3 +1,6 @@
+# Overview
+In this project, three algorithms for computing three-body interactions for molecular dynamics simulations are implemented. All algorithms are based on those of P. Koanantakool and K. Yelick [1]. The forces between particle triplets are computed using the Axilrod-Teller potential, and our implementation of this potential is based on that of G. Marcelli [2].
+
 # Cloning the project
 Please use the git parameter ```--recurse-submodules``` when cloning the project, so all submodules are loaded.
 
@@ -35,8 +38,8 @@ Execute `make` in the build directory after executing the above command. The mai
   - In this example, 27 processes are launched, which calculate one simulation step using the p3bca algorithm in a 3x3x3 regular grid decomposition with a cutoff radius of c=2. The particles are stored in out.csv after the simulation.
 
 ## Simple measurement of one Simulation Step
-- Pass the following parameter to CMake: ```cmake .. -MEASURESIMSTEP_3BMDA=ON```
-- The main program can be executed as in the upper step. As output, the times of all processors, as well as the average time over all processors are printed on the console in a JSON format.
+- Pass the following parameter to CMake: ```cmake .. -DMEASURESIMSTEP_3BMDA=ON```
+- The main program can be executed as in the upper step. As output, the times of all processors, as well as the maximum time over all processors are printed on the console in a JSON format (in nanoseconds).
 
 ## Particle Generator
 The following particle distributions can be generated:
@@ -98,3 +101,16 @@ The following parameters are available for cmake:
   - Usage: ```cmake .. -DVLEVEL=1 && make```
 
 All default values are either `OFF`, or `-1` if a parameter is not specified.
+
+# External Tools
+The following external tools are used for this project:
+- [Google Benchmark](https://github.com/google/benchmark)
+- [Google Test](https://github.com/google/googletest)
+- [RapidCSV](https://github.com/d99kris/rapidcsv)
+- [RapidJSON](https://rapidjson.org/)
+- [RapidYAML](https://github.com/biojppm/rapidyaml)
+- [Vectorclass](https://github.com/vectorclass/version2)
+
+# References
+- [1]: P. Koanantakool and K. Yelick, "A Computation- and Communication-Optimal Parallel Direct 3-Body Algorithm," SC '14: Proceedings of the International Conference for High Performance Computing, Networking, Storage and Analysis, 2014, pp. 363-374, doi: 10.1109/SC.2014.35.
+- [2]: Marcelli, Gianluca. The role of three-body interactions on the equilibrium and non-equilibrium properties of fluids from molecular simulation. University of Kent (United Kingdom), 2001.

@@ -13,8 +13,6 @@ void RegularGridDecomposition::Init(std::shared_ptr<Simulation> simulation)
 
     this->numDims = this->cartRank.GetDimensions();
 
-    // int worldSize = this->simulation->GetTopology()->GetWorldSize();
-
     std::array<int, 3> dims = cartTopology->GetDims();
 
     std::array<int, 3UL> rank = this->cartRank.GetRank();
@@ -23,40 +21,19 @@ void RegularGridDecomposition::Init(std::shared_ptr<Simulation> simulation)
     this->dimY = dims[1];
     this->dimZ = dims[2];
 
-    // calculate the num of processors along each dimension
-    // this->dimX = std::cbrt(worldSize);
-
     std::tuple<Eigen::Array3d, Eigen::Array3d> domainMinMax = getDomainMinMax(this->simulation->GetAllParticles());
-
-    /*if (simulation->GetTopology()->GetWorldRank() == 0) {
-        std::cout << "domain min: (" << std::get<0>(domainMinMax)[0] << ", " << std::get<0>(domainMinMax)[1] << ", "
-                  << std::get<0>(domainMinMax)[2] << "), domain max: (" << std::get<1>(domainMinMax)[0] << ", "
-                  << std::get<1>(domainMinMax)[1] << ", " << std::get<1>(domainMinMax)[2] << ")" << std::endl;
-    }*/
 
     Eigen::Array3d diff = (std::get<1>(domainMinMax) - std::get<0>(domainMinMax)).abs();
 
     this->physicalDomainSize = diff;
 
-    // Eigen::Array3d physicalDomainCenter((std::get<1>(domainMinMax).x() + std::get<0>(domainMinMax).x()) / 2.0,
-    //                                    (std::get<1>(domainMinMax).y() + std::get<0>(domainMinMax).y()) / 2.0,
-    //                                    (std::get<1>(domainMinMax).z() + std::get<0>(domainMinMax).z()) / 2.0);
-
     Eigen::Array3d domainMin = std::get<0>(domainMinMax);
-    // Eigen::Array3d domainMax(physicalDomainCenter + (physicalDomainSize / 2.0));
-
     this->localCellWidth = diff / Eigen::Array3d((double)dimX, (double)dimY, (double)dimZ);
 
     Eigen::Array3d cartRankE(rank[0], rank[1], rank[2]);
 
     this->localCellMin = domainMin + (cartRankE * localCellWidth);
     this->localCellMax = localCellMin + localCellWidth;
-
-    // std::cout << "(" << domainMin[0] << ", " << domainMin[1] << ", " << domainMin[2] << ")" << std::endl;
-    // std::cout << "(" << localCellMin[0] << ", " << localCellMin[1] << ", " << localCellMin[2] << ")" << std::endl;
-    // std::cout << "(" << localCellMax[0] << ", " << localCellMax[1] << ", " << localCellMax[2] << ")" << std::endl;
-    // std::cout << "(" << localCellWidth[0] << ", " << localCellWidth[1] << ", " << localCellWidth[2] << ")" <<
-    // std::endl;
 
     binParticles(this->simulation->GetAllParticles());
 }
@@ -97,13 +74,6 @@ void RegularGridDecomposition::exchangeParticlesDim(int dim)
             ++it;
         }
     }
-
-    /*if (this->cartTopology->GetWorldRank() == 0) {
-        std::cout << sendToLeftNeighbor.size() << std::endl;
-        std::cout << sendToRightNeighbor.size() << std::endl;
-        std::cout << recvFromLeftNeighbor.size() << std::endl;
-        std::cout << recvFromRightNeighbor.size() << std::endl;
-    }*/
 
     // send to left and right neighbors
     int leftNeighbor = cartTopology->GetLeftNeighbor(dim);

@@ -24,10 +24,6 @@ private:
 
     void writeSimulationStepToCSV(std::string file);
 
-#ifdef PROFILE_3BMDA
-    // void calcOverallHitrate(int step, double hitrate);
-#endif
-
 public:
     Simulation(int iterations, std::shared_ptr<Algorithm> algorithm, std::shared_ptr<Topology> topology,
                std::shared_ptr<Potential> potential, std::shared_ptr<DomainDecomposition> decomposition,

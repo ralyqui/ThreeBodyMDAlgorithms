@@ -41,7 +41,6 @@ namespace Utility
         std::ofstream csvFile;
         csvFile.open(file);
         csvFile << "ID, pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m\n";
-        // std::cout << particles.size();
         for (size_t i = 0; i < particles.size(); i++) {
             if (particles[i].isDummy) continue;
             csvFile << particles[i].ID << ", " << particles[i].pX << ", " << particles[i].pY << ", " << particles[i].pZ
@@ -57,7 +56,6 @@ namespace Utility
         std::ofstream csvFile;
         csvFile.open(file);
         csvFile << "ID, pX, pY, pZ, vX, vY, vZ, aX, aY, aZ, m, fX, fY, fZ\n";
-        // std::cout << particles.size();
         for (size_t i = 0; i < particles.size(); i++) {
             if (particles[i].isDummy) continue;
             csvFile << particles[i].ID << ", " << particles[i].pX << ", " << particles[i].pY << ", " << particles[i].pZ
@@ -107,52 +105,5 @@ namespace Utility
         }
         return result;
     }
-    /*
-        std::tuple<std::vector<std::pair<int, std::vector<int>>>, std::vector<std::pair<int, std::vector<int>>>>
-        jsonToDecompositionArray(const char *filename, std::string type)
-        {
-            // std::string json = get_file_contents(filename);
-            const char *json = get_file_contents(filename).c_str();
-
-            rapidjson::Document document;
-            document.Parse(json);
-
-            // rapidjson::StringBuffer buffer;
-            // rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-            // document.Accept(writer);
-            // std::cout << buffer.GetString() << std::endl;
-
-            std::tuple<std::vector<std::pair<int, std::vector<int>>>, std::vector<std::pair<int, std::vector<int>>>>
-                decompositions;
-
-            const rapidjson::Value &optimal = document["optimal"];
-            const rapidjson::Value &naive = document["naive"];
-
-            decompositions = std::tuple(std::vector<std::pair<int, std::vector<int>>>(),
-                                        std::vector<std::pair<int, std::vector<int>>>());
-
-            for (rapidjson::Value::ConstMemberIterator it = optimal.MemberBegin(); it != optimal.MemberEnd(); ++it) {
-                std::pair<int, std::vector<int>> decomposition;
-                decomposition.second = std::vector<int>();
-                decomposition.first = std::stoi(it->name.GetString());
-                for (rapidjson::SizeType i = 0; i < it->value.Size(); i++) {
-                    decomposition.second.push_back(it->value[i].GetInt());
-                }
-                std::get<0>(decompositions).push_back(decomposition);
-            }
-
-            for (rapidjson::Value::ConstMemberIterator it = naive.MemberBegin(); it != naive.MemberEnd(); ++it) {
-                std::pair<int, std::vector<int>> decomposition;
-                decomposition.second = std::vector<int>();
-                decomposition.first = std::stoi(it->name.GetString());
-                for (rapidjson::SizeType i = 0; i < it->value.Size(); i++) {
-                    decomposition.second.push_back(it->value[i].GetInt());
-                }
-                std::get<1>(decompositions).push_back(decomposition);
-            }
-
-            return decompositions;
-        }
-    */
 
 }  // namespace Utility

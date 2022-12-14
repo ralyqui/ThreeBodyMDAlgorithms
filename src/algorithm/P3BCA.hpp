@@ -8,7 +8,6 @@ class P3BCA final : public Algorithm {
 private:
     double cutoff;
     int worldRank;
-    // int numCutoffBoxes;
     int numDims;
     int dimX;
     int dimY;

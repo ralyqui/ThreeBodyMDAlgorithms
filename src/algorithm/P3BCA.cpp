@@ -122,8 +122,6 @@ void P3BCA::calcDiff1D(int& cartRank, int& src, int& diff, int i)
     int oldSrc;
     int iOld = i - 1;
 
-    // int g_x_iOld = Utility::mod(iOld + cartRank, this->dimX);
-
     oldSrc = Utility::mod(iOld + cartRank, this->dimX);
 
     diff = oldSrc - src;
@@ -184,7 +182,6 @@ void P3BCA::schedule2DHelper(int i2, int& i3, std::array<int, 2>& cartRank, std:
 // a mapping from an int to a cartesian coordinate (int, int, int)
 void P3BCA::schedule3D(int i, std::array<int, 3>& myCartRank, std::array<int, 3>& src)
 {
-    // int cutoffLenX = 2 * this->nCbX + 1;
     int cutoffLenY = 2 * this->nCbY + 1;
     int cutoffLenZ = 2 * this->nCbZ + 1;
 
@@ -211,7 +208,6 @@ void P3BCA::calcDestFromSrc3D(std::array<int, 3>& myCartRank, std::array<int, 3>
 
 void P3BCA::calcDiff3D(std::array<int, 3>& cartRank, std::array<int, 3>& src, std::array<int, 3>& diff, int i)
 {
-    // int cutoffLenX = 2 * this->nCbX + 1;
     int cutoffLenY = 2 * this->nCbY + 1;
     int cutoffLenZ = 2 * this->nCbZ + 1;
 
@@ -283,12 +279,6 @@ void P3BCA::handleOffsetVector3D(std::array<int, 3>& nextSrcRank, std::array<int
                                  std::array<int, 3>& offsetVector, std::array<int, 3>& diff,
                                  std::array<int, 3>& coordsSrc, std::array<int, 3>& coordsDst)
 {
-    // int myCoords[3];
-    // int coordsOld[3];
-
-    // MPI_Cart_coords(this->cartTopology->GetComm(), this->worldRank, 3, myCoords);
-    // MPI_Cart_coords(this->cartTopology->GetComm(), owner, 3, coordsOld);
-
     coordsSrc[0] = Utility::mod(nextSrcRank[0] + offsetVector[0], this->dimX);
     coordsSrc[1] = Utility::mod(nextSrcRank[1] + offsetVector[1], this->dimY);
     coordsSrc[2] = Utility::mod(nextSrcRank[2] + offsetVector[2], this->dimZ);
@@ -307,12 +297,6 @@ void P3BCA::handleOffsetVector2D(std::array<int, 2>& nextSrcRank, std::array<int
                                  std::array<int, 2>& offsetVector, std::array<int, 2>& diff,
                                  std::array<int, 2>& coordsSrc, std::array<int, 2>& coordsDst)
 {
-    // int myCoords[2];
-    // int coordsOld[2];
-
-    // MPI_Cart_coords(this->cartTopology->GetComm(), this->worldRank, 2, myCoords);
-    // MPI_Cart_coords(this->cartTopology->GetComm(), owner, 2, coordsOld);
-
     coordsSrc[0] = Utility::mod(nextSrcRank[0] + offsetVector[0], this->dimX);
     coordsSrc[1] = Utility::mod(nextSrcRank[1] + offsetVector[1], this->dimY);
 
@@ -327,16 +311,8 @@ void P3BCA::handleOffsetVector2D(std::array<int, 2>& nextSrcRank, std::array<int
 void P3BCA::handleOffsetVector1D(int& nextSrcRank, int& nextDstRank, int& offsetVector, int& diff, int& coordsSrc,
                                  int& coordsDst)
 {
-    // int myCoords;
-    // int coordsOld;
-
-    // MPI_Cart_coords(this->cartTopology->GetComm(), this->worldRank, 1, &myCoords);
-    // MPI_Cart_coords(this->cartTopology->GetComm(), owner, 1, &coordsOld);
-
     coordsSrc = Utility::mod(nextSrcRank + offsetVector, this->dimX);
     coordsDst = Utility::mod(nextDstRank + (-offsetVector), this->dimX);
-    // std::cout << "myRank: " << worldRank << ", coordsDst: " << coordsDst << ", offset: " << offsetVector <<
-    // std::endl;
 
     // adjust the offset vector for the next iteration
     offsetVector += diff;
@@ -354,11 +330,6 @@ int P3BCA::shiftLeft(std::vector<Utility::Particle>& buf, int owner, int& nextSr
     int dest;
     MPI_Cart_rank(this->cartTopology->GetComm(), &coordsSrc, &src);
     MPI_Cart_rank(this->cartTopology->GetComm(), &coordsDst, &dest);
-
-    // if (this->worldRank == 0) {
-    // std::cout << "myRank: " << this->worldRank << ", shift buffer from " << owner << " to " << dest
-    //          << ", and import from " << src << std::endl;
-    //}
 
     return mpiShift(buf, owner, src, dest);
 }
@@ -402,11 +373,6 @@ int P3BCA::mpiShift(std::vector<Utility::Particle>& buf, int owner, int src, int
     std::chrono::time_point<std::chrono::system_clock> end;
     start = std::chrono::system_clock::now();
 #endif
-
-    /*if (this->worldRank == 4) {
-        std::cout << "myRank: " << this->worldRank << ", shift buffer from " << owner << " to " << dst
-                  << ", and import from " << src << std::endl;
-    }*/
 
     this->tmpRecv.clear();
 
@@ -643,17 +609,6 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
     // edge case: #proc is 2
     for (int i2 = 0; i2 < (cartTopology->GetWorldSize() == 2 ? 1 : this->numSteps); i2++) {
         for (int i3 = i2; i3 < this->numSteps; i3++) {
-            /*if (myCoords[0] == 0 && myCoords[1] == 0 && myCoords[2] == 0) {
-                int b1Coords2[3];
-                int b2Coords2[3];
-
-                MPI_Cart_coords(this->cartTopology->GetComm(), this->b1Owner, 3, b1Coords2);
-                MPI_Cart_coords(this->cartTopology->GetComm(), this->b2Owner, 3, b2Coords2);
-                std::cout << "my coords (" << myCoords[0] << ", " << myCoords[1] << ", " << myCoords[2]
-                          << "), b1: (" << b1Coords2[0] << ", " << b1Coords2[1] << ", " << b1Coords2[2] << "), b2: "
-                          << "(" << b2Coords2[0] << ", " << b2Coords2[1] << ", " << b2Coords2[2] << ")" << std::endl;
-            }*/
-            // if (cartTopology->GetWorldSize() == 2 && i2 < 1)
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
             std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
@@ -671,7 +626,6 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
             numBufferInteractions++;
 
 #ifdef TESTS_3BMDA
-            // TESTS_3BMDA is defined
             processed.push_back(Utility::Triplet(this->worldRank, this->b1Owner, this->b2Owner));
 #endif
 
@@ -679,8 +633,6 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
             // only accumulate if there are possible particle interactions to avoid div by 0
             if (std::get<1>(numParticleInteractions) > 0) {
                 this->hitrate += (double)std::get<0>(numParticleInteractions);
-                // hitRateDivider++;
-
                 hitRateDivider += std::get<1>(numParticleInteractions);
             }
 #endif
@@ -718,28 +670,12 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                         getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner2D, nextDstRankInner2D,
                                                    offsetVectorInner2D, diffInner2D);
                     } else {
-                        /*if (this->worldRank == 4) {
-                            std::cout << i3 << std::endl;
-                            std::cout << "my rank: " << this->worldRank
-                                      << " before shiftLeft b2 in 1D schedule: nextSrcRankInner1D = "
-                                      << nextSrcRankInner1D << ", nextDstRankInner1D = " << nextDstRankInner1D
-                                      << ", offsetVectorInner1D = " << offsetVectorInner1D << std::endl;
-                        }*/
                         getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner1D, nextDstRankInner1D,
                                                    offsetVectorInner1D, diffInner1D);
-
-                        // getBufOwner(2) = mpiShift(this->b2, getBufOwner(2), Utility::mod(worldRank + 1, this->dimX),
-                        //                          Utility::mod(worldRank - 1, this->dimX));
-                        /*if (this->worldRank == 0) {
-                            std::cout << this->worldRank << " after shiftLeft b2 in 1D schedule"
-                                      << "offsetVectorInner1D = " << offsetVectorInner1D << ", i3= " << i3 << std::endl;
-                        }*/
                     }
                 }
             }
         }
-
-        // std::cout << this->worldRank << " after inner loop" << std::endl;
 
         // only shift if not the last step
         if (i2 < ((cartTopology->GetWorldSize() == 2 ? 1 : this->numSteps) - 1)) {
@@ -821,11 +757,6 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 calcDestFromSrc1D(myCoords1D, nextSrcRankInner1D, nextDstRankInner1D);
                 calcDiff1D(myCoords1D, nextSrcRankInner1D, diffInner1D, i2 + 1);
 
-                /*if (this->worldRank == 0) {
-                    std::cout << "before shiftLeft b1 in 1D schedule: nextSrcRankOuter1D = " << nextSrcRankOuter1D
-                              << ", nextDstRankOuter1D = " << nextDstRankOuter1D << ", i2 = " << i2 << std::endl;
-                }*/
-
 #ifdef PROFILE_3BMDA
                 // this prevents double time measurements
                 std::chrono::time_point<std::chrono::system_clock> start;
@@ -849,18 +780,8 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
                 getBufOwner(2) = shiftLeft(this->b2, getBufOwner(2), nextSrcRankInner1D, nextDstRankInner1D,
                                            offsetVectorInner1D, diffInner1D);
 
-                // getBufOwner(1) = mpiShift(this->b1, getBufOwner(1), Utility::mod(worldRank + 1, this->dimX),
-                //                          Utility::mod(worldRank - 1, this->dimX));
                 offsetVectorInner1D = offsetVectorOuter1D;
-
-                /*if (this->worldRank == 0) {
-                    std::cout << "after shiftLeft b1 in 1D schedule" << std::endl;
-                }*/
             }
-
-            // copy b1 to b2 -> optimized schedule
-            // b2 = b1;
-            // this->b2Owner = this->b1Owner;
         }
     }
 
@@ -870,7 +791,6 @@ std::tuple<uint64_t, uint64_t> P3BCA::SimulationStep()
     if (hitRateDivider > 0) {
         this->hitrate /= (double)hitRateDivider;
         this->hitrates.push_back(this->hitrate);
-        // this->hitrates.push_back((double)numParticleInteractionsAcc / (double)hitRateDivider);
     }
 
 #endif
