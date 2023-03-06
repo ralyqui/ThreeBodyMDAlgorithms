@@ -4,3 +4,6 @@
 
 # no VS Code stuff
 **/.vscode/
+
+.idea
+cmake-build-debug

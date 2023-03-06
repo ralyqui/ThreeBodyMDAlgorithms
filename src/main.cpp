@@ -4,7 +4,9 @@
 #include <string>
 #include <vector>
 
+#include "C01.hpp"
 #include "MPIReporter.hpp"
+#include "SharedGridDecomposition.hpp"
 #include "algorithm/AUTA.hpp"
 #include "algorithm/NATA.hpp"
 #include "algorithm/P3BCA.hpp"
@@ -28,6 +30,14 @@
 Utility::cliArguments a;
 std::vector<Utility::Particle> particles;
 MPI_Datatype mpiParticleType;
+
+std::shared_ptr<Simulation> createC01Context(std:: string csvOut) {
+    std::shared_ptr<SharedGridDecomposition> gridDecomposition = std::make_shared<SharedGridDecomposition>();
+
+    std::shared_ptr<AxilrodTeller> potential = std::make_shared<AxilrodTeller>(1.0);
+
+    std::shared_ptr<C01> c01 = std::make_shared<C01>(a.cutoff);
+}
 
 std::shared_ptr<Simulation> createNATAContext(std::string csvOut)
 {
