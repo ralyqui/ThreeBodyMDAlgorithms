@@ -1,0 +1,220 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "src",
+					"childIndexes" : 
+					[
+						2,
+						3,
+						4
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-src-Debug-b6cf2213fc5053b67c22.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "src/utility",
+					"jsonFile" : "directory-src.utility-Debug-77569dd1d53133694646.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "src/utility"
+				},
+				{
+					"build" : "src/tools",
+					"jsonFile" : "directory-src.tools-Debug-45cf6c62ebae9991927b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 0,
+					"source" : "src/tools",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "src/external/rapidyaml",
+					"childIndexes" : 
+					[
+						5
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-src.external.rapidyaml-Debug-eb11616eae28da7f4e0b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "src/external/rapidyaml",
+					"targetIndexes" : 
+					[
+						4,
+						5
+					]
+				},
+				{
+					"build" : "src/external/rapidyaml/subprojects/c4core/build",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-src.external.rapidyaml.subprojects.c4core.build-Debug-bcd53406d5f9400ed1e8.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 4,
+					"projectIndex" : 2,
+					"source" : "src/external/rapidyaml/ext/c4core",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					],
+					"name" : "3BMDA",
+					"targetIndexes" : 
+					[
+						2,
+						3
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						4
+					],
+					"name" : "ryml",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						4,
+						5
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						5
+					],
+					"name" : "c4core",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 5,
+					"id" : "c4core::@bbd8f45b2c56808b05e5",
+					"jsonFile" : "target-c4core-Debug-696a73f983ce12f86d34.json",
+					"name" : "c4core",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "c4core-amalgamate::@bbd8f45b2c56808b05e5",
+					"jsonFile" : "target-c4core-amalgamate-Debug-feb7d45543174eaab2ed.json",
+					"name" : "c4core-amalgamate",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "main::@145eef247bfb46b6828c",
+					"jsonFile" : "target-main-Debug-f9900d739ee1a50950f8.json",
+					"name" : "main",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "particlegenerator::@de05559f4338c8534979",
+					"jsonFile" : "target-particlegenerator-Debug-795a6413176c239439d9.json",
+					"name" : "particlegenerator",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "ryml::@18d809c841312e3e7058",
+					"jsonFile" : "target-ryml-Debug-9da7f86d1dad871e7f85.json",
+					"name" : "ryml",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "ryml-uninstall::@18d809c841312e3e7058",
+					"jsonFile" : "target-ryml-uninstall-Debug-81f38ccb98ca2dd24a7e.json",
+					"name" : "ryml-uninstall",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+		"source" : "/home/dev/Documents/ThreeBodyMDAlgorithms"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

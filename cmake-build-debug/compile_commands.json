@@ -1,0 +1,247 @@
+[
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/main.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/main.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/main.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/topology/Topology.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/topology/Topology.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology/Topology.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/topology/RingTopology.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/topology/RingTopology.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology/RingTopology.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/topology/CartTopology.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/topology/CartTopology.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology/CartTopology.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/decomposition/AtomDecomposition.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition/AtomDecomposition.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition/AtomDecomposition.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/decomposition/RegularGridDecomposition.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition/RegularGridDecomposition.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition/RegularGridDecomposition.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/decomposition/DomainDecomposition.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition/DomainDecomposition.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition/DomainDecomposition.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/linked-cells/LinkedCell.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/linked-cells/LinkedCell.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/linked-cells/LinkedCell.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/linked-cells/CellGrid.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/linked-cells/CellGrid.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/linked-cells/CellGrid.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/algorithm/Algorithm.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/Algorithm.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/Algorithm.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/algorithm/NATA.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/NATA.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/NATA.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/algorithm/AUTA.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/AUTA.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/AUTA.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/algorithm/P3BCA.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/P3BCA.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/P3BCA.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/algorithm/C01.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/C01.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/C01.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/algorithm/C18.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/C18.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm/C18.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/utility/utility.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/utility/utility.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility/utility.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/potential/AxilrodTeller.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/potential/AxilrodTeller.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential/AxilrodTeller.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/potential/Potential.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/potential/Potential.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential/Potential.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/simulation/Simulation.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation/Simulation.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation/Simulation.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/simulation/SimulationShared.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation/SimulationShared.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation/SimulationShared.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/utility -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/algorithm -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/decomposition -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/topology -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/potential -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/simulation -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidjson/include -isystem /usr/local/include/eigen3  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -fopenmp -std=gnu++20 -o src/CMakeFiles/main.dir/MPIReporter.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/MPIReporter.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/MPIReporter.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=gnu++20 -o src/tools/CMakeFiles/particlegenerator.dir/particleToCSV.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/particleToCSV.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/particleToCSV.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=gnu++20 -o src/tools/CMakeFiles/particlegenerator.dir/ParticleGenerator.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/ParticleGenerator.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/ParticleGenerator.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=gnu++20 -o src/tools/CMakeFiles/particlegenerator.dir/ClusteredGaussGenerator.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/ClusteredGaussGenerator.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/ClusteredGaussGenerator.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=gnu++20 -o src/tools/CMakeFiles/particlegenerator.dir/ClosestPackedGenerator.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/ClosestPackedGenerator.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/ClosestPackedGenerator.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=gnu++20 -o src/tools/CMakeFiles/particlegenerator.dir/GaussGenerator.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/GaussGenerator.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/GaussGenerator.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=gnu++20 -o src/tools/CMakeFiles/particlegenerator.dir/GridGenerator.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/GridGenerator.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/GridGenerator.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=gnu++20 -o src/tools/CMakeFiles/particlegenerator.dir/UniformGenerator.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/UniformGenerator.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/tools/UniformGenerator.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/src/c4/yml/common.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/common.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/common.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/src/c4/yml/node.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/node.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/node.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/src/c4/yml/parse.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/parse.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/parse.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/src/c4/yml/preprocess.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/preprocess.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/preprocess.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/src/c4/yml/tree.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/tree.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src/c4/yml/tree.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/ext/c4core/src/c4/base64.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/base64.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/base64.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/ext/c4core/src/c4/char_traits.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/char_traits.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/char_traits.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/ext/c4core/src/c4/error.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/error.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/error.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/ext/c4core/src/c4/format.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/format.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/format.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/ext/c4core/src/c4/language.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/language.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/language.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/ext/c4core/src/c4/memory_resource.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/memory_resource.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/memory_resource.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/ext/c4core/src/c4/memory_util.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/memory_util.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/memory_util.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/src -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/CMakeFiles/ryml.dir/ext/c4core/src/c4/utf.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/utf.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/utf.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/subprojects/c4core/build/CMakeFiles/c4core.dir/src/c4/base64.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/base64.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/base64.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/subprojects/c4core/build/CMakeFiles/c4core.dir/src/c4/char_traits.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/char_traits.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/char_traits.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/subprojects/c4core/build/CMakeFiles/c4core.dir/src/c4/error.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/error.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/error.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/subprojects/c4core/build/CMakeFiles/c4core.dir/src/c4/format.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/format.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/format.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/subprojects/c4core/build/CMakeFiles/c4core.dir/src/c4/language.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/language.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/language.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/subprojects/c4core/build/CMakeFiles/c4core.dir/src/c4/memory_resource.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/memory_resource.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/memory_resource.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/subprojects/c4core/build/CMakeFiles/c4core.dir/src/c4/memory_util.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/memory_util.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/memory_util.cpp"
+},
+{
+  "directory": "/home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug",
+  "command": "/opt/open-mpi/bin/mpicxx -DOPENMPAVAIL -I/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src  -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always -std=c++20 -o src/external/rapidyaml/subprojects/c4core/build/CMakeFiles/c4core.dir/src/c4/utf.cpp.o -c /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/utf.cpp",
+  "file": "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src/c4/utf.cpp"
+}
+]

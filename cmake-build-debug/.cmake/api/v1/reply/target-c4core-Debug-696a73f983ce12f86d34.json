@@ -1,0 +1,575 @@
+{
+	"archive" : {},
+	"artifacts" : 
+	[
+		{
+			"path" : "src/external/rapidyaml/subprojects/c4core/build/libc4core.a"
+		}
+	],
+	"backtrace" : 3,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"c4_add_target",
+			"c4_add_library",
+			"install",
+			"c4_install_target",
+			"add_compile_definitions",
+			"target_include_directories",
+			"target_compile_features",
+			"c4_target_inherit_cxx_standard",
+			"target_sources",
+			"c4_add_target_sources"
+		],
+		"files" : 
+		[
+			"src/external/rapidyaml/ext/c4core/cmake/c4Project.cmake",
+			"src/external/rapidyaml/ext/c4core/CMakeLists.txt",
+			"CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 1,
+				"line" : 88,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 1724,
+				"parent" : 1
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 1839,
+				"parent" : 2
+			},
+			{
+				"command" : 4,
+				"file" : 1,
+				"line" : 102,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 2333,
+				"parent" : 4
+			},
+			{
+				"file" : 2
+			},
+			{
+				"command" : 5,
+				"file" : 2,
+				"line" : 64,
+				"parent" : 6
+			},
+			{
+				"command" : 6,
+				"file" : 0,
+				"line" : 1893,
+				"parent" : 2
+			},
+			{
+				"command" : 8,
+				"file" : 0,
+				"line" : 1928,
+				"parent" : 2
+			},
+			{
+				"command" : 7,
+				"file" : 0,
+				"line" : 1282,
+				"parent" : 9
+			},
+			{
+				"command" : 10,
+				"file" : 0,
+				"line" : 1882,
+				"parent" : 2
+			},
+			{
+				"command" : 9,
+				"file" : 0,
+				"line" : 2212,
+				"parent" : 11
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : " -Wall -Wextra -fopenmp -g -pg -Og -fdiagnostics-color=always"
+				},
+				{
+					"fragment" : "-std=c++20"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 7,
+					"define" : "OPENMPAVAIL"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 8,
+					"path" : "/home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core/src"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					10
+				],
+				"standard" : "20"
+			},
+			"sourceIndexes" : 
+			[
+				2,
+				8,
+				17,
+				21,
+				24,
+				25,
+				27,
+				47
+			]
+		}
+	],
+	"folder" : 
+	{
+		"name" : "c4core"
+	},
+	"id" : "c4core::@bbd8f45b2c56808b05e5",
+	"install" : 
+	{
+		"destinations" : 
+		[
+			{
+				"backtrace" : 5,
+				"path" : "lib"
+			}
+		],
+		"prefix" : 
+		{
+			"path" : "/usr/local"
+		}
+	},
+	"name" : "c4core",
+	"nameOnDisk" : "libc4core.a",
+	"paths" : 
+	{
+		"build" : "src/external/rapidyaml/subprojects/c4core/build",
+		"source" : "src/external/rapidyaml/ext/c4core"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "c4",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24,
+				25,
+				26,
+				27,
+				28,
+				29,
+				30,
+				31,
+				32,
+				40,
+				41,
+				42,
+				43,
+				44,
+				45,
+				46,
+				47,
+				48,
+				49,
+				50,
+				51
+			]
+		},
+		{
+			"name" : "c4\\std",
+			"sourceIndexes" : 
+			[
+				33,
+				34,
+				35,
+				36,
+				37,
+				38,
+				39
+			]
+		},
+		{
+			"name" : "c4\\ext\\debugbreak",
+			"sourceIndexes" : 
+			[
+				52
+			]
+		},
+		{
+			"name" : "c4\\ext\\rng",
+			"sourceIndexes" : 
+			[
+				53
+			]
+		},
+		{
+			"name" : "c4\\ext\\sg14",
+			"sourceIndexes" : 
+			[
+				54
+			]
+		},
+		{
+			"name" : "c4\\ext",
+			"sourceIndexes" : 
+			[
+				55,
+				56
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/allocator.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/base64.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"compileGroupIndex" : 0,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/base64.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/blob.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/bitmask.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/charconv.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/c4_pop.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/c4_push.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"compileGroupIndex" : 0,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/char_traits.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/char_traits.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/common.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/compiler.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/config.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/cpu.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/ctor_dtor.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/dump.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/enum.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"compileGroupIndex" : 0,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/error.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/error.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/export.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/format.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"compileGroupIndex" : 0,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/format.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/hash.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/language.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"compileGroupIndex" : 0,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/language.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"compileGroupIndex" : 0,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/memory_resource.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/memory_resource.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"compileGroupIndex" : 0,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/memory_util.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/memory_util.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/platform.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/preprocessor.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/restrict.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/span.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/std/std.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/std/std_fwd.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/std/string.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/std/string_fwd.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/std/tuple.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/std/vector.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/std/vector_fwd.hpp",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/substr.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/substr_fwd.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/szconv.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/type_name.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/types.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/unrestrict.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/utf.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"compileGroupIndex" : 0,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/utf.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/windows.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/windows_pop.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/windows_push.hpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/c4core.natvis",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/ext/debugbreak/debugbreak.h",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/ext/rng/rng.hpp",
+			"sourceGroupIndex" : 3
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/ext/sg14/inplace_function.h",
+			"sourceGroupIndex" : 4
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/ext/fast_float.hpp",
+			"sourceGroupIndex" : 5
+		},
+		{
+			"backtrace" : 12,
+			"path" : "src/external/rapidyaml/ext/c4core/src/c4/ext/fast_float_all.h",
+			"sourceGroupIndex" : 5
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}

@@ -1,0 +1,10 @@
+/home/dev/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/223.8214.51/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/dev/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/223.8214.51/bin/ninja/linux/ninja -DCMAKE_C_COMPILER=/opt/open-mpi/bin/mpicc -DCMAKE_CXX_COMPILER=/opt/open-mpi/bin/mpicxx -G Ninja -S /home/dev/Documents/ThreeBodyMDAlgorithms -B /home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug
+-- GCC detected, adding compile flags
+-- OpenMP detected, adding compiler definition
+-- ryml: using C++ standard: C++20
+-- ryml: importing subproject c4core (SUBDIRECTORY)... /home/dev/Documents/ThreeBodyMDAlgorithms/src/external/rapidyaml/ext/c4core
+-- c4core: using C++ standard: C++20
+-- ryml: -----> target ryml PUBLIC incorporating lib c4core
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/dev/Documents/ThreeBodyMDAlgorithms/cmake-build-debug
