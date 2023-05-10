@@ -2,9 +2,9 @@
 
 #include <memory>
 
-//#ifdef PROFILE_3BMDA
+// #ifdef PROFILE_3BMDA
 #include <chrono>
-//#endif
+// #endif
 
 #include "../MPIReporter.hpp"
 #include "../decomposition/DomainDecomposition.hpp"
@@ -57,6 +57,7 @@ public:
     virtual ~Algorithm();
 
     virtual void Init(std::shared_ptr<Simulation> simulation);
+    virtual void Init(std::shared_ptr<Potential> potential);
     virtual std::tuple<uint64_t, uint64_t> SimulationStep() = 0;
 
     std::tuple<uint64_t, uint64_t> CalculateInteractions(std::vector<Utility::Particle> &b0,

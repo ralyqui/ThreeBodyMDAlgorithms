@@ -2,9 +2,8 @@
 
 Potential::Potential() {}
 Potential::~Potential() {}
-void Potential::Init(std::shared_ptr<Simulation> simulation)
+void Potential::Init()
 {
-    this->simulation = simulation;
 #ifdef PROFILE_3BMDA
     this->counter = 0;
     this->timeAcc = 0;

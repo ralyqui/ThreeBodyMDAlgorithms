@@ -21,8 +21,8 @@ protected:
 public:
     Potential();
     virtual ~Potential();
-    virtual void Init(std::shared_ptr<Simulation> simulation);
-    virtual void CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k) = 0;
+    virtual void Init();
+    virtual void CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k, bool N3L = true) = 0;
 
 #ifdef PROFILE_3BMDA
     std::map<std::string, std::pair<char, double>> GetAvgCalcTime();

@@ -45,14 +45,14 @@ private:
     int& getBufOwner(int i);
 
     // 1D
-    
+
     void schedule1D(int i, int& myCartRank, int& src);
     void calcDestFromSrc1D(int& myCartRank, int& src, int& dst);
     void schedule1DHelper(int i3, int& cartRank, int& src, int& dst, int& diff);
     void calcDiff1D(int& cartRank, int& src, int& diff, int i);
     void handleOffsetVector1D(int& nextSrcRank, int& nextDstRank, int& offsetVector, int& diff,
                               int& coordsSrc, int& coordsDst);
-    
+
 
     // 2D
     void schedule2D(int i, std::array<int, 2>& myCartRank, std::array<int, 2>& src);

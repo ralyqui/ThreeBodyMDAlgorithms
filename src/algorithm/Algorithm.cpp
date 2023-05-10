@@ -4,6 +4,7 @@ Algorithm::Algorithm() {}
 
 Algorithm::~Algorithm() {}
 
+void Algorithm::Init(std::shared_ptr<Potential> potential) { this->potential = potential; }
 void Algorithm::Init(std::shared_ptr<Simulation> simulation)
 {
     this->simulation = simulation;
@@ -65,10 +66,10 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
     uint64_t numActParticleInteractions = 0;
     uint64_t numPossibleParticleInteractions = 0;
     double sqrCutoff = cutoff * cutoff;
-    //#pragma omp parallel
+    // #pragma omp parallel
     //{
-    //    #pragma omp single
-    //    {
+    //     #pragma omp single
+    //     {
     for (size_t i = b0Start; i < (b0NumSteps != -1 ? (size_t)(b0Start + b0NumSteps) : b0.size()); ++i) {
         if (b0NumSteps != -1) std::cout << worldRank << ": " << i << std::endl;
         if (b0[i].isDummy) {
@@ -99,7 +100,7 @@ std::tuple<uint64_t, uint64_t> Algorithm::calculateInteractions(std::vector<Util
                     }
                 }
 
-                //#pragma omp task
+                // #pragma omp task
                 //{
 #ifdef PROFILE_3BMDA
                 std::chrono::time_point<std::chrono::system_clock> start1;

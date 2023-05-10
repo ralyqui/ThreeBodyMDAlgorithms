@@ -5,8 +5,9 @@
 #include <vector>
 
 #include "C01.hpp"
+#include "C18.hpp"
 #include "MPIReporter.hpp"
-#include "SharedGridDecomposition.hpp"
+#include "SimulationShared.hpp"
 #include "algorithm/AUTA.hpp"
 #include "algorithm/NATA.hpp"
 #include "algorithm/P3BCA.hpp"
@@ -31,12 +32,22 @@ Utility::cliArguments a;
 std::vector<Utility::Particle> particles;
 MPI_Datatype mpiParticleType;
 
-std::shared_ptr<Simulation> createC01Context(std:: string csvOut) {
-    std::shared_ptr<SharedGridDecomposition> gridDecomposition = std::make_shared<SharedGridDecomposition>();
-
+std::shared_ptr<SimulationShared> createC01Context(std::string csvOut)
+{
     std::shared_ptr<AxilrodTeller> potential = std::make_shared<AxilrodTeller>(1.0);
 
-    std::shared_ptr<C01> c01 = std::make_shared<C01>(a.cutoff);
+    std::shared_ptr<C01> c01 = std::make_shared<C01>(a.cutoff, particles, a.deltaT, a.gForce);
+
+    return std::make_shared<SimulationShared>(a.iterations, c01, potential, particles, a.deltaT, a.gForce, csvOut);
+}
+
+std::shared_ptr<SimulationShared> createC18Context(std::string csvOut)
+{
+    std::shared_ptr<AxilrodTeller> potential = std::make_shared<AxilrodTeller>(1.0);
+
+    std::shared_ptr<C18> c18 = std::make_shared<C18>(a.cutoff, particles, a.deltaT, a.gForce);
+
+    return std::make_shared<SimulationShared>(a.iterations, c18, potential, particles, a.deltaT, a.gForce, csvOut);
 }
 
 std::shared_ptr<Simulation> createNATAContext(std::string csvOut)
@@ -550,45 +561,56 @@ int main(int argc, char* argv[])
 
     // decompositions = Utility::jsonToDecompositionArray("decompositions.json", "optimal");
 
-    std::shared_ptr<Simulation> simulation;
+    if (a.algorithm == AlgorithmType::C01Type || a.algorithm == AlgorithmType::C18Type) {
+        //        printf("Algorithm C01 and C18 are not supported in this version of the code.\n");
+        std::shared_ptr<SimulationShared> simulation;
+        switch (a.algorithm) {
+            case AlgorithmType::C01Type: simulation = createC01Context(a.outputCSV); break;
+            case AlgorithmType::C18Type: simulation = createC18Context(a.outputCSV); break;
+        }
+        simulation->Init();
 
-    switch (a.algorithm) {
-        case AlgorithmType::NATAType: simulation = createNATAContext(a.outputCSV); break;
-        case AlgorithmType::P3BCAType:
-            simulation = createP3BCAContext(
-                a.outputCSV,
-                Utility::getDecomposition(worldSize, (a.optimalDecomposition ? decompositions : decompositionsNaive)));
-            break;
-        case AlgorithmType::AUTAType: simulation = createAUTAContext(a.outputCSV); break;
-        default: simulation = createNATAContext(a.outputCSV); break;
-    }
+        // execute simulation
+        simulation->Start();
+    } else {
+        std::shared_ptr<Simulation> simulation;
 
-    simulation->Init();
+        switch (a.algorithm) {
+            case AlgorithmType::NATAType: simulation = createNATAContext(a.outputCSV); break;
+            case AlgorithmType::P3BCAType:
+                simulation = createP3BCAContext(
+                    a.outputCSV, Utility::getDecomposition(
+                                     worldSize, (a.optimalDecomposition ? decompositions : decompositionsNaive)));
+                break;
+            case AlgorithmType::AUTAType: simulation = createAUTAContext(a.outputCSV); break;
+            default: simulation = createNATAContext(a.outputCSV); break;
+        }
 
-    // execute simulation
-    simulation->Start();
+        simulation->Init();
+
+        // execute simulation
+        simulation->Start();
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA) && VLEVEL > 0
 
-    std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) + " and have done " +
-                          std::to_string(simulation->GetNumParticleInteractions(0)) +
-                          " particle interactions actually, and " +
-                          std::to_string(simulation->GetNumBufferInteractions(0)) + " buffer interactions";
+        std::string message = "I'm proc " + std::to_string(simulation->GetTopology()->GetWorldRank()) +
+                              " and have done " + std::to_string(simulation->GetNumParticleInteractions(0)) +
+                              " particle interactions actually, and " +
+                              std::to_string(simulation->GetNumBufferInteractions(0)) + " buffer interactions";
 
-    MPIReporter::instance()->StoreMessage(simulation->GetTopology()->GetWorldRank(), message);
+        MPIReporter::instance()->StoreMessage(simulation->GetTopology()->GetWorldRank(), message);
 #endif
 
 #ifdef PROFILE_3BMDA
-    doTimingStuff(simulation, a.outputProfile);
+        doTimingStuff(simulation, a.outputProfile);
 #endif
 
 #if defined(VLEVEL) && !defined(BENCHMARK_3BMDA) && !defined(TESTS_3BMDA)
-    gatherAndPrintMessages();
+        gatherAndPrintMessages();
 #endif
-
+    }
     // finalize
     MPI_Type_free(&mpiParticleType);
     MPI_Finalize();
-
     return 0;
 }

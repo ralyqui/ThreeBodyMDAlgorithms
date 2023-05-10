@@ -81,6 +81,10 @@ namespace Utility
                             a.algorithm = AlgorithmType::P3BCAType;
                         } else if (value.compare("auta") == 0) {
                             a.algorithm = AlgorithmType::AUTAType;
+                        } else if (value.compare("c01") == 0) {
+                            a.algorithm = AlgorithmType::C01Type;
+                        } else if (value.compare("c18") == 0) {
+                            a.algorithm = AlgorithmType::C18Type;
                         } else {
                             a.printHelp();
                             exit(1);

@@ -1,1 +1,1 @@
-enum AlgorithmType { NATAType, P3BCAType, AUTAType };
+enum AlgorithmType { NATAType, P3BCAType, AUTAType, C01Type, C18Type };

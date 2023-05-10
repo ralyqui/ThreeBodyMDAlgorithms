@@ -15,7 +15,7 @@ void Simulation::Init()
     this->topology->Init(simulationPtr);
     this->decomposition->Init(simulationPtr);
     this->algorithm->Init(simulationPtr);
-    this->potential->Init(simulationPtr);
+    this->potential->Init();
 }
 
 Simulation::~Simulation() {}
@@ -28,7 +28,6 @@ std::shared_ptr<DomainDecomposition> Simulation::GetDecomposition() { return thi
 void Simulation::Start()
 {
     for (int i = 0; i < iterations; ++i) {
-
 #ifdef MEASURESIMSTEP_3BMDA
         std::chrono::time_point<std::chrono::system_clock> start;
         std::chrono::time_point<std::chrono::system_clock> end;
@@ -106,7 +105,6 @@ void Simulation::writeSimulationStepToCSV(std::string file)
     // elements from each process are gathered in order of their rank
     int numOfMyParticles = decomposition->GetNumOfMyParticles();
     MPI_Gather(&numOfMyParticles, 1, MPI_INT, numParticlesPerProcessor.data(), 1, MPI_INT, 0, topology->GetComm());
-
 
     std::vector<int> displacements;
     int sumDispl = 0;

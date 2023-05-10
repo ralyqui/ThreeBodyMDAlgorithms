@@ -9,6 +9,6 @@ private:
 public:
     AxilrodTeller(double v);
     virtual ~AxilrodTeller();
-    void CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k) override;
-    void Init(std::shared_ptr<Simulation> simulation) override;
+    void CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k, bool N3L = true) override;
+    void Init() override;
 };

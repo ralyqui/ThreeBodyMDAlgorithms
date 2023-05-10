@@ -4,7 +4,7 @@ AxilrodTeller::AxilrodTeller(double v) : v(v) {}
 
 AxilrodTeller::~AxilrodTeller() {}
 
-void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k)
+void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, Utility::Particle &k, bool N3L)
 {
     /*
     #ifdef PROFILE_3BMDA
@@ -101,32 +101,36 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
 #pragma omp atomic
         i.fZ -= newIfZContrib;
 
+        if (N3L) {
 #pragma omp atomic
-        j.fX -= newJfXContrib;
+            j.fX -= newJfXContrib;
 #pragma omp atomic
-        j.fY -= newJfYContrib;
+            j.fY -= newJfYContrib;
 #pragma omp atomic
-        j.fZ -= newJfZContrib;
+            j.fZ -= newJfZContrib;
 
 #pragma omp atomic
-        k.fX -= newKfXContrib;
+            k.fX -= newKfXContrib;
 #pragma omp atomic
-        k.fY -= newKfYContrib;
+            k.fY -= newKfYContrib;
 #pragma omp atomic
-        k.fZ -= newKfZContrib;
+            k.fZ -= newKfZContrib;
+        }
     }
 #else
     i.fX -= newIfXContrib;
     i.fY -= newIfYContrib;
     i.fZ -= newIfZContrib;
 
-    j.fX -= newJfXContrib;
-    j.fY -= newJfYContrib;
-    j.fZ -= newJfZContrib;
+    if (N3L) {
+        j.fX -= newJfXContrib;
+        j.fY -= newJfYContrib;
+        j.fZ -= newJfZContrib;
 
-    k.fX -= newKfXContrib;
-    k.fY -= newKfYContrib;
-    k.fZ -= newKfZContrib;
+        k.fX -= newKfXContrib;
+        k.fY -= newKfYContrib;
+        k.fZ -= newKfZContrib;
+    }
 #endif
     /*
     #ifdef PROFILE_3BMDA
@@ -148,4 +152,4 @@ void AxilrodTeller::CalculateForces(Utility::Particle &i, Utility::Particle &j, 
     */
 }
 
-void AxilrodTeller::Init(std::shared_ptr<Simulation> simulation) { Potential::Init(simulation); }
+void AxilrodTeller::Init() {}
