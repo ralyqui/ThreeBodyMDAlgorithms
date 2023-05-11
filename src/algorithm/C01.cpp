@@ -6,24 +6,29 @@
 
 #include "C01.hpp"
 
+#include <thread>
+
 #include "omp.h"
+
+const int MAX_THREADS = 1;
 
 C01::~C01(){};
 
-std::vector<std::shared_ptr<LinkedCell>> C01::getNeighbors(int x, int y, int z)
+std::vector<std::shared_ptr<LinkedCell>> getNeighbors(std::shared_ptr<Grid> grid, int x, int y, int z)
 {
     std::vector<std::shared_ptr<LinkedCell>> neighbors;
     // Add all neighboring cells to the vector
-    for (int j = -1; z <= 1; z++) {
+    for (int j = -1; j <= 1; j++) {
         for (int i = -1; i <= 1; i++) {
             for (int k = -1; k <= 1; k++) {
-                if ((z == 0 && i == 0 && k == 0) || x + i < 0 || x + i >= grid->getWidth() || y + k < 0 ||
-                    y + k >= grid->getHeight() || z + j < 0 || z + j >= grid->getDepth()) {
+                if ((j == 0 && i == 0 && k == 0) || x + i < 0 || x + i >= grid->getWidth() || y + j < 0 ||
+                    y + j >= grid->getHeight() || z + k < 0 || z + k >= grid->getDepth()) {
                     continue;
                 }
-                neighbors.push_back(grid->getCell(x + i, y + k, z + j));
-                if (grid->getCell(x + i, y + k, z + j) == nullptr) {
-                    std::cout << "Cell is null:" << x + i << " " << y + k << " " << z + j << std::endl;
+                auto cell = grid->getCell(x + i, y + j, z + k);
+                neighbors.push_back(cell);
+                if (cell == nullptr) {
+                    std::cout << "Cell is null:" << x + i << " " << y + j << " " << z + k << std::endl;
                 }
             }
         }
@@ -42,29 +47,28 @@ std::vector<std::shared_ptr<Particle>> funnelParticles(std::vector<std::shared_p
     return particles;
 }
 
-std::tuple<uint64_t, uint64_t> C01::SimulationStep()
+void simulateStepThreaded(std::shared_ptr<Grid> grid, double cutoff, double dt, Eigen::Vector3d gForce,
+                          std::shared_ptr<Potential> potential, int start, int end)
 {
-    auto start = std::chrono::steady_clock::now();
-    uint64_t numInteractions = 0;
-    uint64_t numParticles = 0;
+    printf("Thread %d started with params %d and %d\n", std::this_thread::get_id(), start, end);
+    auto startt = std::chrono::steady_clock::now();
     Eigen::Array3d domainSize = grid->getDomainSize();
     int width = grid->getWidth();
     int height = grid->getHeight();
     int depth = grid->getDepth();
-    printf("Num of CPU: %d\n", omp_get_num_procs());
-#pragma omp parallel for num_threads(6) collapse(3)
-    for (int i = 0; i < depth; i++) {
+    for (int i = start; i < std::min(end, depth); i++) {
         for (int j = 0; j < height; j++) {
             for (int k = 0; k < width; k++) {
-                int tid = omp_get_thread_num();
-                printf("Hello world from omp thread %d\n", tid);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                //                printf("Processing cell %d %d %d at thread %d\n", k, j, i,
+                //                std::this_thread::get_id());
                 auto cell = grid->getCell(k, j, i);
                 auto particles = cell->getParticles();
-                auto neighbors = getNeighbors(k, j, i);
+                auto neighbors = getNeighbors(grid, k, j, i);
                 auto neighboringParticles = funnelParticles(neighbors);
                 for (auto particle : particles) {
                     particle->ResetForce();
-                    particle->Update(this->dt, this->gForce);
+                    particle->Update(dt, gForce);
                     for (auto p1 : neighboringParticles) {
                         if (p1->GetSqrDistPeriodic(*particle, domainSize) > cutoff * cutoff) {
                             continue;
@@ -73,7 +77,6 @@ std::tuple<uint64_t, uint64_t> C01::SimulationStep()
                             if (p2->GetSqrDistPeriodic(*particle, domainSize) > cutoff * cutoff || p1->ID == p2->ID) {
                                 continue;
                             }
-                            numInteractions++;
                             potential->CalculateForces(*particle, *p1, *p2, false);
                         }
                     }
@@ -81,7 +84,29 @@ std::tuple<uint64_t, uint64_t> C01::SimulationStep()
             }
         }
     }
+    auto endt = std::chrono::steady_clock::now();
+    double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(endt - startt).count();
+    printf("Thread %d finished with %f elapsed\n", std::this_thread::get_id(), elapsed);
+}
 
+std::tuple<uint64_t, uint64_t> C01::SimulationStep()
+{
+    auto start = std::chrono::steady_clock::now();
+    uint64_t numInteractions = 0;
+    uint64_t numParticles = 0;
+    int depth = grid->getDepth();
+    std::vector<std::thread> threads;
+    for (int i = 0; i < MAX_THREADS; i++) {
+        printf("threads: %d, depth: %d", MAX_THREADS, depth);
+        int start = depth / (double)MAX_THREADS * i;
+        int end = depth / (double)MAX_THREADS * (i + 1);
+        threads.emplace_back(simulateStepThreaded, grid, cutoff, this->dt, this->gForce, this->potential, start, end);
+        printf("Thread start: %d, end: %d\n", start, end);
+    }
+    for (auto& th : threads) {
+        th.join();
+    }
+    this->grid->redistributeParticles();
     auto end = std::chrono::steady_clock::now();
     double elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(end - start).count();
     std::cout << elapsed << std::endl;

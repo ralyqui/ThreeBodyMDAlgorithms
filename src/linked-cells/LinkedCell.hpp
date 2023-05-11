@@ -17,5 +17,7 @@ public:
 
     void removeParticle(const std::shared_ptr<Particle>& particle) { particles_.remove(particle); }
 
+    void clearParticles() { particles_.clear(); }
+
     [[nodiscard]] const std::list<std::shared_ptr<Particle>>& getParticles() const { return particles_; }
 };

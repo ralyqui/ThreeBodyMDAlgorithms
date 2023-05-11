@@ -28,6 +28,5 @@ public:
 
     virtual ~C01();
 
-    std::vector<std::shared_ptr<LinkedCell>> getNeighbors(int x, int y, int j);
     std::tuple<uint64_t, uint64_t> SimulationStep() override;
 };

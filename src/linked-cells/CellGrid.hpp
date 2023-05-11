@@ -82,6 +82,36 @@ public:
         return x < 0 || x >= width_ || y < 0 || y >= height_ || z < 0 || z >= depth_;
     }
 
+    void redistributeParticles()
+    {
+        std::vector<std::shared_ptr<Particle>> allParticles;
+
+        // Collect all particles and clear cells.
+        for (auto& depth : cells_) {
+            for (auto& row : depth) {
+                for (auto& cell : row) {
+                    auto& particles = cell->getParticles();
+                    allParticles.insert(allParticles.end(), particles.begin(), particles.end());
+                    cell->clearParticles();
+                }
+            }
+        }
+
+        // Redistribute particles.
+        for (const auto& particle : allParticles) {
+            int x = static_cast<int>(particle->pX / cutoff);
+            int y = static_cast<int>(particle->pY / cutoff);
+            int z = static_cast<int>(particle->pZ / cutoff);
+
+            // Wraparound logic.
+            x = (x + width_) % width_;
+            y = (y + height_) % height_;
+            z = (z + depth_) % depth_;
+
+            cells_[z][y][x]->addParticle(particle);
+        }
+    }
+
 private:
     int width_;
     int height_;
